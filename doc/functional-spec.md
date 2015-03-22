@@ -9,6 +9,7 @@ The Open Academic Robotics Kit (OARK) is an initiative to make it easier for peo
 
 ---
 OARK enables people to experiment to build _their_ robot
+
 ---
 
 The OARK does assume access to a 3D printer, and also access to equipment that can't be 3D printed, servos, wiring, controller boards and the like.
@@ -38,6 +39,7 @@ All design and engineering decisions will be taken with the following principle 
 
 ---
 Simple is better than complicated
+
 ---
 
 ## Major Components
