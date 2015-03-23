@@ -1,6 +1,6 @@
 Open Framework for Controlling Low Cost 3D Robots \\
 Software Engineering Project at Curtin University \\
-Raymond Sheh, Hannes Herrmann, Tim Peskett, Mike Aldred, Delan Azabani
+Raymond Sheh, Hannes Herrmann, Mike Aldred, Delan Azabani, Tim Peskett
 
 All source code in this project is released under the terms of the GNU General
 Public License, version 2, as published by the Free Software Foundation.
