@@ -1,0 +1,129 @@
+#Must be sure to thoroughly check/fix the min/max values before testing.
+#The six wheel wonder could conceivably break if these are not reasonable.
+
+
+wheel_fl_cont:
+    controller:
+        package: dynamixel_controllers
+        module: joint_torque_controller
+        type: JointTorqueController
+    joint_name: wheel_fl_joint
+    joint_speed: 1.0
+    motor:
+        id: 9
+        init: 0 
+        min: 0
+        max: 4095
+
+
+wheel_fr_cont:
+    controller:
+        package: dynamixel_controllers
+        module: joint_torque_controller
+        type: JointTorqueController
+    joint_name: wheel_fr_joint
+    joint_speed: 1.0
+    motor:
+        id: 10 
+        init: 0 
+        min: 0
+        max: 4095
+
+
+wheel_cl_cont:
+    controller:
+        package: dynamixel_controllers
+        module: joint_torque_controller
+        type: JointTorqueController
+    joint_name: wheel_cl_joint
+    joint_speed: 1.0
+    motor:
+        id: 2 
+        init: 0 
+        min: 0
+        max: 4095
+
+
+wheel_cr_cont:
+    controller:
+        package: dynamixel_controllers
+        module: joint_torque_controller
+        type: JointTorqueController
+    joint_name: wheel_cr_joint
+    joint_speed: 1.0
+    motor:
+        id: 3 
+        init: 0 
+        min: 0
+        max: 4095
+
+
+wheel_bl_cont:
+    controller:
+        package: dynamixel_controllers
+        module: joint_torque_controller
+        type: JointTorqueController
+    joint_name: wheel_bl_joint
+    joint_speed: 1.0
+    motor:
+        id: 5 
+        init: 0 
+        min: 0
+        max: 4095
+
+
+
+wheel_br_cont:
+    controller:
+        package: dynamixel_controllers
+        module: joint_torque_controller
+        type: JointTorqueController
+    joint_name: wheel_br_joint
+    joint_speed: 1.0
+    motor:
+        id: 4 
+        init: 0 
+        min: 0
+        max: 4095
+
+
+axel_f_cont:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: axel_f_joint
+    joint_speed: 1.0
+    motor:
+        id: 8
+        init: 512
+        min: 0
+        max: 1023
+
+
+axel_b_cont:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: axel_b_joint
+    joint_speed: 1.0
+    motor:
+        id: 6
+        init: 512
+        min: 0
+        max: 1023
+
+
+susp_cont:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: susp_joint
+    joint_speed: 1.0
+    motor:
+        id: 7
+        init: 512
+        min: 0
+        max: 1023

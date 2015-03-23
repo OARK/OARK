@@ -1,0 +1,86 @@
+<!-- Our launch file for our project. It is here that we launch
+	 the dynamixel controller manager, spawn the controllers,
+	 spawn the metacontrollers, and launch our own node.
+
+	 It is assumed that this code would run on a raspberry pi.
+	 As such, the serial port used is /dev/ttyAMA0. Care should
+	 be taken to properly configure this port before this launch
+	 file is actually loaded.
+-->
+
+<launch>
+
+	<!-- Launch the controller manager. Params in manager.yaml -->
+	<node
+		name="dynamixel_manager"
+		pkg="dynamixel_controllers"
+		type="controller_manager.py"
+		required="true"
+		output="screen">
+
+		<rosparam command="load" file="$(find sixww)/launch/manager.yaml" />
+
+	</node>
+
+
+	<!-- Spawn the controllers. -->
+	<node
+		name="controller_spawner"
+		pkg="dynamixel_controllers"
+		type="controller_spawner.py"
+		args="	--manager=dxl_manager
+				--port pi_out_port
+				wheel_fl_cont
+				wheel_fr_cont
+				wheel_cl_cont
+				wheel_cr_cont
+				wheel_bl_cont
+				wheel_br_cont
+				axel_f_cont
+				axel_b_cont
+				susp_cont
+			 "
+		output="screen">
+
+		<rosparam command="load" file="$(find sixww)/launch/controllers.yaml" />
+
+	</node>
+
+
+	<!-- Spawn the metacontroller -->
+	<!-- The metacontroller is not currently implemented because
+		 it is giving me too much trouble right now.
+		 I'm not 100% sure whether the in-built action server
+		 will support what I want to do.-->
+<!--
+	<node
+		name="meta_spawner"
+		pkg="dynamixel_controllers"
+		type="controller_spawner.py"
+		args="- -manager=dxl_manager
+			  - -type=meta
+			  sixww_controller
+			  wheel_fl_cont
+			  wheel_fr_cont
+			  wheel_cl_cont
+			  wheel_cr_cont
+			  wheel_bl_cont
+			  wheel_br_cont
+			  axel_f_cont
+			  axel_b_cont
+			  susp_cont
+			  "
+		output="screen">
+
+		<rosparam command="load" file="$(find sixww)/launch/meta.yaml" />
+	</node>
+	-->
+
+	<!-- Finally, launch our client to control the six wheel wonder-->
+	<node
+		pkg="sixww"
+		type="sixww_node.py"
+		output="screen"/>
+
+</launch>
+

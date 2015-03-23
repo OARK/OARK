@@ -1,0 +1,12 @@
+#This yaml file is heavily based on the example at 
+#wiki.ros.org/dynamixel_controllers/Tutorials/Creatingdynamixelactionclient
+
+sixww_controller:
+    controller:
+        package: dynamixel_controllers
+        module: joint_trajectory_action_controller
+        type: JointTrajectoryActionController
+    joint_trajectory_action_node:
+        min_velocity: 0.1
+        constraints:
+            goal_time: 0.25
