@@ -1,0 +1,12 @@
+#Use glob syntax
+syntax: glob
+
+#Vim backup file
+*~
+
+#Vim swap file
+*.swp
+
+#Build directories
+ros-pkg/devel
+ros-pkg/build
