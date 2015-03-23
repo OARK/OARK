@@ -23,6 +23,12 @@ Tim Peskett
 
 ### Purpose
 
+The purpose of this document is to define and agree upon a set of requirements
+to be satisfied, goals to be met, and standards that should be upheld during
+the development of the Open Framework for Controlling Low Cost 3D Robots,
+henceforth referred to as "Ophir" for brevity, a nickname which is inspired by
+its similarity to a subsequence of the project name's initial letters.
+
 ### Scope
 
 ### Definitions
