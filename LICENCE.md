@@ -1,5 +1,5 @@
-Open Framework for Controlling Low Cost 3D Robots
-Software Engineering Project at Curtin University
+Open Framework for Controlling Low Cost 3D Robots \\
+Software Engineering Project at Curtin University \\
 Raymond Sheh, Hannes Herrmann, Tim Peskett, Mike Aldred, Delan Azabani
 
 All source code in this project is released under the terms of the GNU General
@@ -16,6 +16,7 @@ specified, are used under the terms of the three-clause BSD licence.
 
 ---
 
+~~~
                     GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991
 
@@ -355,9 +356,11 @@ proprietary programs.  If your program is a subroutine library, you may
 consider it more useful to permit linking proprietary applications with the
 library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.
+~~~
 
 ---
 
+~~~
 Creative Commons Legal Code
 
 Attribution-ShareAlike 3.0 Unported
@@ -717,9 +720,11 @@ Creative Commons Notice
     this trademark restriction does not form part of the License.
 
     Creative Commons may be contacted at https://creativecommons.org/.
+~~~
 
 ---
 
+~~~
 The three-clause BSD licence
 
 Redistribution and use in source and binary forms, with or without
@@ -746,3 +751,4 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
 LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+~~~
