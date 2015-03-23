@@ -23,11 +23,22 @@ To construct the sex-wheeled wonder, you will need a 3D printer, and a number of
 The 3D printed parts are available on the OARK site, and there are five different types to be printed:
 
 * 6 x Wheel, it is the six-wheeled wonder after all.
+![Wheel](pictures/Parts-05-Wheel.jpg)
+
 * 2 x End body segment.
+![End Segment](pictures/Parts-01-End-Segment.jpg)
+
 * 1 x Main body.
+![Main Body](pictures/Parts-02-Main-Body.jpg)
+
 * 1 x Estop button mounting.
+![EStop button mounting](pictures/Parts-04-EStop.jpg)
+
 * 1 x Suspension arm.
-* 2 x Bushes.
+![Suspension Arm](pictures/Parts-03-Suspension-Arm.jpg)
+
+* 3 x Bushes.
+![Bush](pictures/Parts-06-Bush.jpg)
 
 # Assembly
 
@@ -69,9 +80,11 @@ The suspension arm is then mounted to one of end segment assemblies.
 
 ![Suspension and End Assembly](pictures/10-Suspension-With-Segment-Assembly.jpg)
 
-This end segment with suspension arm is mounted to the main body.
+This end segment with suspension arm is mounted to the main body. Note, that a bush is required for mounting the servo to the main body.
 
 ![Suspension, end assembly with main body](pictures/11-Suspension-With-Main-Assembly.jpg)
+
+![Assembly with main body, bush](pictures/11-0-Suspension-With-Main-Assembly-Bush.jpg)
 
 Finally the remaining end segment is mounted to the main body.
 
