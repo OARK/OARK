@@ -60,7 +60,6 @@ With the main body, two servos need to be mounted as shown:
 ## Actuated suspension
 
 The remaining assembly is to mount a single servo on the suspension bracket as shown.
-((The picture currently shows two servos, however this will be updated so that only one is shown))
 
 This servo is mounted with drive wheel sideways, this is the servo that will eventually be mounted to the main body.
 
