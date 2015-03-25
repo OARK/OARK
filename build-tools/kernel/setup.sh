@@ -7,14 +7,13 @@
 # to build two kernels. One kernel that is for use with QEMU, and the other that
 # is for the actual image to run on Raspberry Pi hardware.
 
+set -euo pipefail
+IFS=$'\n\t'
+
 # I want to be sure that operations are done relative to this scripts directory,
 # not from current directory someone may have when running it.
 #
 # http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
-
-set -euo pipefail
-IFS=$'\n\t'
-
 getScriptDirectory() {
     local SOURCE="${BASH_SOURCE[0]}"
     while [ -h "$SOURCE" ]; do
@@ -38,6 +37,13 @@ kernelDirectory() {
     echo $(getScriptDirectory)/linux
 }
 
+# Clone the given Git repo if the directory doesn't exist, otherwise try to
+# update to the latest version.
+# Will not consider if the repo has been modified, merging it needed, etc.
+#
+# $1 - Directory to repo.
+# $2 - URL to upstream repo.
+# $3 - Misc options when pulling updates.
 pullGitRepo() {
     if [[ ! -e $1 ]]; then
         git clone $3 $2 $1
