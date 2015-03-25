@@ -87,17 +87,17 @@ TODO
 
 ### Fundamental components
 
-### Base platforms
+### Platforms
 
-### Robot server hardware
+### Supervisor hardware
 
-### Robot server middleware
+### Supervisor middleware
 
-### Robot server software
+### Supervisor software
 
-### Controller client hardware
+### Controller hardware
 
-### Controller client software
+### Controller software
 
 ## Requirements
 
@@ -113,11 +113,11 @@ TODO
 
 ## Design
 
-### Robot servers
+### Supervisors
 
-### Controller clients
+### Controllers
 
-### Base platforms
+### Supported platforms
 
 ### Supported peripherals
 
