@@ -84,12 +84,15 @@ buildQEMUKernel() {
     export PATH=$(toolChainDirectory)/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin:$PATH
 
     local oldDirectory=$(getScriptDirectory)
+    local buildDirectory=$(getScriptDirectory)/build/qemu/linux
+
     cd $(kernelDirectory)
 
-    make O=$oldDirectory/build/qemu ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- versatile_defconfig
+    make O=$buildDirectory ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- versatile_defconfig
 
-    cd $oldDirectory/build/qemu
-    cp ../../qemu-kernel.config .config
+    cp $oldDirectory/qemu-kernel.config $buildDirectory/.config
+
+    cd $buildDirectory
 
     make -j`nproc` ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
 
