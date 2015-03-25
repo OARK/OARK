@@ -10,3 +10,7 @@ syntax: glob
 #Build directories
 ros-pkg/devel
 ros-pkg/build
+
+# Kernel and tools
+build-tools/kernel
+build-tools/toochain
