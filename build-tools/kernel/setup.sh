@@ -7,6 +7,8 @@
 # to build two kernels. One kernel that is for use with QEMU, and the other that
 # is for the actual image to run on Raspberry Pi hardware.
 
+# Copyright (c) 2015 SEP 17
+
 set -euo pipefail
 IFS=$'\n\t'
 
