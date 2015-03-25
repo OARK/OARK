@@ -41,6 +41,10 @@ kernelDirectory() {
 # update to the latest version.
 # Will not consider if the repo has been modified, merging it needed, etc.
 #
+# A hard reset is performed, because to apply the kernel patch, we're assuming
+# unmodified sources. We could probably just ignore the error raised when
+# patching.
+
 # $1 - Directory to repo.
 # $2 - URL to upstream repo.
 # $3 - Misc options when pulling updates.
@@ -49,6 +53,7 @@ pullGitRepo() {
         git clone $3 $2 $1
     else
         git -C $1 pull
+        git -C $1 reset --hard
     fi
 }
 
@@ -64,5 +69,37 @@ ensureKernel() {
     pullGitRepo $(kernelDirectory) https://github.com/raspberrypi/linux --depth=1
 }
 
+# Patch kernel
+#
+# QEMU doesn't support the Raspberry Pi as a system, so instead we use the
+# versatile system. However, the kernel config options don't give us the
+# necessary options, this patch enables them.
+patchKernel() {
+    echo "Patch kernel"
+    patch -p1 -d $(kernelDirectory) < $(getScriptDirectory)/linux-arm-qemu.patch
+}
+
+# Build the QEMU kernel
+buildQEMUKernel() {
+    export PATH=$(toolChainDirectory)/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin:$PATH
+
+    local oldDirectory=$(getScriptDirectory)
+    cd $(kernelDirectory)
+
+    make O=$oldDirectory/build/qemu ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- versatile_defconfig
+
+    cd $oldDirectory/build/qemu
+    cp ../../qemu-kernel.config .config
+
+    make -j`nproc` ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
+
+    cp arch/arm/boot/zImage ../qemu-kernel
+
+    make -j`nproc` ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=../modules modules_install
+}
+
 ensureToolchain
 ensureKernel
+patchKernel
+
+buildQEMUKernel
