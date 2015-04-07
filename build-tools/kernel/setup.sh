@@ -107,8 +107,26 @@ buildQEMUKernel() {
     make -j`nproc` ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=../modules modules_install
 }
 
-ensureToolchain
-ensureKernel
-patchKernel
+# Displays the help text.
+help() {
+    echo "setup.sh - Simple script for building a Raspberry Pi image for QEmu"
+    echo
+    echo "    setup.sh       - Run without arguments, will download toolchain and Linux kernel."
+    echo "    setup.sh build - Will download toolchain and kernel and build the image."
+    echo "    setup.sh help  - This help text."
+}
 
-buildQEMUKernel
+# No parameters to script, assume getting build tools only.
+if [ $# -eq 0 ]; then
+    ensureToolchain
+    ensureKernel
+elif [ "$1" = "build" ]; then
+
+    ensureToolchain
+    ensureKernel
+
+    patchKernel
+    buildQEMUKernel
+else
+    help
+fi
