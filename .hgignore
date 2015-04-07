@@ -14,3 +14,6 @@ ros-pkg/build
 # Kernel and tools
 build-tools/kernel
 build-tools/toochain
+
+# Vagrant files
+.vagrant
