@@ -52,7 +52,11 @@ kernelDirectory() {
 # $3 - Misc options when pulling updates.
 pullGitRepo() {
     if [[ ! -e $1 ]]; then
-        git clone $3 $2 $1
+        if [ $# -eq 3 ]; then
+            git clone $3 $2 $1
+        else
+            git clone $2 $1
+        fi
     else
         git -C $1 pull
         git -C $1 reset --hard
