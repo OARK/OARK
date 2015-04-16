@@ -52,7 +52,7 @@ Be sure that any SSH keys of the servers there will be connections to are in the
 
 ## Jenkins authentication
 
-Seems to be a bit tricky. It seems you have to use the API token. Apparently not.
+Seems to be a bit tricky. It seems you have to use the API token. When in doubt, put the token everywhere.
 
 ## Notes
 
