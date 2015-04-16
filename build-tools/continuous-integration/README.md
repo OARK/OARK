@@ -50,6 +50,10 @@ Add the generated public key to both Bitbucket and Kiln.
 
 Be sure that any SSH keys of the servers there will be connections to are in the known_hosts file.
 
+## Jenkins authentication
+
+Seems to be a bit tricky.
+
 ## Notes
 
 At the moment the build will fail if there are no differences in any of the target repos.
