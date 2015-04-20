@@ -53,7 +53,8 @@ Be sure that any SSH keys of the servers there will be connections to are in the
 ## Jenkins authentication
 
 The Jenkins auth system is a bit funny, apparently you need read access for
-a job to build it. I've developing quite a loathing for Jenkins.
+a job to build it. I've developing quite a loathing for Jenkins. Now installed
+a plugin that will get around it.
 
 ## Notes
 
