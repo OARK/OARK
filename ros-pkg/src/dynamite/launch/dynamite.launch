@@ -1,0 +1,22 @@
+<!-- 
+	 It is assumed that this code would run on a raspberry pi.
+	 As such, the serial port used is /dev/ttyAMA0. Care should
+	 be taken to properly configure this port before this launch
+	 file is actually loaded.
+-->
+
+<launch>
+
+	<!-- Launch the controller manager. Params in manager.yaml -->
+	<node
+		name="dynamixel_manager"
+		pkg="dynamixel_controllers"
+		type="controller_manager.py"
+		required="true"
+		output="screen">
+
+		<rosparam command="load" file="$(find dynamite)/launch/manager.yaml" />
+
+	</node>
+</launch>
+
