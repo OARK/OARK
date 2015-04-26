@@ -4,16 +4,68 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SurfaceView;
+import android.widget.TextView;
 
+import org.intelligentrobots.oarkcontroller.streams.VideoStream;
+import org.sipdroid.net.SipdroidSocket;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 public class MainActivity extends ActionBarActivity {
+
+    private Thread setupThread;
+
+    private TextView testTextView;
+    private SurfaceView testSurfaceView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        testTextView = (TextView) findViewById(R.id.debugLogTextView);
+        testSurfaceView = (SurfaceView) findViewById(R.id.robotCameraView);
+
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        setupThread = new Thread() {
+            public void run() {
+                SipdroidSocket testSocket = null;
+                try {
+                    testSocket = new SipdroidSocket(5000);
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+
+                testTextView.append("Trying to create video stream.\n");
+                VideoStream testVideoStream = null;
+                try {
+                    testVideoStream = new VideoStream(testSocket, testTextView, testSurfaceView);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                testTextView.append("Trying to start video stream.\n");
+                testVideoStream.start();
+                testTextView.append("Video stream thread started.\n");
+            }
+        };
+
+        setupThread.start();
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -35,5 +87,26 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private static byte[] getLocalIPAddress() {
+        byte ip[] = null;
+        try {
+            for (Enumeration en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intF = (NetworkInterface) en.nextElement();
+
+                for (Enumeration enumIpAddr = intF.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = (InetAddress) enumIpAddr.nextElement();
+
+                    if (!inetAddress.isLoopbackAddress()) {
+                        ip = inetAddress.getAddress();
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+
+        return ip;
     }
 }
