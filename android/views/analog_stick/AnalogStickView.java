@@ -9,7 +9,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.MotionEvent;
 
-
 /**
  * This view is of a basic analog stick. The analog stick can be
  * queried to get a value between 1.0 and -1.0 in both the X and Y
@@ -22,8 +21,17 @@ import android.view.MotionEvent;
  *      backColor - The color of the analog stick background
  *      pointerColor - The color of the pointer
  *      pointerRad - The radius of the pointer circle.
+ *      effects - Draw advanced effects (experimental)
+ *      axes    - Axes to allow movement on (X, Y, or BOTH)
+ *      transparent - Whether the background should be transparent or not
+ *
+ *      TODO: Observer pattern to update observers when position changes.
  */
 public class AnalogStickView extends View {
+    private final int X = 0;
+    private final int Y = 1;
+    private final int BOTH = 2;
+
     private int backColor = Color.BLACK;
     private int pointerColor = Color.RED;
 
@@ -31,6 +39,10 @@ public class AnalogStickView extends View {
     private float touchX, touchY;
     private float circleRad = 5.0f;
     private Paint circlePainter;
+
+    private boolean effects = true;
+    private int axes = BOTH;
+    private boolean transparent = true;
 
     public AnalogStickView(Context context) {
         super(context);
@@ -54,8 +66,12 @@ public class AnalogStickView extends View {
 
         /* Retrieve styling attributes if available */
         backColor = a.getColor(R.styleable.AnalogStickView_backColor, backColor);
+        transparent = a.getBoolean(R.styleable.AnalogStickView_transparent, transparent);
         pointerColor = a.getColor(R.styleable.AnalogStickView_pointerColor, pointerColor);
         circleRad = a.getFloat(R.styleable.AnalogStickView_pointerRad, circleRad);
+
+        effects = a.getBoolean(R.styleable.AnalogStickView_effects, effects);
+        axes = a.getInt(R.styleable.AnalogStickView_axes, axes);
 
         a.recycle();
 
@@ -68,6 +84,8 @@ public class AnalogStickView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        float minorRad;
+        float majorRad = circleRad;
         int width = getWidth();
         int height = getHeight();
 
@@ -82,8 +100,32 @@ public class AnalogStickView extends View {
             touchY = height / 2;
         }
 
-        canvas.drawColor(backColor);
-        canvas.drawCircle(touchX, touchY, circleRad, circlePainter);
+        if(!transparent) {
+            canvas.drawColor(backColor);
+        }
+
+        if(effects) {
+        /* Save current transformation matrix */
+            canvas.save();
+                double angle;
+                double tilt;
+
+                angle = Math.toDegrees(Math.atan2(getAnalogY(), getAnalogX()));
+                tilt = 1 - (Math.hypot(touchX - width / 2, touchY - height / 2) /
+                            Math.hypot(width / 2, height / 2));
+
+                canvas.translate(touchX, touchY);
+                canvas.rotate((float) -angle);
+                canvas.scale((float) tilt, 1);
+
+                canvas.drawCircle(0, 0, circleRad, circlePainter);
+
+            /* Restore old transformation matrix */
+            canvas.restore();
+        }
+        else {
+            canvas.drawCircle(touchX, touchY, circleRad, circlePainter);
+        }
     }
 
     @Override
@@ -95,8 +137,12 @@ public class AnalogStickView extends View {
             isTouching = false;
         }
 
-        touchX = me.getX();
-        touchY = me.getY();
+        if(axes != Y) {
+            touchX = me.getX();
+        }
+        if(axes != X) {
+            touchY = me.getY();
+        }
 
         invalidate();
 

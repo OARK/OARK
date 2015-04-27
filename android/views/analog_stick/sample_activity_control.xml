@@ -33,7 +33,11 @@
 
             app:pointerColor="#FF1111"
             app:backColor="#000000"
-            app:pointerRad="60.0"
+            app:transparent="false"
+            app:pointerRad="100.0"
+
+            app:effects="false"
+            app:axes="X"
         />
 
         <view
@@ -45,7 +49,11 @@
 
             app:pointerColor="#FF1111"
             app:backColor="#000000"
-            app:pointerRad="60.0"/>
+            app:transparent="true"
+            app:pointerRad="100.0"
+
+            app:effects="true"
+            app:axes="Y"/>
 
     </FrameLayout>
 
