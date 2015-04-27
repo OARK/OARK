@@ -33,12 +33,6 @@ import control.pos_controller as controller
 import control.manager_proxy as proxy
 
 
-FORWARD = 1
-BACKWARD = 2
-TURNLEFT = 3
-TURNRIGHT = 4
-STOP = 5
-
 controllers = {}
 
 #This is not yet fully implemented. That is to say
@@ -47,32 +41,30 @@ controllers = {}
 #duration field of the msg object is completely
 #ignored and so stop messages should be sent to
 #stop the movement of the robot.
-def msg_received(message):
-    if msg.get_type() == FORWARD:
+def msg_received(msg):
+    if msg.get_type() == msg.ALL_GO:
         controller['front_left'].command(msg.get_value())
         controller['front_right'].command(msg.get_value())
         controller['back_left'].command(msg.get_value())
         controller['back_front'].command(msg.get_value())
-    elif msg.get_type() == BACKWARD:
-        controller['front_left'].command(msg.get_value())
-        controller['front_right'].command(msg.get_value())
-        controller['back_left'].command(msg.get_value())
-        controller['back_front'].command(msg.get_value())
-    elif msg.get_type() == TURNLEFT:
+    elif msg.get_type() == msg.TURN_CW:
         controller['front_left'].command(msg.get_value())
         controller['front_right'].command(-msg.get_value())
         controller['back_left'].command(msg.get_value())
         controller['back_front'].command(-msg.get_value())
-    elif msg.get_type() == TURNRIGHT:
+    elif msg.get_type() == msg.TURN_CCW:
         controller['front_left'].command(-msg.get_value())
         controller['front_right'].command(msg.get_value())
         controller['back_left'].command(-msg.get_value())
         controller['back_front'].command(msg.get_value())
-    elif msg.get_type() == STOP:
+    elif msg.get_type() == msg.STOP:
         controller['front_left'].command(0)
         controller['front_right'].command(0)
         controller['back_left'].command(0)
         controller['back_front'].command(0)
+    else:
+        print str(msg)
+
 
 if __name__ == '__main__':
     args = rospy.myargv(argv=sys.argv)
@@ -80,7 +72,9 @@ if __name__ == '__main__':
 
     port_ns = 'pi_out_port'
     manager_ns = 'dxl_manager'
-    addr = '192.0.0.2'
+
+    #Address of all interfaces
+    interfaces = ''
 
     proxy = ManagerProxy(manager_ns, [port_ns])
 

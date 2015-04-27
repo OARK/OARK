@@ -22,12 +22,25 @@
 
 import struct
 
+
+NOOP = 0
+PING = 1
+STOP = 2
+LEFT_GO = 3
+RIGHT_GO = 4
+ALL_GO = 5
+ARM_GO = 6
+TURN_CCW = 7
+TURN_CW = 8
+
+
 class Msg:
     def __init__(self, net_data):
+        print len(net_data)
         (self.type,
          self.id, 
          self.val, 
-         self.duration) = struct.unpack('!BBBi', net_data)
+         self.duration) = struct.unpack('!bbbi', net_data)
 
     def get_type(self):
         return self.type
