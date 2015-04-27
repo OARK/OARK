@@ -17,3 +17,6 @@ build-tools/toochain
 
 # Vagrant files
 .vagrant
+
+#Python bytecode files
+*.pyc

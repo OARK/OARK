@@ -28,32 +28,32 @@
             android:layout_width="160dp"
             android:layout_height="160dp"
             class="sep_17.fourwwcontrol.AnalogStickView"
-            android:id="@+id/leftAnalogStick"
+            android:id="@+id/left_analog_stick"
             android:layout_gravity="left|bottom"
 
-            app:pointerColor="#FF1111"
+            app:pointerColor="#88FF1111"
             app:backColor="#000000"
             app:transparent="false"
             app:pointerRad="100.0"
 
             app:effects="false"
-            app:axes="X"
+            app:axes="Y"
         />
 
         <view
             android:layout_width="160dp"
             android:layout_height="160dp"
             class="sep_17.fourwwcontrol.AnalogStickView"
-            android:id="@+id/rightAnalogStick"
+            android:id="@+id/right_analog_stick"
             android:layout_gravity="right|bottom"
 
-            app:pointerColor="#FF1111"
+            app:pointerColor="#88FF1111"
             app:backColor="#000000"
             app:transparent="true"
             app:pointerRad="100.0"
 
             app:effects="true"
-            app:axes="Y"/>
+            app:axes="X"/>
 
     </FrameLayout>
 
