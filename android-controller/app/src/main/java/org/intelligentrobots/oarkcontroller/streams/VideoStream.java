@@ -52,11 +52,6 @@ public class VideoStream extends Thread {
         m_surface = outputSurfaceView.getHolder().getSurface();
         m_codec = MediaCodec.createDecoderByType("video/avc");
 
-        MediaFormat format = MediaFormat.createVideoFormat("video/avc", 800, 600);
-        m_codec.configure(format, m_surface, null, 0);
-
-        m_codec.start();
-
         m_outputTextView = outputTextView;
     }
 
@@ -102,6 +97,12 @@ public class VideoStream extends Thread {
             println("ERROR; RTP socket is null");
             return;
         }
+
+        MediaFormat format = MediaFormat.createVideoFormat("video/avc", 800, 600);
+
+        m_codec.configure(format, m_surface, null, 0);
+
+        m_codec.start();
 
         // TODO: Magic number, fix.
         byte[] buffer = new byte[BUFFER_SIZE + 12];

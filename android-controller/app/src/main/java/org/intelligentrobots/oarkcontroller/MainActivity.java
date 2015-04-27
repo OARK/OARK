@@ -24,6 +24,8 @@ public class MainActivity extends ActionBarActivity {
     private TextView testTextView;
     private SurfaceView testSurfaceView;
 
+    private VideoRenderer testVideoRenderer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,39 +34,9 @@ public class MainActivity extends ActionBarActivity {
         testTextView = (TextView) findViewById(R.id.debugLogTextView);
         testSurfaceView = (SurfaceView) findViewById(R.id.robotCameraView);
 
-    }
+        testVideoRenderer = new VideoRenderer(testTextView, testSurfaceView);
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        setupThread = new Thread() {
-            public void run() {
-                SipdroidSocket testSocket = null;
-                try {
-                    testSocket = new SipdroidSocket(5000);
-                } catch (SocketException e) {
-                    e.printStackTrace();
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                }
-
-                testTextView.append("Trying to create video stream.\n");
-                VideoStream testVideoStream = null;
-                try {
-                    testVideoStream = new VideoStream(testSocket, testTextView, testSurfaceView);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                testTextView.append("Trying to start video stream.\n");
-                testVideoStream.start();
-                testTextView.append("Video stream thread started.\n");
-            }
-        };
-
-        setupThread.start();
-
+        testSurfaceView.getHolder().addCallback(testVideoRenderer);
     }
 
     @Override
