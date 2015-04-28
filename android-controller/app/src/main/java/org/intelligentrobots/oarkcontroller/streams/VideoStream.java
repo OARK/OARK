@@ -2,6 +2,8 @@ package org.intelligentrobots.oarkcontroller.streams;
 
 import android.media.MediaCodec;
 import android.media.MediaFormat;
+import android.media.MediaCodec.BufferInfo;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.widget.TextView;
@@ -35,6 +37,7 @@ public class VideoStream extends Thread {
     private MediaCodec m_codec;
     private ByteBuffer[] m_decodeInputBuffers;
 
+    private final static String TAG = "VideoStream: ";
     /**
      * RptStreamReceiver
      */
@@ -98,7 +101,7 @@ public class VideoStream extends Thread {
             return;
         }
 
-        MediaFormat format = MediaFormat.createVideoFormat("video/avc", 800, 600);
+        MediaFormat format = MediaFormat.createVideoFormat("video/avc", 640, 480);
 
         m_codec.configure(format, m_surface, null, 0);
 
@@ -110,7 +113,11 @@ public class VideoStream extends Thread {
 
         m_running = true;
 
+        RtpH264 testRtpH264 = new RtpH264();
+        BufferInfo info = new BufferInfo();
+
         while (m_running) {
+
             try {
                 m_rtpSocket.receive(m_rtpPacket);
 
@@ -119,19 +126,42 @@ public class VideoStream extends Thread {
                 ByteBuffer inputBuffer;
 
                 if (inputBufferIndex >= 0) {
+                    Log.d(TAG, "BufferIndex: " + inputBufferIndex);
                     inputBuffer = m_codec.getInputBuffer(inputBufferIndex);
                     inputBuffer.clear();
 
-                    inputBuffer.put(m_rtpPacket.getPayload());
+                    testRtpH264.setPayload(m_rtpPacket.getPayload(), m_rtpPacket.getPayloadLength());
+                    testRtpH264.parsePacket();
 
-                    m_codec.queueInputBuffer(inputBufferIndex, 0, m_rtpPacket.getPayloadLength(), 0, 0);
+                    if (testRtpH264.isReady()) {
+                        Log.d(TAG, "RtpH264 is ready");
+                        inputBuffer.put(testRtpH264.getOutputBuffer());
+                        m_codec.queueInputBuffer(inputBufferIndex, 0, testRtpH264.getOutputBuffer().length, 0, 0);
+                        inputBuffer.clear();
+                    }
 
-                    inputBuffer.clear();
+                    int outIndex = m_codec.dequeueOutputBuffer(info, 10000);
+
+                    Log.d(TAG, "OutIndex result: " + outIndex);
+
+                    switch (outIndex) {
+                        case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
+                            Log.d("DecodeActivity", "INFO_OUTPUT_BUFFERS_CHANGED");
+                            break;
+                        case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
+                            Log.d("DecodeActivity", "New format " + m_codec.getOutputFormat());
+                            break;
+                        case MediaCodec.INFO_TRY_AGAIN_LATER:
+                            Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
-                println("Current sequence number: " + m_rtpPacket.getSequenceNumber() + "\n");
-                println("Payload type: " + m_rtpPacket.getPayloadType() + "\n");
-                println("Payoad length: " + m_rtpPacket.getPayloadLength() + "\n");
+
+
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
