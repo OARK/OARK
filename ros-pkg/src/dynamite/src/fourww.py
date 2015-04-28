@@ -29,7 +29,8 @@ import sys
 import argparse
 
 import net.cmd_listener as net_listen
-import control.pos_controller as controller
+from net.msg import *
+from control.pos_controller import PosController
 import control.manager_proxy as proxy
 
 
@@ -66,6 +67,17 @@ def msg_received(msg):
         print str(msg)
 
 
+def msg_received_test(msg):
+    if msg.get_type() == LEFT_GO:
+        controllers['wheel_left'].command(msg.get_value())
+    if msg.get_type() == RIGHT_GO:
+        controllers['wheel_right'].command(msg.get_value())
+    else:
+        controllers['wheel_left'].command(0.0);
+        controllers['wheel_right'].command(0.0);
+        print str(msg)
+
+
 if __name__ == '__main__':
     args = rospy.myargv(argv=sys.argv)
     parser = argparse.ArgumentParser(description='Four Wheel Wonder control program')
@@ -76,31 +88,33 @@ if __name__ == '__main__':
     #Address of all interfaces
     interfaces = ''
 
-    proxy = ManagerProxy(manager_ns, [port_ns])
-
     try:
         #parser.add_argument(
 
         rospy.init_node('forww_node')
 
-        listener = CmdListener(addr)
-        listener.add_data_listener(msg_received)
+        man_proxy = proxy.ManagerProxy(manager_ns)
 
+        listener = net_listen.CmdListener(interfaces)
+        listener.add_data_listener(msg_received_test)
+
+        controllers['wheel_left'] = PosController(man_proxy, 'wheel_left', port_ns)
+        controllers['wheel_right'] = PosController(man_proxy, 'wheel_right', port_ns)
         #Right now there is no functional difference
         #between position controllers and torque
         #controllers so only a position controller is
         #used.
-        controllers['front_left'] = PosController(proxy, 'front_left', port_ns)
-        controllers['front_right'] = PosController(proxy, 'front_right', port_ns)
-        controllers['back_left'] = PosController(proxy, 'back_left', port_ns)
-        controllers['back_right'] = PosController(proxy, 'back_right', port_ns)
-        controllers['arm_base'] = PosController(proxy, 'arm_base', port_ns)
-        controllers['arm_top'] = PosController(proxy, 'arm_top', port_ns)
+        #controllers['front_left'] = PosController(proxy, 'front_left', port_ns)
+        #controllers['front_right'] = PosController(proxy, 'front_right', port_ns)
+        #controllers['back_left'] = PosController(proxy, 'back_left', port_ns)
+        #controllers['back_right'] = PosController(proxy, 'back_right', port_ns)
+        #controllers['arm_base'] = PosController(proxy, 'arm_base', port_ns)
+        #controllers['arm_top'] = PosController(proxy, 'arm_top', port_ns)
 
         rospy.spin()
 
         listener.shutdown()
 
-    except rospy.ROSInterruptException, rie;
+    except rospy.ROSInterruptException, r:
         pass
 

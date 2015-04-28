@@ -21,7 +21,7 @@ import threading
 #the arguments must be passed in as text.
 #Remarks: I'm not sure how much I like this approach
 #and we may have to change it later on.
-def __thread_getter(mutex_name, cond_func_name):
+def thread_getter(mutex_name, cond_func_name):
     """
         This is a decorator that can be used to
         safely create getters for data that belongs
@@ -45,7 +45,7 @@ def __thread_getter(mutex_name, cond_func_name):
             def is_data_init():
                 return data != None
 
-            @__thread_getter('thread_mutex', 'is_data_init')
+            @thread_getter('thread_mutex', 'is_data_init')
             def get_data():
                 return data
         """
@@ -70,8 +70,8 @@ class Controller:
 
         #Ensure that state gets updated
         self.motor_state = None
-        self.motor_mutex = threading.Lock()
-        proxy.set_state_callback(controller_name, self._state_callback)
+        #self.motor_mutex = threading.Lock()
+        #self.proxy.set_state_callback(controller_name, self._state_callback)
 
     def get_name(self):
         return self.controller_name
@@ -90,38 +90,38 @@ class Controller:
     def is_motorstate_init(self):
         return self.motor_state != None
 
-    @__thread_getter('motor_mutex', 'is_motorstate_init')
+    @thread_getter('motor_mutex', 'is_motorstate_init')
     def get_motor_id(self):
         return self.motor_state.id
 
-    @__thread_getter('motor_mutex', 'is_motorstate_init')
+    @thread_getter('motor_mutex', 'is_motorstate_init')
     def get_motor_goal(self):
         return self.motor_state.goal
             
-    @__thread_getter('motor_mutex', 'is_motorstate_init')
+    @thread_getter('motor_mutex', 'is_motorstate_init')
     def get_motor_position(self):
         return self.motor_state.position
 
-    @__thread_getter('motor_mutex', 'is_motorstate_init')
+    @thread_getter('motor_mutex', 'is_motorstate_init')
     def get_motor_error(self):
         return self.motor_state.error
 
-    @__thread_getter('motor_mutex', 'is_motorstate_init')
+    @thread_getter('motor_mutex', 'is_motorstate_init')
     def get_motor_speed(self):
         return self.motor_state.speed
 
-    @__thread_getter('motor_mutex', 'is_motorstate_init')
+    @thread_getter('motor_mutex', 'is_motorstate_init')
     def get_motor_load(self):
         return self.motor_state.load
 
-    @__thread_getter('motor_mutex', 'is_motorstate_init')
+    @thread_getter('motor_mutex', 'is_motorstate_init')
     def get_motor_voltage(self):
         return self.motor_state.voltage
 
-    @__thread_getter('motor_mutex', 'is_motorstate_init')
+    @thread_getter('motor_mutex', 'is_motorstate_init')
     def get_motor_temp(self):
         return self.motor_state.temperature
 
-    @__thread_getter('motor_mutex', 'is_motorstate_init')
+    @thread_getter('motor_mutex', 'is_motorstate_init')
     def is_motor_moving(self):
         return self.motor_state.moving

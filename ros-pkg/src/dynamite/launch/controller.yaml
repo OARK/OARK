@@ -1,0 +1,40 @@
+wheel_left:
+    controller:
+        package: dynamixel_controllers
+        module: joint_torque_controller
+        type: JointTorqueController
+    joint_name: left_joint
+    joint_speed: 1.0
+    motor:
+        id: 1
+        init: 0 
+        min: 0
+        max: 4093
+
+wheel_right:
+    controller:
+        package: dynamixel_controllers
+        module: joint_torque_controller
+        type: JointTorqueController
+    joint_name: right_joint
+    joint_speed: 1.0
+    motor:
+        id: 2
+        init: 0 
+        min: 0
+        max: 4093
+
+
+
+pos_cont:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: pos_joint
+    joint_speed: 1.0
+    motor:
+        id: 1
+        init: 512
+        min: 0
+        max: 1023
