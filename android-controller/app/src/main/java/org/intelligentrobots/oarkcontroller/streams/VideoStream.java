@@ -113,40 +113,44 @@ public class VideoStream extends Thread {
 
         m_running = true;
 
-        RtpH264 testRtpH264 = new RtpH264();
+        NewRtpH264 testRtpH264 = new NewRtpH264();
         BufferInfo info = new BufferInfo();
 
         while (m_running) {
 
             try {
-                m_rtpSocket.receive(m_rtpPacket);
 
-                int inputBufferIndex = m_codec.dequeueInputBuffer(SO_TIMEOUT);
-
+                int inputBufferIndex = m_codec.dequeueInputBuffer(-1);
                 ByteBuffer inputBuffer;
 
+                Log.d(TAG, "BufferIndex: " + inputBufferIndex);
+
                 if (inputBufferIndex >= 0) {
-                    Log.d(TAG, "BufferIndex: " + inputBufferIndex);
                     inputBuffer = m_codec.getInputBuffer(inputBufferIndex);
-                    inputBuffer.clear();
 
-                    testRtpH264.setPayload(m_rtpPacket.getPayload(), m_rtpPacket.getPayloadLength());
-                    testRtpH264.parsePacket();
+                    boolean bufferReady = true;
+                    do {
+                        m_rtpSocket.receive(m_rtpPacket);
 
-                    if (testRtpH264.isReady()) {
-                        Log.d(TAG, "RtpH264 is ready");
-                        inputBuffer.put(testRtpH264.getOutputBuffer());
-                        m_codec.queueInputBuffer(inputBufferIndex, 0, testRtpH264.getOutputBuffer().length, 0, 0);
-                        inputBuffer.clear();
-                    }
+                        if (testRtpH264.doProcess(m_rtpPacket) == NewRtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
+                            bufferReady = !testRtpH264.ready();
+                        }
+                    } while (bufferReady);
 
-                    int outIndex = m_codec.dequeueOutputBuffer(info, 10000);
+                    Log.d(TAG, "RtpH264 Ready " + testRtpH264.getOutputBuffer().length + "bytes");
 
-                    Log.d(TAG, "OutIndex result: " + outIndex);
+                    inputBuffer.put(testRtpH264.getOutputBuffer());
+                    Log.d(TAG, "Queue Input Buffer");
+                    m_codec.queueInputBuffer(inputBufferIndex, 0, testRtpH264.getOutputBuffer().length, 0, 0);
+                    testRtpH264.clear();
+
+                    Log.d(TAG, "Dequeue Output Buffer");
+                    int outIndex = m_codec.dequeueOutputBuffer(info, 1000);
 
                     switch (outIndex) {
                         case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
                             Log.d("DecodeActivity", "INFO_OUTPUT_BUFFERS_CHANGED");
+                            m_codec.releaseOutputBuffer(outIndex, true);
                             break;
                         case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
                             Log.d("DecodeActivity", "New format " + m_codec.getOutputFormat());
@@ -158,10 +162,6 @@ public class VideoStream extends Thread {
                             break;
                     }
                 }
-
-
-
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
