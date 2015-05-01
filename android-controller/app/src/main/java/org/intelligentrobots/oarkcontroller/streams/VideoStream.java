@@ -150,7 +150,6 @@ public class VideoStream extends Thread {
                     switch (outIndex) {
                         case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
                             Log.d("DecodeActivity", "INFO_OUTPUT_BUFFERS_CHANGED");
-                            m_codec.releaseOutputBuffer(outIndex, true);
                             break;
                         case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
                             Log.d("DecodeActivity", "New format " + m_codec.getOutputFormat());
@@ -159,6 +158,9 @@ public class VideoStream extends Thread {
                             Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
                             break;
                         default:
+                            Log.d("DocodeActivity", "Surface decoder given buffer " + outIndex +
+                                " (size=" + info.size + ")");
+                            m_codec.releaseOutputBuffer(outIndex, true);
                             break;
                     }
                 }
