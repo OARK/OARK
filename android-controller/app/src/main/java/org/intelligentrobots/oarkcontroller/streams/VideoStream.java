@@ -1,6 +1,7 @@
 package org.intelligentrobots.oarkcontroller.streams;
 
 import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaCodec.BufferInfo;
 import android.util.Log;
@@ -102,6 +103,8 @@ public class VideoStream extends Thread {
         }
 
         MediaFormat format = MediaFormat.createVideoFormat("video/avc", 640, 480);
+        format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
+                MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar);
 
         m_codec.configure(format, m_surface, null, 0);
 
@@ -123,8 +126,6 @@ public class VideoStream extends Thread {
                 int inputBufferIndex = m_codec.dequeueInputBuffer(-1);
                 ByteBuffer inputBuffer;
 
-                Log.d(TAG, "BufferIndex: " + inputBufferIndex);
-
                 if (inputBufferIndex >= 0) {
                     inputBuffer = m_codec.getInputBuffer(inputBufferIndex);
 
@@ -137,14 +138,11 @@ public class VideoStream extends Thread {
                         }
                     } while (bufferReady);
 
-                    Log.d(TAG, "RtpH264 Ready " + testRtpH264.getOutputBuffer().length + "bytes");
-
                     inputBuffer.put(testRtpH264.getOutputBuffer());
-                    Log.d(TAG, "Queue Input Buffer");
+
                     m_codec.queueInputBuffer(inputBufferIndex, 0, testRtpH264.getOutputBuffer().length, 0, 0);
                     testRtpH264.clear();
 
-                    Log.d(TAG, "Dequeue Output Buffer");
                     int outIndex = m_codec.dequeueOutputBuffer(info, 1000);
 
                     switch (outIndex) {

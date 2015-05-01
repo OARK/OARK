@@ -81,8 +81,6 @@ public class NewRtpH264 {
         boolean startBit = (inPayload[1] & 0x80) == 0x80;
         boolean endBit = (inPayload[1] & 0x40) == 0x40;
 
-        Log.d(TAG, "S: " + startBit + " E: " + endBit);
-
         byte nalHeader = 0;
 
         if (startBit) {
@@ -105,7 +103,6 @@ public class NewRtpH264 {
         }
 
         if (startBit) {
-            Log.d(TAG, "Writing header in buffer.");
             mOutputBuffer.write(nalHeader);
             mOutputBuffer.write(SYNC_BYTES, 0, SYNC_BYTES.length);
             mOutputBuffer.write(inPayload, 1, inPayload.length - 1);
@@ -113,10 +110,7 @@ public class NewRtpH264 {
             mOutputBuffer.write(inPayload, 2, inPayload.length - 2);
         }
 
-        Log.d(TAG, "Processing Fragment Packet: " + mProcessingFragmentPacket);
-
         if (endBit) {
-            Log.d(TAG, "End bit, no longer fragmenting.");
             mProcessingFragmentPacket = false;
             return ProcessResult.BUFFER_PROCESSED_OK;
         } else {
@@ -133,7 +127,6 @@ public class NewRtpH264 {
     private ProcessResult processSingleNALUnitPacket(
                                                      int inNalUnitType,
                                                      byte[] inPayload) {
-        Log.d(TAG, "Single NAL unit packet");
         mNalUnitType = inNalUnitType;
 
         mOutputBuffer.write(0);
@@ -171,11 +164,7 @@ public class NewRtpH264 {
 
         mLastSequenceNo = inRtp.getSequenceNumber();
 
-        Log.d(TAG, "Sequence No: " + mLastSequenceNo);
-
         int nalUnitType = payload[0] & 0x1f;
-
-        Log.d(TAG, "NAL Unit Type: " + nalUnitType);
 
         // Single NAL unit packet.
         if ((nalUnitType >= 1) && (nalUnitType <= 23)) {
