@@ -38,33 +38,39 @@ import msg
 
 
 class CmdListener:
-    def __init__(self, addr, port=1717, name='listener'):
+    def __init__(self, interface, port=1717, name='listener'):
         """
             CmdListener constructor
             Creates the network socket and initialises it to the appropriate port.
-            It then connects the socket so that it is ready to send *and* receive
-            data.
+            It then binds the socket to a port and interface and wait for clients 
+            to connect to it.
             Parameters:
-                addr        -   The IPv4 address to connect to as a string.
+                interface   -   The address of the interface that we wish to receive
+                                connections on. Empty string ('') for all.
                 port        -   The port number on the local/remote host to receive/transmit
                                 data on. Defaults to an unused port 1717.
                 name        -   The name of the thread
         """
-        af_inet_addr = (addr, port)
 
         self.data_listeners = []
         self.dc_listeners = []
 
+        af_inet_addr = (interface, port)
+
         try:
-            #socket.create_connection always creates a TCP socket
-            self.sock_fd = socket.create_connection(af_inet_addr)
+            #Create TCP socket
+            self.sock_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock_fd.bind(af_inet_addr)
+
+            #Allow connections
+            self.sock_fd.listen(1)
 
             #Need to block when there is no data
             self.sock_fd.setblocking(1)
         except socket.timeout, t:
-            raise ConnectionInception("Connection timed out for " + addr)
+            raise ConnectionInception("Could not connect socket")
         except Exception, e:
-            raise NetworkInception("Could not initialise socket for " + addr)
+            raise NetworkInception("Could not initialise socket")
 
         try:
             #Create thread to frequently poll socket
@@ -84,8 +90,13 @@ class CmdListener:
         self.sock_fd.close()
 
     def listen(self):
+        #Wait for connection
+        self.recv_sock, self.remote_addr = self.sock_fd.accept()
+        print "Accepted connection!"
+
+        #Update observers while running
         while self.run_listener:
-            first_byte = self.sock_fd.recv(1)
+            first_byte = self.recv_sock.recv(1)
 
             #Test whether client has dropped 
             if not first_byte:
@@ -96,11 +107,17 @@ class CmdListener:
 
             else:
                 msg_len = ord(first_byte)
-                msg_body = msg.Msg(self.sock_fd.recv(msg_len))
+
+                #Receive until we have an entire message
+                msg_body = self.recv_sock.recv(msg_len)
+                while len(msg_body) < msg_len:
+                    msg_body = msg_body + self.recv_sock.recv(len(msg_body) - msg_len)
+
+                msg_parsed = msg.Msg(msg_body)
 
                 #Give message to all registered observers
                 for callback in self.data_listeners:
-                    callback(msg_body)
+                    callback(msg_parsed)
 
 
     def add_data_listener(self, callback):
@@ -150,8 +167,6 @@ def print_msg(msg):
 
 #Basic module test code
 if __name__ == '__main__':
-    lis = CmdListener('127.0.0.1')
+    lis = CmdListener('')
     lis.add_data_listener(print_msg)
-    time.sleep(10)
-    lis.shutdown()
 

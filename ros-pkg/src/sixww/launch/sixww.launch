@@ -77,10 +77,11 @@
 	-->
 
 	<!-- Finally, launch our client to control the six wheel wonder-->
+<!--
 	<node
 		pkg="sixww"
 		type="sixww_node.py"
-		output="screen"/>
+		output="screen"/>-->
 
 </launch>
 

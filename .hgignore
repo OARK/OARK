@@ -18,6 +18,9 @@ build-tools/toochain
 # Vagrant files
 .vagrant
 
+# Python bytecode files
+*.pyc
+
 # Android Project
 .gradle
 local.properties
