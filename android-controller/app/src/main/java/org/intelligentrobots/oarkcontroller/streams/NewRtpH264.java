@@ -158,6 +158,7 @@ public class NewRtpH264 {
             result = reset();
 
             if (result == ProcessResult.OUTPUT_BUFFER_NOT_FILLED) {
+                mLastSequenceNo = inRtp.getSequenceNumber();
                 return result;
             }
         }
@@ -187,6 +188,7 @@ public class NewRtpH264 {
     }
 
     public byte[] getOutputBuffer() {
+        // Log.d(TAG, "Output Buffer size: " + mOutputBuffer.size());
         return mOutputBuffer.toByteArray();
     }
 
