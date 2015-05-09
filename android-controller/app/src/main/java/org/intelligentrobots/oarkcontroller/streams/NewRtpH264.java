@@ -24,7 +24,7 @@ public class NewRtpH264 {
     /**
      * Prefix byte sequence for any NAL unit.
      */
-    private final static byte[] SYNC_BYTES = {0, 0, 1};
+    private final static byte[] SYNC_BYTES = {0, 0, 0, 1};
 
     /**
      * Are we currently processing a fragmented NAL unit across packets.
@@ -76,12 +76,13 @@ public class NewRtpH264 {
          * Second byte is the FU header.
          */
 
-        mNalUnitType = inPayload[0] & 0x1f;
 
         byte nalHeader = (byte) ((inPayload[0] & 0xe0) | (inPayload[1] & 0x1f));
 
         boolean startBit = (inPayload[1] & 0x80) == 0x80;
         boolean endBit = (inPayload[1] & 0x40) == 0x40;
+
+        mDiscardBuffer = false;
 
         if (startBit) {
             /*
@@ -100,9 +101,9 @@ public class NewRtpH264 {
         }
 
         if (startBit) {
-            mOutputBuffer.write(nalHeader);
             mOutputBuffer.write(SYNC_BYTES, 0, SYNC_BYTES.length);
-            mOutputBuffer.write(inPayload, 1, inPayload.length - 1);
+            mOutputBuffer.write(nalHeader);
+            mOutputBuffer.write(inPayload, 2, inPayload.length - 2);
         } else {
             mOutputBuffer.write(inPayload, 2, inPayload.length - 2);
         }
@@ -111,6 +112,7 @@ public class NewRtpH264 {
             mProcessingFragmentPacket = false;
             return ProcessResult.BUFFER_PROCESSED_OK;
         } else {
+            mProcessingFragmentPacket = true;
             return ProcessResult.OUTPUT_BUFFER_NOT_FILLED;
         }
     }
@@ -178,6 +180,8 @@ public class NewRtpH264 {
 
             if (mDiscardBuffer) {
                 mProcessingFragmentPacket = false;
+                Log.d(TAG, "Discarding buffer.");
+                mOutputBuffer.reset();
             }
         }
 
@@ -194,6 +198,10 @@ public class NewRtpH264 {
         mOutputBuffer.reset();
 
         return ProcessResult.OUTPUT_BUFFER_NOT_FILLED;
+    }
+
+    public int currentLength() {
+        return mOutputBuffer.size();
     }
 
     public boolean ready() {
