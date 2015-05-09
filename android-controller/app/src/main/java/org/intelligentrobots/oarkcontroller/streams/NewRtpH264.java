@@ -78,10 +78,10 @@ public class NewRtpH264 {
 
         mNalUnitType = inPayload[0] & 0x1f;
 
+        byte nalHeader = (byte) ((inPayload[0] & 0xe0) | (inPayload[1] & 0x1f));
+
         boolean startBit = (inPayload[1] & 0x80) == 0x80;
         boolean endBit = (inPayload[1] & 0x40) == 0x40;
-
-        byte nalHeader = 0;
 
         if (startBit) {
             /*
@@ -93,9 +93,6 @@ public class NewRtpH264 {
             }
 
             mProcessingFragmentPacket = true;
-
-            // Reconstruct NAL header.
-            nalHeader = (byte) ((inPayload[0] & 0xe0) | mNalUnitType);
 
         } else if (!mProcessingFragmentPacket) {
             mDiscardBuffer = true;

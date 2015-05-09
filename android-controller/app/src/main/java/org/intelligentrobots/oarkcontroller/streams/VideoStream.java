@@ -150,7 +150,6 @@ public class VideoStream extends Thread {
         }
 
         MediaFormat format = MediaFormat.createVideoFormat("video/avc", 320, 240);
-        // format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
 
         m_codec.configure(format, m_surface, null, 0);
 
@@ -178,11 +177,14 @@ public class VideoStream extends Thread {
                     boolean bufferNotReady = true;
                     do {
                         m_rtpSocket.receive(m_rtpPacket);
+                        Log.d(TAG, "RTP packet size is: " + m_rtpPacket.getPayloadLength() + " bytes.");
 
                         if (testRtpH264.doProcess(m_rtpPacket) == NewRtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
                             bufferNotReady = !testRtpH264.ready();
                         }
                     } while (bufferNotReady);
+
+                    Log.d(TAG, "Output from RTP depay is " + testRtpH264.getOutputBuffer().length + " bytes.");
 
                     byte[] transferArray = testRtpH264.getOutputBuffer();
 
@@ -204,8 +206,8 @@ public class VideoStream extends Thread {
                             // Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
                             break;
                         default:
-                            // Log.d("DocodeActivity", "Surface decoder given buffer " + outIndex +
-                            //    " (size=" + info.size + ")");
+                            Log.d("DocodeActivity", "Surface decoder given buffer " + outIndex +
+                                " (size=" + info.size + ")");
                             m_codec.releaseOutputBuffer(outIndex, true);
                             break;
                     }
