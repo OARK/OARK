@@ -111,7 +111,7 @@ class CmdListener:
                 #Receive until we have an entire message
                 msg_body = self.recv_sock.recv(msg_len)
                 while len(msg_body) < msg_len:
-                    msg_body = msg_body + self.recv_sock.recv(len(msg_body) - msg_len)
+                    msg_body = msg_body + self.recv_sock.recv(msg_len - len(msg_body))
 
                 msg_parsed = msg.Msg(msg_body)
 

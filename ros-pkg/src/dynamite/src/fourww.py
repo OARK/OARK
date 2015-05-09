@@ -46,34 +46,36 @@ def msg_received(msg):
         controller['fr'].set_torque(-msg.get_value())
         controller['br'].set_torque(-msg.get_value())
     elif msg.get_type() == msg.ARM_GO:
-        #Value is between 0 and 255. Arm goes from 200-850 (AX12 Units)
+        #Value is between 0 and 127. Arm goes from 200-850 (AX12 Units)
         lower = 200
         upper = 850
 
-        ax12_coords = (msg.get_value / 255) * (upper - lower) + upper
+        ax12_coords = (msg.get_value / 127) * (upper - lower) + upper
         result = (ax12_coords / 1023 - 0.5) * (300 * 3.1415926 / 180)
         controller['arm_base'].set_position(result)
 
     elif msg.get_type() == msg.WRIST_GO:
-        #Value is between 0 and 255. Wrist goes from 173 - 820 (AX12 Units)
+        #Value is between 0 and 127. Wrist goes from 173 - 820 (AX12 Units)
         lower = 173
         upper = 820
 
-        ax12_coords = (msg.get_value / 255) * (upper - lower) + upper
+        ax12_coords = (msg.get_value / 127) * (upper - lower) + upper
         result = (ax12_coords / 1023 - 0.5) * (300 * 3.1415926 / 180)
         controller['arm_wrist'].set_position(result)
 
     elif msg.get_type() == msg.HAND_GO:
-        #Value is between 0 and 255. Hand goes from 570-1023 (AX12 Units)
+        #Value is between 0 and 127. Hand goes from 570-1023 (AX12 Units)
         lower = 570
         upper = 1023
 
-        ax12_coords = (msg.get_value / 255) * (upper - lower) + upper
+        ax12_coords = (msg.get_value / 127) * (upper - lower) + upper
         result = (ax12_coords / 1023 - 0.5) * (300 * 3.1415926 / 180)
         controller['arm_hand'].set_position(result)
     else:
         print str(msg)
 
+def msg_received_test(msg):
+    print str(msg)
 
 
 if __name__ == '__main__':
@@ -88,21 +90,21 @@ if __name__ == '__main__':
 
     try:
 
-        rospy.init_node('forww_node')
+        rospy.init_node('fourww_node')
 
-        man_proxy = proxy.ManagerProxy(manager_ns)
+        man = proxy.ManagerProxy(manager_ns)
 
         listener = net_listen.CmdListener(interfaces)
         listener.add_data_listener(msg_received_test)
 
-        controllers['fl'] = torque_controller.TorqueController(man, 'wheel_fl', 'pi_out_port')
-        controllers['fr'] = torque_controller.TorqueController(man, 'wheel_fr', 'pi_out_port')
-        controllers['bl'] = torque_controller.TorqueController(man, 'wheel_bl', 'pi_out_port')
-        controllers['br'] = torque_controller.TorqueController(man, 'wheel_br', 'pi_out_port')
+        controllers['fl'] = TorqueController(man, 'wheel_fl', 'pi_out_port')
+        controllers['fr'] = TorqueController(man, 'wheel_fr', 'pi_out_port')
+        controllers['bl'] = TorqueController(man, 'wheel_bl', 'pi_out_port')
+        controllers['br'] = TorqueController(man, 'wheel_br', 'pi_out_port')
 
-        controllers['arm_base'] = pos_controller.PosController(man, 'arm_base', 'pi_out_port')
-        controllers['arm_wrist'] = pos_controller.PosController(man, 'arm_wrist', 'pi_out_port')
-        controllers['arm_hand'] = pos_controller.PosController(man, 'arm_hand', 'pi_out_port')
+        controllers['arm_base'] = PosController(man, 'arm_base', 'pi_out_port')
+        controllers['arm_wrist'] = PosController(man, 'arm_wrist', 'pi_out_port')
+        controllers['arm_hand'] = PosController(man, 'arm_hand', 'pi_out_port')
 
         rospy.spin()
 
