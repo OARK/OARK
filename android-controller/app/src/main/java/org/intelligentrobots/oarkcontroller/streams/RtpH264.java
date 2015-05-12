@@ -157,12 +157,13 @@ public class RtpH264 {
      * Processes a buffer.
      *
      * @param inRtp Rtp packet in.
-     * @param
      */
     public ProcessResult doProcess(RtpPacket inRtp) {
         byte[] payload = inRtp.getPayload();
 
         ProcessResult result = ProcessResult.OUTPUT_BUFFER_NOT_FILLED;
+
+        boolean continueProcessing = true;
 
         if ((mLastSequenceNo != -1) &&
             ((inRtp.getSequenceNumber() - mLastSequenceNo) != 1)) {
@@ -176,30 +177,30 @@ public class RtpH264 {
 
             if (result == ProcessResult.OUTPUT_BUFFER_NOT_FILLED) {
                 mLastSequenceNo = inRtp.getSequenceNumber();
-                return result;
+                continueProcessing = false;
             }
         }
 
-        mLastSequenceNo = inRtp.getSequenceNumber();
+        if (continueProcessing) {
+            mLastSequenceNo = inRtp.getSequenceNumber();
 
-        int nalUnitType = payload[0] & 0x1f;
+            int nalUnitType = payload[0] & 0x1f;
 
-        // Single NAL unit packet.
-        if ((nalUnitType >= 1) && (nalUnitType <= 23)) {
-            mProcessingFragmentPacket = false;
-
-            result = processSingleNALUnitPacket(
-                                                nalUnitType,
-                                                payload
-                                                );
-        } else if (nalUnitType == 28) {
-            // FU-A Fragmentation unit (FU)
-            result = processFUPacket(payload);
-
-            if (mDiscardBuffer) {
+            // Single NAL unit packet.
+            if ((nalUnitType >= 1) && (nalUnitType <= 23)) {
                 mProcessingFragmentPacket = false;
-                Log.d(TAG, "Discarding buffer.");
-                mOutputBuffer.reset();
+
+                result = processSingleNALUnitPacket(nalUnitType,
+                                                    payload);
+            } else if (nalUnitType == 28) {
+                // FU-A Fragmentation unit (FU)
+                result = processFUPacket(payload);
+
+                if (mDiscardBuffer) {
+                    mProcessingFragmentPacket = false;
+                    Log.d(TAG, "Discarding buffer.");
+                    mOutputBuffer.reset();
+                }
             }
         }
 
@@ -207,7 +208,6 @@ public class RtpH264 {
     }
 
     public byte[] getOutputBuffer() {
-        // Log.d(TAG, "Output Buffer size: " + mOutputBuffer.size());
         return mOutputBuffer.toByteArray();
     }
 

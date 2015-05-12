@@ -28,6 +28,9 @@ public class VideoStream extends Thread {
     /** Maximum blocking time, spent waiting for reading new bytes (ms) */
     public static final int SO_TIMEOUT = 1000;
 
+    public static final int DEFAULT_WIDTH = 640;
+    public static final int DEFAULT_HEIGHT = 480;
+
     private RtpSocket mRtpSocket;
     private RtpPacket mRtpPacket;
 
@@ -48,9 +51,7 @@ public class VideoStream extends Thread {
     }
 
     public VideoStream(SipdroidSocket socket, SurfaceView outputSurfaceView) throws IOException {
-        if (socket != null) {
-            mRtpSocket = new RtpSocket(socket);
-        }
+        this(socket);
 
         mSurface = outputSurfaceView.getHolder().getSurface();
         mCodec = MediaCodec.createDecoderByType("video/avc");
@@ -98,18 +99,19 @@ public class VideoStream extends Thread {
             return;
         }
 
-        MediaFormat format = MediaFormat.createVideoFormat("video/avc", 640, 480);
+        MediaFormat format = MediaFormat.createVideoFormat("video/avc",
+                                                           DEFAULT_WIDTH,
+                                                           DEFAULT_HEIGHT);
 
         mCodec.configure(format, mSurface, null, 0);
         mCodec.start();
 
-        // TODO: Magic number, fix.
         byte[] buffer = new byte[BUFFER_SIZE];
         mRtpPacket = new RtpPacket(buffer, 0);
 
         mRunning = true;
 
-        RtpH264 testRtpH264 = new RtpH264();
+        RtpH264 rtpH264Depacket = new RtpH264();
         BufferInfo info = new BufferInfo();
 
         while (mRunning) {
@@ -127,20 +129,20 @@ public class VideoStream extends Thread {
                         mRtpSocket.receive(mRtpPacket);
                         Log.d(TAG, "RTP Payload Size: " + mRtpPacket.getPayloadLength());
 
-                        if (testRtpH264.doProcess(mRtpPacket) == RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
-                            bufferNotReady = !testRtpH264.ready();
+                        if (rtpH264Depacket.doProcess(mRtpPacket) == RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
+                            bufferNotReady = !rtpH264Depacket.ready();
                         }
-                        Log.d(TAG, "Output Buffer Size: " + testRtpH264.currentLength());
+                        Log.d(TAG, "Output Buffer Size: " + rtpH264Depacket.currentLength());
                     } while (bufferNotReady);
 
-                    Log.d(TAG, "Output from RTP depay is " + testRtpH264.getOutputBuffer().length + " bytes.");
+                    Log.d(TAG, "Output from RTP depay is " + rtpH264Depacket.getOutputBuffer().length + " bytes.");
 
-                    byte[] transferArray = testRtpH264.getOutputBuffer();
+                    byte[] transferArray = rtpH264Depacket.getOutputBuffer();
 
                     inputBuffer.put(transferArray);
 
                     mCodec.queueInputBuffer(inputBufferIndex, 0, transferArray.length, 0, 0);
-                    testRtpH264.clear();
+                    rtpH264Depacket.clear();
 
                     int outIndex = mCodec.dequeueOutputBuffer(info, 10000);
 
