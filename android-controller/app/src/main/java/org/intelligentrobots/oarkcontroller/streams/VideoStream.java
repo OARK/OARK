@@ -21,8 +21,11 @@ import java.nio.ByteBuffer;
  * VideoStream is for receiving a video stream from the robot.
  */
 public class VideoStream extends Thread {
-    /** Size of the read buffer. */
-    public static final int BUFFER_SIZE = 4096;
+    /**
+     * Size of input buffer from network.
+     * TODO: Update to find MTU of network device used, and use that.
+     */
+    public static final int BUFFER_SIZE = 2048;
 
     /** Maximum blocking time, spent waiting for reading new bytes (ms) */
     public static final int SO_TIMEOUT = 1000;
@@ -105,7 +108,7 @@ public class VideoStream extends Thread {
         m_codec.start();
 
         // TODO: Magic number, fix.
-        byte[] buffer = new byte[BUFFER_SIZE + 12];
+        byte[] buffer = new byte[BUFFER_SIZE];
         m_rtpPacket = new RtpPacket(buffer, 0);
 
         m_running = true;
