@@ -6,6 +6,9 @@ package org.intelligentrobots.oarkcontroller.streams;
  *
  * This class will take the payload of a RTP packet, and determine which of the
  * three payload structures it is.
+ *
+ * It only implements a limited subset of the spec, just enough to get
+ * the specific payload from the OARK camera at time of writing.
  */
 
 import java.io.ByteArrayOutputStream;
@@ -23,7 +26,12 @@ public class RtpH264 {
     private ByteArrayOutputStream mOutputBuffer;
 
     /**
-     * Prefix byte sequence for any NAL unit.
+     * Prefix byte sequence for any NAL unit. This is part of the
+     * Annex B spec for H264. This actually isn't in RFC 6184.
+     * However, it seems some decoders require these to be present.
+     *
+     * TODO: Find out if there are hardware decoders that will crash
+     * if they are present.
      */
     private final static byte[] SYNC_BYTES = {0, 0, 1};
 
@@ -38,8 +46,10 @@ public class RtpH264 {
      */
     private long mLastSequenceNo = -1;
 
-    private int mNalUnitType;
-
+    /**
+     * If we have incorrect data in the buffer, set this to true so it
+     * can be discarded so we can start processing new data.
+     */
     private boolean mDiscardBuffer;
 
     private String TAG = "NewRtp:";
@@ -49,6 +59,9 @@ public class RtpH264 {
         OUTPUT_BUFFER_NOT_FILLED
     }
 
+    /**
+     * Allocates the buffer used for parsing the RTPH264 packets.
+     */
     public RtpH264() {
         mOutputBuffer = new ByteArrayOutputStream();
     }
@@ -126,9 +139,7 @@ public class RtpH264 {
     private ProcessResult processSingleNALUnitPacket(
                                                      int inNalUnitType,
                                                      byte[] inPayload) {
-        mNalUnitType = inNalUnitType;
-
-        mOutputBuffer.write(0);
+        //
         mOutputBuffer.write(SYNC_BYTES, 0, SYNC_BYTES.length);
         mOutputBuffer.write(inPayload, 0, inPayload.length);
 
