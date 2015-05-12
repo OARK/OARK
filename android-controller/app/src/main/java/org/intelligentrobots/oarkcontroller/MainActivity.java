@@ -20,8 +20,6 @@ import java.util.Enumeration;
 public class MainActivity extends ActionBarActivity {
 
     private Thread setupThread;
-
-    private TextView testTextView;
     private SurfaceView testSurfaceView;
 
     private VideoRenderer testVideoRenderer;
@@ -31,10 +29,9 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        testTextView = (TextView) findViewById(R.id.debugLogTextView);
         testSurfaceView = (SurfaceView) findViewById(R.id.robotCameraView);
 
-        testVideoRenderer = new VideoRenderer(testTextView, testSurfaceView);
+        testVideoRenderer = new VideoRenderer(testSurfaceView);
 
         testSurfaceView.getHolder().addCallback(testVideoRenderer);
     }

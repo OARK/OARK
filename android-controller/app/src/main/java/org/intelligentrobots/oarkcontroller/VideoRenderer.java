@@ -12,22 +12,20 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 /**
- * Created by aldredmr on 27/04/15.
+ * This is a surface callback
  */
 public class VideoRenderer implements SurfaceHolder.Callback {
-    private Thread m_codecThread;
-    private TextView m_testTextView;
-    private SurfaceView m_testSurfaceView;
+    private Thread mCodecThread;
+    private SurfaceView mSurfaceView;
 
-    public VideoRenderer(TextView testTextView, SurfaceView testSurfaceView) {
-        m_testTextView = testTextView;
-        m_testSurfaceView = testSurfaceView;
+    public VideoRenderer(SurfaceView testSurfaceView) {
+        mSurfaceView = testSurfaceView;
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
 
-        m_codecThread = new Thread() {
+        mCodecThread = new Thread() {
             public void run() {
                 SipdroidSocket testSocket = null;
                 try {
@@ -40,7 +38,7 @@ public class VideoRenderer implements SurfaceHolder.Callback {
 
                 VideoStream testVideoStream = null;
                 try {
-                    testVideoStream = new VideoStream(testSocket, m_testTextView, m_testSurfaceView);
+                    testVideoStream = new VideoStream(testSocket, mSurfaceView);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -51,7 +49,7 @@ public class VideoRenderer implements SurfaceHolder.Callback {
         };
 
         // When the surface is created, start the codec.
-        m_codecThread.start();
+        mCodecThread.start();
     }
 
     @Override

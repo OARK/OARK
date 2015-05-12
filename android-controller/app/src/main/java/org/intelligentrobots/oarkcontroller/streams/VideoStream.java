@@ -8,7 +8,6 @@ import android.media.MediaCodec.BufferInfo;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceView;
-import android.widget.TextView;
 
 import org.sipdroid.net.RtpPacket;
 import org.sipdroid.net.RtpSocket;
@@ -33,7 +32,6 @@ public class VideoStream extends Thread {
 
     private boolean m_running;
 
-    private TextView m_outputTextView;
     private Surface m_surface;
 
     private MediaCodec m_codec;
@@ -49,15 +47,13 @@ public class VideoStream extends Thread {
         }
     }
 
-    public VideoStream(SipdroidSocket socket, TextView outputTextView, SurfaceView outputSurfaceView) throws IOException {
+    public VideoStream(SipdroidSocket socket, SurfaceView outputSurfaceView) throws IOException {
         if (socket != null) {
             m_rtpSocket = new RtpSocket(socket);
         }
 
         m_surface = outputSurfaceView.getHolder().getSurface();
         m_codec = MediaCodec.createDecoderByType("video/avc");
-
-        m_outputTextView = outputTextView;
     }
 
     /** Thread running? */
@@ -145,7 +141,6 @@ public class VideoStream extends Thread {
      */
     public void run() {
         if (m_rtpSocket == null) {
-            println("ERROR; RTP socket is null");
             return;
         }
 
@@ -177,13 +172,15 @@ public class VideoStream extends Thread {
                     boolean bufferNotReady = true;
                     do {
                         m_rtpSocket.receive(m_rtpPacket);
+                        Log.d(TAG, "RTP Payload Size: " + m_rtpPacket.getPayloadLength());
 
                         if (testRtpH264.doProcess(m_rtpPacket) == NewRtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
                             bufferNotReady = !testRtpH264.ready();
                         }
+                        Log.d(TAG, "Output Buffer Size: " + testRtpH264.currentLength());
                     } while (bufferNotReady);
 
-                    // Log.d(TAG, "Output from RTP depay is " + testRtpH264.getOutputBuffer().length + " bytes.");
+                    Log.d(TAG, "Output from RTP depay is " + testRtpH264.getOutputBuffer().length + " bytes.");
 
                     byte[] transferArray = testRtpH264.getOutputBuffer();
 
@@ -192,7 +189,7 @@ public class VideoStream extends Thread {
                     m_codec.queueInputBuffer(inputBufferIndex, 0, transferArray.length, 0, 0);
                     testRtpH264.clear();
 
-                    int outIndex = m_codec.dequeueOutputBuffer(info, 1000);
+                    int outIndex = m_codec.dequeueOutputBuffer(info, 10000);
 
                     switch (outIndex) {
                         case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
@@ -202,11 +199,11 @@ public class VideoStream extends Thread {
                             Log.d("DecodeActivity", "New format " + m_codec.getOutputFormat());
                             break;
                         case MediaCodec.INFO_TRY_AGAIN_LATER:
-                            // Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
+                            Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
                             break;
                         default:
-                            //Log.d("DocodeActivity", "Surface decoder given buffer " + outIndex +
-                            //    " (size=" + info.size + ")");
+                            Log.d("DocodeActivity", "Surface decoder given buffer " + outIndex +
+                                " (size=" + info.size + ")");
                             m_codec.releaseOutputBuffer(outIndex, true);
                             break;
                     }
@@ -214,19 +211,6 @@ public class VideoStream extends Thread {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    /** Debug output */
-
-    private void println(final String inStr) {
-        if (m_outputTextView != null) {
-            m_outputTextView.post(new Runnable() {
-                @Override
-                public void run() {
-                    m_outputTextView.append(inStr);
-                }
-            });
         }
     }
 }

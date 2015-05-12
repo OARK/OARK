@@ -9,6 +9,7 @@ package org.intelligentrobots.oarkcontroller.streams;
  */
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 
 import android.util.Log;
 
@@ -24,7 +25,7 @@ public class NewRtpH264 {
     /**
      * Prefix byte sequence for any NAL unit.
      */
-    private final static byte[] SYNC_BYTES = {0, 0, 0, 1};
+    private final static byte[] SYNC_BYTES = {0, 0, 1};
 
     /**
      * Are we currently processing a fragmented NAL unit across packets.
@@ -103,10 +104,9 @@ public class NewRtpH264 {
         if (startBit) {
             mOutputBuffer.write(SYNC_BYTES, 0, SYNC_BYTES.length);
             mOutputBuffer.write(nalHeader);
-            mOutputBuffer.write(inPayload, 2, inPayload.length - 2);
-        } else {
-            mOutputBuffer.write(inPayload, 2, inPayload.length - 2);
         }
+
+        mOutputBuffer.write(inPayload, 2, inPayload.length - 2);
 
         if (endBit) {
             mProcessingFragmentPacket = false;
