@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
  */
 public class VideoStream extends Thread {
     /** Size of the read buffer. */
-    public static final int BUFFER_SIZE = 1024;
+    public static final int BUFFER_SIZE = 4096;
 
     /** Maximum blocking time, spent waiting for reading new bytes (ms) */
     public static final int SO_TIMEOUT = 1000;
