@@ -45,7 +45,7 @@ public class VideoRenderer implements SurfaceHolder.Callback {
         mCodecThread = new Thread() {
             public void run() {
                 SipdroidSocket listenSocket = null;
-                
+
                 try {
                     listenSocket = new SipdroidSocket(mPortNumber);
                 } catch (SocketException e) {
