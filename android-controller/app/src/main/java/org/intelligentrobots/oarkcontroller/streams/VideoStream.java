@@ -156,7 +156,7 @@ public class VideoStream extends Thread {
 
         m_running = true;
 
-        NewRtpH264 testRtpH264 = new NewRtpH264();
+        RtpH264 testRtpH264 = new RtpH264();
         BufferInfo info = new BufferInfo();
 
         while (m_running) {
@@ -174,7 +174,7 @@ public class VideoStream extends Thread {
                         m_rtpSocket.receive(m_rtpPacket);
                         Log.d(TAG, "RTP Payload Size: " + m_rtpPacket.getPayloadLength());
 
-                        if (testRtpH264.doProcess(m_rtpPacket) == NewRtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
+                        if (testRtpH264.doProcess(m_rtpPacket) == RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
                             bufferNotReady = !testRtpH264.ready();
                         }
                         Log.d(TAG, "Output Buffer Size: " + testRtpH264.currentLength());

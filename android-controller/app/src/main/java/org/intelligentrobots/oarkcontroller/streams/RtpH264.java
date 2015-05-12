@@ -15,7 +15,7 @@ import android.util.Log;
 
 import org.sipdroid.net.RtpPacket;
 
-public class NewRtpH264 {
+public class RtpH264 {
     /**
      * When we reconstruct NAL units from RTP packets, we may have to build
      * across packets, so this is a buffer that will persist across boundaries.
@@ -49,7 +49,7 @@ public class NewRtpH264 {
         OUTPUT_BUFFER_NOT_FILLED
     }
 
-    public NewRtpH264() {
+    public RtpH264() {
         mOutputBuffer = new ByteArrayOutputStream();
     }
 
