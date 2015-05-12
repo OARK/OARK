@@ -90,52 +90,6 @@ public class VideoStream extends Thread {
         }
     }
 
-    private MediaCodecInfo selectCodec(String mimeType) {
-        int numCodecs = MediaCodecList.getCodecCount();
-        for (int i = 0; i < numCodecs; i++) {
-            MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
-            if (!codecInfo.isEncoder()) {
-                continue;
-            }
-            String[] types = codecInfo.getSupportedTypes();
-            for (int j = 0; j < types.length; j++) {
-                if (types[j].equalsIgnoreCase(mimeType)) {
-                    return codecInfo;
-                }
-            }
-        }
-        return null;
-    }
-
-    private int selectColorFormat(String mimeType) {
-        MediaCodecInfo codecInfo = selectCodec(mimeType);
-        int colorFormat = 0;
-        MediaCodecInfo.CodecCapabilities capabilities =  codecInfo.getCapabilitiesForType(mimeType);
-        for (int i = 0; i < capabilities.colorFormats.length; i++) {
-
-            if (isRecognizedFormat(capabilities.colorFormats[i])) {
-                colorFormat = capabilities.colorFormats[i];
-                break;
-            }
-        }
-
-        return colorFormat;
-    }
-
-    private boolean isRecognizedFormat(int colorFormat) {
-        switch (colorFormat) {
-            // these are the formats we know how to handle for this test
-            case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar:
-            case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar:
-            case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar:
-            case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedSemiPlanar:
-            case MediaCodecInfo.CodecCapabilities.COLOR_TI_FormatYUV420PackedSemiPlanar:
-                return true;
-            default:
-                return false;
-        }
-    }
-
     /**
      * Run the thread for handling the video stream.
      */
@@ -192,20 +146,19 @@ public class VideoStream extends Thread {
                     int outIndex = m_codec.dequeueOutputBuffer(info, 10000);
 
                     switch (outIndex) {
-                        case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
-                            Log.d("DecodeActivity", "INFO_OUTPUT_BUFFERS_CHANGED");
-                            break;
-                        case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
-                            Log.d("DecodeActivity", "New format " + m_codec.getOutputFormat());
-                            break;
-                        case MediaCodec.INFO_TRY_AGAIN_LATER:
-                            Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
-                            break;
-                        default:
-                            Log.d("DocodeActivity", "Surface decoder given buffer " + outIndex +
-                                " (size=" + info.size + ")");
-                            m_codec.releaseOutputBuffer(outIndex, true);
-                            break;
+                    case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
+                        break;
+                    case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
+                        Log.d("DecodeActivity", "New format " + m_codec.getOutputFormat());
+                        break;
+                    case MediaCodec.INFO_TRY_AGAIN_LATER:
+                        Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
+                        break;
+                    default:
+                        Log.d("DocodeActivity", "Surface decoder given buffer " + outIndex +
+                              " (size=" + info.size + ")");
+                        m_codec.releaseOutputBuffer(outIndex, (info.size != 0));
+                        break;
                     }
                 }
             } catch (IOException e) {
