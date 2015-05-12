@@ -31,7 +31,7 @@ public class MainActivity extends ActionBarActivity {
 
         testSurfaceView = (SurfaceView) findViewById(R.id.robotCameraView);
 
-        testVideoRenderer = new VideoRenderer(testSurfaceView);
+        testVideoRenderer = new VideoRenderer(testSurfaceView, 5000);
 
         testSurfaceView.getHolder().addCallback(testVideoRenderer);
     }
