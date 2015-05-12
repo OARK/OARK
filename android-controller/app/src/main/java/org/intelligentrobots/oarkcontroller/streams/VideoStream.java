@@ -12,6 +12,7 @@ import org.sipdroid.net.RtpSocket;
 import org.sipdroid.net.SipdroidSocket;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 
@@ -99,6 +100,12 @@ public class VideoStream extends Thread {
             return;
         }
 
+        try {
+            mRtpSocket.getDatagramSocket().setSoTimeout(SO_TIMEOUT);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+
         MediaFormat format = MediaFormat.createVideoFormat("video/avc",
                                                            DEFAULT_WIDTH,
                                                            DEFAULT_HEIGHT);
@@ -116,7 +123,6 @@ public class VideoStream extends Thread {
 
         while (mRunning) {
 
-            try {
 
                 int inputBufferIndex = mCodec.dequeueInputBuffer(-1);
                 ByteBuffer inputBuffer;
@@ -126,7 +132,16 @@ public class VideoStream extends Thread {
 
                     boolean bufferNotReady = true;
                     do {
-                        mRtpSocket.receive(mRtpPacket);
+                        try {
+                            Log.d(TAG, "Trying to read packet.");
+                            mRtpSocket.receive(mRtpPacket);
+                        } catch (InterruptedIOException ex) {
+                            Log.d(TAG, "Interrupted IO Exception: " + ex.toString());
+                        } catch (IOException ex) {
+                            // If we get an exception, just clear out the MediaCodec buffers.
+                            Log.d(TAG, "IO Exception" + ex.toString());
+                            rtpH264Depacket.discardBuffer();
+                        }
 
                         if (rtpH264Depacket.doProcess(mRtpPacket) == RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
                             bufferNotReady = !rtpH264Depacket.ready();
@@ -141,7 +156,7 @@ public class VideoStream extends Thread {
                     mCodec.queueInputBuffer(inputBufferIndex, 0, transferArray.length, 0, 0);
                     rtpH264Depacket.clear();
 
-                    int outIndex = mCodec.dequeueOutputBuffer(info, 10000);
+                    int outIndex = mCodec.dequeueOutputBuffer(info, 1000);
 
                     switch (outIndex) {
                     case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
@@ -157,9 +172,6 @@ public class VideoStream extends Thread {
                         break;
                     }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 }

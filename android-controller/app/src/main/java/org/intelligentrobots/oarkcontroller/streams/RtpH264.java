@@ -63,6 +63,8 @@ public class RtpH264 {
      */
     public RtpH264() {
         mOutputBuffer = new ByteArrayOutputStream();
+        mProcessingFragmentPacket = false;
+        mLastSequenceNo = -1;
     }
 
     /**
@@ -180,7 +182,7 @@ public class RtpH264 {
             }
         }
 
-        if (continueProcessing) {
+        if (continueProcessing && payload.length > 0) {
             mLastSequenceNo = inRtp.getSequenceNumber();
 
             int nalUnitType = payload[0] & 0x1f;
@@ -226,4 +228,6 @@ public class RtpH264 {
     }
 
     public void clear() { mOutputBuffer.reset(); }
+
+    public void discardBuffer() { mDiscardBuffer = true; }
 }
