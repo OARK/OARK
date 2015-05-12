@@ -27,6 +27,11 @@ public class VideoRenderer implements SurfaceHolder.Callback {
     /**
      * After the video renderer is created here, it must be added as a
      * callback on the surface.
+     *
+     * e.g:
+     *   testSurfaceView = (SurfaceView) findViewById(R.id.robotCameraView);
+     *   testVideoRenderer = new VideoRenderer(testSurfaceView, 5000);
+     *   testSurfaceView.getHolder().addCallback(testVideoRenderer);
      */
     public VideoRenderer(SurfaceView inSurfaceView, int inPortNumber) {
         mSurfaceView = inSurfaceView;
@@ -54,14 +59,14 @@ public class VideoRenderer implements SurfaceHolder.Callback {
                     e.printStackTrace();
                 }
 
-                VideoStream testVideoStream = null;
+                VideoStream streamRenderer = null;
                 try {
-                    testVideoStream = new VideoStream(listenSocket, mSurfaceView);
+                    streamRenderer = new VideoStream(listenSocket, mSurfaceView);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                testVideoStream.start();
+                streamRenderer.start();
 
             }
         };
