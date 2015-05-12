@@ -98,36 +98,43 @@ public class RtpH264 {
 
         mDiscardBuffer = false;
 
+        boolean continueProcessing = true;
+
+        ProcessResult result = ProcessResult.BUFFER_PROCESSED_OK;
+
         if (startBit) {
             /*
              * The start bit and end bit can't be in the same FU header.
              */
             if (endBit) {
                 mDiscardBuffer = true;
-                return ProcessResult.BUFFER_PROCESSED_OK;
+                continueProcessing = false;
+            } else {
+                mProcessingFragmentPacket = true;
             }
-
-            mProcessingFragmentPacket = true;
-
         } else if (!mProcessingFragmentPacket) {
             mDiscardBuffer = true;
-            return ProcessResult.BUFFER_PROCESSED_OK;
+            continueProcessing = false;
         }
 
-        if (startBit) {
-            mOutputBuffer.write(SYNC_BYTES, 0, SYNC_BYTES.length);
-            mOutputBuffer.write(nalHeader);
+        if (continueProcessing) {
+
+            if (startBit) {
+                mOutputBuffer.write(SYNC_BYTES, 0, SYNC_BYTES.length);
+                mOutputBuffer.write(nalHeader);
+            }
+
+            mOutputBuffer.write(inPayload, 2, inPayload.length - 2);
+
+            if (endBit) {
+                mProcessingFragmentPacket = false;
+            } else {
+                mProcessingFragmentPacket = true;
+                result = ProcessResult.OUTPUT_BUFFER_NOT_FILLED;
+            }
         }
 
-        mOutputBuffer.write(inPayload, 2, inPayload.length - 2);
-
-        if (endBit) {
-            mProcessingFragmentPacket = false;
-            return ProcessResult.BUFFER_PROCESSED_OK;
-        } else {
-            mProcessingFragmentPacket = true;
-            return ProcessResult.OUTPUT_BUFFER_NOT_FILLED;
-        }
+        return result;
     }
 
     /**

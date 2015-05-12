@@ -1,8 +1,6 @@
 package org.intelligentrobots.oarkcontroller.streams;
 
 import android.media.MediaCodec;
-import android.media.MediaCodecInfo;
-import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.media.MediaCodec.BufferInfo;
 import android.util.Log;
@@ -30,15 +28,14 @@ public class VideoStream extends Thread {
     /** Maximum blocking time, spent waiting for reading new bytes (ms) */
     public static final int SO_TIMEOUT = 1000;
 
-    private RtpSocket m_rtpSocket;
-    private RtpPacket m_rtpPacket;
+    private RtpSocket mRtpSocket;
+    private RtpPacket mRtpPacket;
 
-    private boolean m_running;
+    private boolean mRunning;
 
-    private Surface m_surface;
+    private Surface mSurface;
 
-    private MediaCodec m_codec;
-    private ByteBuffer[] m_decodeInputBuffers;
+    private MediaCodec mCodec;
 
     private final static String TAG = "VideoStream: ";
     /**
@@ -46,22 +43,22 @@ public class VideoStream extends Thread {
      */
     public VideoStream(SipdroidSocket socket) {
         if (socket != null) {
-            m_rtpSocket = new RtpSocket(socket);
+            mRtpSocket = new RtpSocket(socket);
         }
     }
 
     public VideoStream(SipdroidSocket socket, SurfaceView outputSurfaceView) throws IOException {
         if (socket != null) {
-            m_rtpSocket = new RtpSocket(socket);
+            mRtpSocket = new RtpSocket(socket);
         }
 
-        m_surface = outputSurfaceView.getHolder().getSurface();
-        m_codec = MediaCodec.createDecoderByType("video/avc");
+        mSurface = outputSurfaceView.getHolder().getSurface();
+        mCodec = MediaCodec.createDecoderByType("video/avc");
     }
 
     /** Thread running? */
     public boolean isRunning() {
-        return m_running;
+        return mRunning;
     }
 
     /**
@@ -69,7 +66,7 @@ public class VideoStream extends Thread {
      */
     void empty() {
         try {
-            m_rtpSocket.getDatagramSocket().setSoTimeout(1);
+            mRtpSocket.getDatagramSocket().setSoTimeout(1);
 
             /*
              * This relies on throwing an exception when there's no more data
@@ -78,7 +75,7 @@ public class VideoStream extends Thread {
              * TODO: Fix it.
              */
             while(true) {
-                m_rtpSocket.receive(m_rtpPacket);
+                mRtpSocket.receive(mRtpPacket);
             }
         } catch (SocketException e) {
             e.printStackTrace();
@@ -87,7 +84,7 @@ public class VideoStream extends Thread {
         }
 
         try {
-            m_rtpSocket.getDatagramSocket().setSoTimeout(SO_TIMEOUT);
+            mRtpSocket.getDatagramSocket().setSoTimeout(SO_TIMEOUT);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -97,41 +94,40 @@ public class VideoStream extends Thread {
      * Run the thread for handling the video stream.
      */
     public void run() {
-        if (m_rtpSocket == null) {
+        if (mRtpSocket == null) {
             return;
         }
 
         MediaFormat format = MediaFormat.createVideoFormat("video/avc", 640, 480);
 
-        m_codec.configure(format, m_surface, null, 0);
-
-        m_codec.start();
+        mCodec.configure(format, mSurface, null, 0);
+        mCodec.start();
 
         // TODO: Magic number, fix.
         byte[] buffer = new byte[BUFFER_SIZE];
-        m_rtpPacket = new RtpPacket(buffer, 0);
+        mRtpPacket = new RtpPacket(buffer, 0);
 
-        m_running = true;
+        mRunning = true;
 
         RtpH264 testRtpH264 = new RtpH264();
         BufferInfo info = new BufferInfo();
 
-        while (m_running) {
+        while (mRunning) {
 
             try {
 
-                int inputBufferIndex = m_codec.dequeueInputBuffer(-1);
+                int inputBufferIndex = mCodec.dequeueInputBuffer(-1);
                 ByteBuffer inputBuffer;
 
                 if (inputBufferIndex >= 0) {
-                    inputBuffer = m_codec.getInputBuffer(inputBufferIndex);
+                    inputBuffer = mCodec.getInputBuffer(inputBufferIndex);
 
                     boolean bufferNotReady = true;
                     do {
-                        m_rtpSocket.receive(m_rtpPacket);
-                        Log.d(TAG, "RTP Payload Size: " + m_rtpPacket.getPayloadLength());
+                        mRtpSocket.receive(mRtpPacket);
+                        Log.d(TAG, "RTP Payload Size: " + mRtpPacket.getPayloadLength());
 
-                        if (testRtpH264.doProcess(m_rtpPacket) == RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
+                        if (testRtpH264.doProcess(mRtpPacket) == RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
                             bufferNotReady = !testRtpH264.ready();
                         }
                         Log.d(TAG, "Output Buffer Size: " + testRtpH264.currentLength());
@@ -143,16 +139,16 @@ public class VideoStream extends Thread {
 
                     inputBuffer.put(transferArray);
 
-                    m_codec.queueInputBuffer(inputBufferIndex, 0, transferArray.length, 0, 0);
+                    mCodec.queueInputBuffer(inputBufferIndex, 0, transferArray.length, 0, 0);
                     testRtpH264.clear();
 
-                    int outIndex = m_codec.dequeueOutputBuffer(info, 10000);
+                    int outIndex = mCodec.dequeueOutputBuffer(info, 10000);
 
                     switch (outIndex) {
                     case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
                         break;
                     case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
-                        Log.d("DecodeActivity", "New format " + m_codec.getOutputFormat());
+                        Log.d("DecodeActivity", "New format " + mCodec.getOutputFormat());
                         break;
                     case MediaCodec.INFO_TRY_AGAIN_LATER:
                         Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
@@ -160,7 +156,7 @@ public class VideoStream extends Thread {
                     default:
                         Log.d("DocodeActivity", "Surface decoder given buffer " + outIndex +
                               " (size=" + info.size + ")");
-                        m_codec.releaseOutputBuffer(outIndex, (info.size != 0));
+                        mCodec.releaseOutputBuffer(outIndex, (info.size != 0));
                         break;
                     }
                 }
