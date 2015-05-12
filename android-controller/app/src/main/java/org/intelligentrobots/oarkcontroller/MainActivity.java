@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceView;
-import android.widget.TextView;
 
 import org.intelligentrobots.oarkcontroller.streams.VideoStream;
 import org.sipdroid.net.SipdroidSocket;
@@ -56,26 +55,5 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private static byte[] getLocalIPAddress() {
-        byte ip[] = null;
-        try {
-            for (Enumeration en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
-                NetworkInterface intF = (NetworkInterface) en.nextElement();
-
-                for (Enumeration enumIpAddr = intF.getInetAddresses(); enumIpAddr.hasMoreElements();) {
-                    InetAddress inetAddress = (InetAddress) enumIpAddr.nextElement();
-
-                    if (!inetAddress.isLoopbackAddress()) {
-                        ip = inetAddress.getAddress();
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
-
-        return ip;
     }
 }
