@@ -127,15 +127,12 @@ public class VideoStream extends Thread {
                     boolean bufferNotReady = true;
                     do {
                         mRtpSocket.receive(mRtpPacket);
-                        Log.d(TAG, "RTP Payload Size: " + mRtpPacket.getPayloadLength());
 
                         if (rtpH264Depacket.doProcess(mRtpPacket) == RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
                             bufferNotReady = !rtpH264Depacket.ready();
                         }
-                        Log.d(TAG, "Output Buffer Size: " + rtpH264Depacket.currentLength());
-                    } while (bufferNotReady);
 
-                    Log.d(TAG, "Output from RTP depay is " + rtpH264Depacket.getOutputBuffer().length + " bytes.");
+                    } while (bufferNotReady);
 
                     byte[] transferArray = rtpH264Depacket.getOutputBuffer();
 
@@ -156,8 +153,6 @@ public class VideoStream extends Thread {
                         Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
                         break;
                     default:
-                        Log.d("DocodeActivity", "Surface decoder given buffer " + outIndex +
-                              " (size=" + info.size + ")");
                         mCodec.releaseOutputBuffer(outIndex, (info.size != 0));
                         break;
                     }

@@ -12,7 +12,6 @@ package org.intelligentrobots.oarkcontroller.streams;
  */
 
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
 
 import android.util.Log;
 

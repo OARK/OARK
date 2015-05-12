@@ -6,16 +6,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceView;
 
-import org.intelligentrobots.oarkcontroller.streams.VideoStream;
-import org.sipdroid.net.SipdroidSocket;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Enumeration;
-
 public class MainActivity extends ActionBarActivity {
 
     private Thread setupThread;
