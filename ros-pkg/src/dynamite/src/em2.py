@@ -82,6 +82,12 @@ def msg_received(msg):
 def msg_received_test(msg):
     print str(msg)
 
+def client_dc():
+    #Stop all motors
+    for cont in controllers:
+        controllers[cont].command(0)
+
+
 
 if __name__ == '__main__':
     #args = rospy.myargv(argv=sys.argv)
@@ -95,12 +101,13 @@ if __name__ == '__main__':
 
     try:
 
-        rospy.init_node('fourww_node')
+        rospy.init_node('em2_node')
 
         man = proxy.ManagerProxy(manager_ns)
 
         listener = net_listen.CmdListener(interfaces)
         listener.add_data_listener(msg_received)
+        listener.add_dc_listener(client_dc)
 
         controllers['fl'] = TorqueController(man, 'wheel_fl', 'pi_out_port')
         controllers['fr'] = TorqueController(man, 'wheel_fr', 'pi_out_port')

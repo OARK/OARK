@@ -30,9 +30,9 @@
 
 <!--
 	<node
-		name="fourww_node"
+		name="em2_node"
 		pkg="dynamite"
-		type="fourww.py"
+		type="em2.py"
 		required="true"
 		output="screen"/>-->
 </launch>
