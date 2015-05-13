@@ -56,7 +56,7 @@ public class Talker {
                 init = true;
             }
             catch(IOException e) {
-                Log.e("FOURWW", "No dice");
+                Log.e("EMUMINI2", "No dice");
             }
         }
     }
@@ -69,7 +69,7 @@ public class Talker {
         sock.close();
     }
 
-    public void send(IMsg msg) throws IOException {
+    public synchronized void send(IMsg msg) throws IOException {
         dos.writeByte(msg.getSize());
         msg.serialise(dos);
         dos.flush();

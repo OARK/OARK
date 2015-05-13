@@ -23,7 +23,7 @@ public class IPActivity extends ActionBarActivity {
         ipButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent activityStarter = new Intent(getBaseContext(), ControlActivity.class);
-                activityStarter.putExtra("tim.is.a.legend.IP_ADDRESS", ipTextView.getText().toString());
+                activityStarter.putExtra("IP_ADDRESS", ipTextView.getText().toString());
                 startActivity(activityStarter);
             }
         });

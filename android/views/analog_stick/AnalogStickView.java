@@ -9,6 +9,9 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.MotionEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This view is of a basic analog stick. The analog stick can be
  * queried to get a value between 1.0 and -1.0 in both the X and Y
@@ -24,8 +27,6 @@ import android.view.MotionEvent;
  *      effects - Draw advanced effects (experimental)
  *      axes    - Axes to allow movement on (X, Y, or BOTH)
  *      transparent - Whether the background should be transparent or not
- *
- *      TODO: Observer pattern to update observers when position changes.
  */
 public class AnalogStickView extends View {
     private final int X = 0;
@@ -43,6 +44,19 @@ public class AnalogStickView extends View {
     private boolean effects = true;
     private int axes = BOTH;
     private boolean transparent = true;
+
+    private ArrayList<AnalogStickListener> listeners = new ArrayList<AnalogStickListener>();
+
+    /* Implement this interface if you wish to receive notifications on the
+       analog stick moving.
+     */
+    public static interface AnalogStickListener {
+        public void onAnalogStickChange(float x, float y);
+    }
+    public void addAnalogStickListener(AnalogStickListener asl) {
+        listeners.add(asl);
+    }
+
 
     public AnalogStickView(Context context) {
         super(context);
@@ -78,23 +92,19 @@ public class AnalogStickView extends View {
         /* Create default painting object */
         circlePainter = new Paint();
         circlePainter.setColor(pointerColor);
+
+        touchX = getWidth() / 2;
+        touchY = getHeight() / 2;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        float minorRad;
-        float majorRad = circleRad;
         int width = getWidth();
         int height = getHeight();
 
-        /* Ensure our cursor doesn't escape view bounds */
-        if(touchX - circleRad < 0) touchX = circleRad;
-        if(touchX + circleRad > width) touchX = width - circleRad;
-        if(touchY - circleRad < 0) touchY = circleRad;
-        if(touchY + circleRad > height) touchY = height - circleRad;
-
+        /* This needs to be here for when drawing occurs before action */
         if(!isTouching) {
             touchX = width / 2;
             touchY = height / 2;
@@ -128,20 +138,38 @@ public class AnalogStickView extends View {
         }
     }
 
+
     @Override
     public boolean onTouchEvent(MotionEvent me ) {
-        if(me.getAction() == me.ACTION_DOWN) {
-            isTouching = true;
-        }
-        else if(me.getAction() == me.ACTION_UP) {
-            isTouching = false;
-        }
+        int width = getWidth();
+        int height = getHeight();
 
+        /* Get only required axes */
         if(axes != Y) {
             touchX = me.getX();
         }
         if(axes != X) {
             touchY = me.getY();
+        }
+
+        /* Check for down/up */
+        if(me.getAction() == me.ACTION_DOWN) {
+            isTouching = true;
+        }
+        else if(me.getAction() == me.ACTION_UP) {
+            isTouching = false;
+            touchX = width / 2;
+            touchY = height / 2;
+        }
+
+        /* Ensure our cursor doesn't escape view bounds */
+        if(touchX - circleRad < 0) touchX = circleRad;
+        if(touchX + circleRad > width) touchX = width - circleRad;
+        if(touchY - circleRad < 0) touchY = circleRad;
+        if(touchY + circleRad > height) touchY = height - circleRad;
+
+        for(AnalogStickListener asl : listeners) {
+            asl.onAnalogStickChange((float)getAnalogX(), (float)getAnalogY());
         }
 
         invalidate();
