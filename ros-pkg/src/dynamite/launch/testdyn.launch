@@ -1,13 +1,10 @@
 <!-- 
-     It is assumed that this code would run on a raspberry pi.
-     As such, the serial port used is /dev/ttyAMA0. Care should
-     be taken to properly configure this port before this launch
-     file is actually loaded.
+	Used as a test
 -->
 
 <launch>
 
-    <!-- Launch the controller manager. Params in controllers.yaml -->
+    <!-- Launch the controller manager. Params in testcont.yaml -->
     <node
         name="dynamixel_manager"
         pkg="dynamixel_controllers"
@@ -22,10 +19,10 @@
                     port_name: "/dev/ttyUSB0"
                     baud_rate: 1000000
                     min_motor_id: 1
-                    max_motor_id: 7
+                    max_motor_id: 2
                     update_rate: 20
         </rosparam>
     </node>
-	<rosparam command="load" file="$(find dynamite)/launch/controllers.yaml" />
+	<rosparam command="load" file="$(find dynamite)/launch/testcont.yaml" />
 </launch>
 

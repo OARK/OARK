@@ -1,0 +1,93 @@
+wheel_fl:
+    controller:
+        package: dynamixel_controllers
+        module: joint_torque_controller
+        type: JointTorqueController
+    joint_name: fl
+    joint_speed: 1023
+    motor:
+        id: 1
+        init: 0
+        min: 0
+        max: 4093
+
+wheel_fr:
+    controller:
+        package: dynamixel_controllers
+        module: joint_torque_controller
+        type: JointTorqueController
+    joint_name: fr
+    joint_speed: 1023
+    motor:
+        id: 2
+        init: 0 
+        min: 0
+        max: 4093
+
+wheel_br:
+    controller:
+        package: dynamixel_controllers
+        module: joint_torque_controller
+        type: JointTorqueController
+    joint_name: br
+    joint_speed: 1023
+    motor:
+        id: 3
+        init: 0
+        min: 0
+        max: 4093
+
+wheel_bl:
+    controller:
+        package: dynamixel_controllers
+        module: joint_torque_controller
+        type: JointTorqueController
+    joint_name: bl
+    joint_speed: 1023
+    motor:
+        id: 4
+        init: 0 
+        min: 0
+        max: 4093
+
+
+arm_base:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: base 
+    joint_speed: 1.0
+    motor:
+        id: 5
+        init: 200
+        min: 200
+        max: 850 
+
+
+arm_wrist:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: wrist
+    joint_speed: 1.0
+    motor:
+        id: 6
+        init: 173
+        min: 173
+        max: 810
+
+arm_hand:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller
+        type: JointPositionController
+    joint_name: hand
+    joint_speed: 1.0
+    motor:
+        id: 7
+        init: 200 
+        min: 0 
+        max: 580 
+

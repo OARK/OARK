@@ -32,6 +32,8 @@ ALL_GO = 5
 ARM_GO = 6
 TURN_CCW = 7
 TURN_CW = 8
+WRIST_GO = 9
+HAND_GO = 10
 
 
 class Msg:

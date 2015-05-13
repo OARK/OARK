@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/bash
 #
 #Adds a necessary python path
 
