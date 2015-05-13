@@ -28,6 +28,8 @@ public class FourWWMsg implements IMsg {
     public final static byte ARM_GO = 6; // Set arm position
     public final static byte TURN_CCW = 7;
     public final static byte TURN_CW = 8;
+    public final static byte WRIST_GO = 9;
+    public final static byte HAND_GO = 10;
 
     private byte type;
     private byte id;

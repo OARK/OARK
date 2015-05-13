@@ -2,12 +2,12 @@ package org.intelligentrobots.oarkcontroller.streams;
 
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.media.MediaCodec.BufferInfo;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceView;
-import android.widget.TextView;
 
 import org.sipdroid.net.RtpPacket;
 import org.sipdroid.net.RtpSocket;
@@ -32,7 +32,6 @@ public class VideoStream extends Thread {
 
     private boolean m_running;
 
-    private TextView m_outputTextView;
     private Surface m_surface;
 
     private MediaCodec m_codec;
@@ -48,15 +47,13 @@ public class VideoStream extends Thread {
         }
     }
 
-    public VideoStream(SipdroidSocket socket, TextView outputTextView, SurfaceView outputSurfaceView) throws IOException {
+    public VideoStream(SipdroidSocket socket, SurfaceView outputSurfaceView) throws IOException {
         if (socket != null) {
             m_rtpSocket = new RtpSocket(socket);
         }
 
         m_surface = outputSurfaceView.getHolder().getSurface();
         m_codec = MediaCodec.createDecoderByType("video/avc");
-
-        m_outputTextView = outputTextView;
     }
 
     /** Thread running? */
@@ -93,18 +90,61 @@ public class VideoStream extends Thread {
         }
     }
 
+    private MediaCodecInfo selectCodec(String mimeType) {
+        int numCodecs = MediaCodecList.getCodecCount();
+        for (int i = 0; i < numCodecs; i++) {
+            MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
+            if (!codecInfo.isEncoder()) {
+                continue;
+            }
+            String[] types = codecInfo.getSupportedTypes();
+            for (int j = 0; j < types.length; j++) {
+                if (types[j].equalsIgnoreCase(mimeType)) {
+                    return codecInfo;
+                }
+            }
+        }
+        return null;
+    }
+
+    private int selectColorFormat(String mimeType) {
+        MediaCodecInfo codecInfo = selectCodec(mimeType);
+        int colorFormat = 0;
+        MediaCodecInfo.CodecCapabilities capabilities =  codecInfo.getCapabilitiesForType(mimeType);
+        for (int i = 0; i < capabilities.colorFormats.length; i++) {
+
+            if (isRecognizedFormat(capabilities.colorFormats[i])) {
+                colorFormat = capabilities.colorFormats[i];
+                break;
+            }
+        }
+
+        return colorFormat;
+    }
+
+    private boolean isRecognizedFormat(int colorFormat) {
+        switch (colorFormat) {
+            // these are the formats we know how to handle for this test
+            case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar:
+            case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar:
+            case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar:
+            case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedSemiPlanar:
+            case MediaCodecInfo.CodecCapabilities.COLOR_TI_FormatYUV420PackedSemiPlanar:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     /**
      * Run the thread for handling the video stream.
      */
     public void run() {
         if (m_rtpSocket == null) {
-            println("ERROR; RTP socket is null");
             return;
         }
 
         MediaFormat format = MediaFormat.createVideoFormat("video/avc", 640, 480);
-        format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
-                MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar);
 
         m_codec.configure(format, m_surface, null, 0);
 
@@ -129,21 +169,27 @@ public class VideoStream extends Thread {
                 if (inputBufferIndex >= 0) {
                     inputBuffer = m_codec.getInputBuffer(inputBufferIndex);
 
-                    boolean bufferReady = true;
+                    boolean bufferNotReady = true;
                     do {
                         m_rtpSocket.receive(m_rtpPacket);
+                        Log.d(TAG, "RTP Payload Size: " + m_rtpPacket.getPayloadLength());
 
                         if (testRtpH264.doProcess(m_rtpPacket) == NewRtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
-                            bufferReady = !testRtpH264.ready();
+                            bufferNotReady = !testRtpH264.ready();
                         }
-                    } while (bufferReady);
+                        Log.d(TAG, "Output Buffer Size: " + testRtpH264.currentLength());
+                    } while (bufferNotReady);
 
-                    inputBuffer.put(testRtpH264.getOutputBuffer());
+                    Log.d(TAG, "Output from RTP depay is " + testRtpH264.getOutputBuffer().length + " bytes.");
 
-                    m_codec.queueInputBuffer(inputBufferIndex, 0, testRtpH264.getOutputBuffer().length, 0, 0);
+                    byte[] transferArray = testRtpH264.getOutputBuffer();
+
+                    inputBuffer.put(transferArray);
+
+                    m_codec.queueInputBuffer(inputBufferIndex, 0, transferArray.length, 0, 0);
                     testRtpH264.clear();
 
-                    int outIndex = m_codec.dequeueOutputBuffer(info, 1000);
+                    int outIndex = m_codec.dequeueOutputBuffer(info, 10000);
 
                     switch (outIndex) {
                         case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
@@ -165,19 +211,6 @@ public class VideoStream extends Thread {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    /** Debug output */
-
-    private void println(final String inStr) {
-        if (m_outputTextView != null) {
-            m_outputTextView.post(new Runnable() {
-                @Override
-                public void run() {
-                    m_outputTextView.append(inStr);
-                }
-            });
         }
     }
 }

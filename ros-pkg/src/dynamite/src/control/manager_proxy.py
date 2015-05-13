@@ -138,16 +138,14 @@ class ManagerProxy:
     def command(self, controller_name, value):
         #Create and cache publisher
         if controller_name not in self._cmds:
-            print "Controller not in self._cmds"
-            self._cmds[controller_name] = rospy.Publisher(controller_name +'/command', std_msgs.msg.Float64, queue_size=10)
-        else:
-            print "Controller in self._cmds"
+            self._cmds[controller_name] = rospy.Publisher(controller_name + '/command', 
+                                                          std_msgs.msg.Float64, 
+                                                          queue_size=10)
 
-        print "Trying to publish XDXD: Speed: " + str(float(value))
         self._cmds[controller_name].publish(std_msgs.msg.Float64(value))
 
     def set_state_callback(self, controller_name, callback):
-        rospy.Subscriber(controller_name + '/state', MotorState, callback)
+        rospy.Subscriber(controller_name + '/state', JointState, callback)
         
 
 

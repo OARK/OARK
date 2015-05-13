@@ -14,17 +14,6 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_above="@+id/debugLogTextView" />
+        android:layout_alignParentBottom="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/debugLogTextView"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/robotCameraView"
-        android:layout_alignEnd="@+id/robotCameraView"
-        android:minHeight="100pt"
-        android:maxLines="10" />
 </RelativeLayout>

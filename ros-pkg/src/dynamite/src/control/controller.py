@@ -12,7 +12,7 @@
 # controllers completely.
 #
 
-from dynamixel_msgs.msg import MotorState
+from dynamixel_msgs.msg import JointState
 import threading
 
 
@@ -69,59 +69,55 @@ class Controller:
         self.proxy = proxy
 
         #Ensure that state gets updated
-        self.motor_state = None
-        #self.motor_mutex = threading.Lock()
-        #self.proxy.set_state_callback(controller_name, self._state_callback)
+        self.joint_state = None
+        self.joint_mutex = threading.Lock()
+        self.proxy.set_state_callback(controller_name, self._state_callback)
 
     def get_name(self):
         return self.controller_name
 
-    def get_motor_state(self):
+    def get_joint_state(self):
         raise NotImplementedError
 
     def command(self, value):
-        raise NotImplementedError
+        raise NotImplementedError('Command not implemented. Use subclass')
 
     #Must be thread-safe
     def _state_callback(self, state):
-        with self.motor_mutex:
-            self.motor_state = state
+        with self.joint_mutex:
+            self.joint_state = state
 
-    def is_motorstate_init(self):
-        return self.motor_state != None
+    def is_jointstate_init(self):
+        return self.joint_state != None
 
-    @thread_getter('motor_mutex', 'is_motorstate_init')
-    def get_motor_id(self):
-        return self.motor_state.id
+    @thread_getter('joint_mutex', 'is_jointstate_init')
+    def get_joint_ids(self):
+        return self.joint_state.motor_ids
 
-    @thread_getter('motor_mutex', 'is_motorstate_init')
-    def get_motor_goal(self):
-        return self.motor_state.goal
+    @thread_getter('joint_mutex', 'is_jointstate_init')
+    def get_joint_temps(self):
+        return self.joint_state.motor_temps
+
+    @thread_getter('joint_mutex', 'is_jointstate_init')
+    def get_joint_goal(self):
+        return self.joint_state.goal_pos
             
-    @thread_getter('motor_mutex', 'is_motorstate_init')
-    def get_motor_position(self):
-        return self.motor_state.position
+    @thread_getter('joint_mutex', 'is_jointstate_init')
+    def get_joint_position(self):
+        return self.joint_state.current_pos
 
-    @thread_getter('motor_mutex', 'is_motorstate_init')
-    def get_motor_error(self):
-        return self.motor_state.error
+    @thread_getter('joint_mutex', 'is_jointstate_init')
+    def get_joint_error(self):
+        return self.joint_state.error
 
-    @thread_getter('motor_mutex', 'is_motorstate_init')
-    def get_motor_speed(self):
-        return self.motor_state.speed
+    @thread_getter('joint_mutex', 'is_jointstate_init')
+    def get_joint_velocity(self):
+        return self.joint_state.velocity
 
-    @thread_getter('motor_mutex', 'is_motorstate_init')
-    def get_motor_load(self):
-        return self.motor_state.load
+    @thread_getter('joint_mutex', 'is_jointstate_init')
+    def get_joint_load(self):
+        return self.joint_state.load
 
-    @thread_getter('motor_mutex', 'is_motorstate_init')
-    def get_motor_voltage(self):
-        return self.motor_state.voltage
-
-    @thread_getter('motor_mutex', 'is_motorstate_init')
-    def get_motor_temp(self):
-        return self.motor_state.temperature
-
-    @thread_getter('motor_mutex', 'is_motorstate_init')
-    def is_motor_moving(self):
-        return self.motor_state.moving
+    @thread_getter('joint_mutex', 'is_jointstate_init')
+    def is_joint_moving(self):
+        return self.joint_state.moving
