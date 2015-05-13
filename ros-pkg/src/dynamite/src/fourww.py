@@ -67,8 +67,8 @@ def msg_received(msg):
 
     elif msg.get_type() == HAND_GO:
         #Value is between 0 and 127. Hand goes from 570-1023 (AX12 Units)
-        lower = 0 
-        upper = 580
+        lower = 150 
+        upper = 870 
 
         print "127 Coords: ", msg.get_value()
         ax12_coords = (msg.get_value() / 127.0) * (upper - lower) + lower
