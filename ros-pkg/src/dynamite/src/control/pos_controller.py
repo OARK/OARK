@@ -12,11 +12,9 @@
 # currently has many thorns. It should be used with
 # caution lest the user be pricked.
 
-import rospy
+
 import controller
 import threading
-import time
-import manager_proxy
 
 
 class PosController(controller.Controller):
@@ -31,20 +29,27 @@ class PosController(controller.Controller):
         self.proxy.stop_pos_cont(self.controller_name, self.port_ns)
 
     def command(self, value):
-        print "Holler back at ya dawg : " + str(self.controller_name)
-        print "Value:", value
         self.proxy.command(self.controller_name, value)
 
+    #TODO - Specifiy position in a sensible unit
     def set_position(self, position):
-        self.proxy.command(self.controller_name, position)
+        self.command(position)
+
+    def stop(self):
+        self.set_position(0)
 
 
+
+
+#Used only for testing
+import rospy
+import time
 
 #Cute little test harness.
 if __name__ == '__main__':
     rospy.init_node('other_node')
     man_proxy = manager_proxy.ManagerProxy('dxl_manager')
-    pos = PosController(man_proxy, 'wheel_cont', 'pi_out_port')
+    pos = PosController(man_proxy, 'wheel_fl', 'pi_out_port')
     time.sleep(3)
     pos.command(2.0)
     time.sleep(3)
