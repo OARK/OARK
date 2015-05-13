@@ -67,8 +67,8 @@ def msg_received(msg):
 
     elif msg.get_type() == HAND_GO:
         #Value is between 0 and 127. Hand goes from 570-1023 (AX12 Units)
-        lower = 0 
-        upper = 580
+        lower = 150 
+        upper = 870 
 
         print "127 Coords: ", msg.get_value()
         ax12_coords = (msg.get_value() / 127.0) * (upper - lower) + lower
@@ -81,6 +81,12 @@ def msg_received(msg):
 
 def msg_received_test(msg):
     print str(msg)
+
+def client_dc():
+    #Stop all motors
+    for cont in controllers:
+        controllers[cont].command(0)
+
 
 
 if __name__ == '__main__':
@@ -95,12 +101,13 @@ if __name__ == '__main__':
 
     try:
 
-        rospy.init_node('fourww_node')
+        rospy.init_node('em2_node')
 
         man = proxy.ManagerProxy(manager_ns)
 
         listener = net_listen.CmdListener(interfaces)
         listener.add_data_listener(msg_received)
+        listener.add_dc_listener(client_dc)
 
         controllers['fl'] = TorqueController(man, 'wheel_fl', 'pi_out_port')
         controllers['fr'] = TorqueController(man, 'wheel_fr', 'pi_out_port')
