@@ -1,6 +1,7 @@
 package org.intelligentrobots.oarkcontroller.streams;
 
 import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaCodec.BufferInfo;
 import android.util.Log;
@@ -110,25 +111,53 @@ public class VideoStream extends Thread {
                                                            DEFAULT_WIDTH,
                                                            DEFAULT_HEIGHT);
 
-        mCodec.configure(format, mSurface, null, 0);
-        mCodec.start();
+        RtpH264 rtpH264Depacket = new RtpH264();
 
         byte[] buffer = new byte[BUFFER_SIZE];
         mRtpPacket = new RtpPacket(buffer, 0);
 
+        boolean formatReady = false;
+
+        do {
+            try {
+                Log.d(TAG, "Trying to read packet.");
+                mRtpSocket.receive(mRtpPacket);
+            } catch (InterruptedIOException ex) {
+                Log.d(TAG, "Interrupted IO Exception: " + ex.toString());
+            } catch (IOException ex) {
+                // If we get an exception, just clear out the MediaCodec buffers.
+                Log.d(TAG, "IO Exception" + ex.toString());
+                rtpH264Depacket.discardBuffer();
+            }
+
+            if (rtpH264Depacket.doProcess(mRtpPacket) == RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
+                Log.d(TAG, "Buffer Processed OK");
+                formatReady = (rtpH264Depacket.getPps() != null) && (rtpH264Depacket.getSps() != null);
+            }
+
+        } while (!formatReady);
+
+        format.setByteBuffer("csd-0", ByteBuffer.wrap(rtpH264Depacket.getSps()));
+        format.setByteBuffer("csd-1", ByteBuffer.wrap(rtpH264Depacket.getPps()));
+
+
+        mCodec.configure(format, mSurface, null, 0);
+        mCodec.start();
+
         mRunning = true;
 
-        RtpH264 rtpH264Depacket = new RtpH264();
+        rtpH264Depacket = new RtpH264();
         BufferInfo info = new BufferInfo();
 
+        ByteBuffer[] inputBuffers = mCodec.getInputBuffers();
+
         while (mRunning) {
-
-
                 int inputBufferIndex = mCodec.dequeueInputBuffer(-1);
                 ByteBuffer inputBuffer;
 
                 if (inputBufferIndex >= 0) {
-                    inputBuffer = mCodec.getInputBuffer(inputBufferIndex);
+                    inputBuffer = inputBuffers[inputBufferIndex];
+                    // inputBuffer = mCodec.getInputBuffer(inputBufferIndex);
 
                     boolean bufferNotReady = true;
                     do {
@@ -144,11 +173,15 @@ public class VideoStream extends Thread {
                         }
 
                         if (rtpH264Depacket.doProcess(mRtpPacket) == RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
-                            bufferNotReady = !rtpH264Depacket.ready();
+                            bufferNotReady = !rtpH264Depacket.ready() && !rtpH264Depacket.isConfigPacket();
+                            if (rtpH264Depacket.isConfigPacket()) {
+                                Log.d(TAG, "Is config packet.");
+                            }
                         }
 
                     } while (bufferNotReady);
 
+                    Log.d(TAG, "Transferring Packet Size: " + rtpH264Depacket.getOutputBuffer().length);
                     byte[] transferArray = rtpH264Depacket.getOutputBuffer();
 
                     inputBuffer.put(transferArray);
@@ -156,7 +189,7 @@ public class VideoStream extends Thread {
                     mCodec.queueInputBuffer(inputBufferIndex, 0, transferArray.length, 0, 0);
                     rtpH264Depacket.clear();
 
-                    int outIndex = mCodec.dequeueOutputBuffer(info, 1000);
+                    int outIndex = mCodec.dequeueOutputBuffer(info, 10000);
 
                     switch (outIndex) {
                     case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:

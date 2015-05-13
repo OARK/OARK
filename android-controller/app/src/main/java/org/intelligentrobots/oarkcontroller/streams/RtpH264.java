@@ -12,6 +12,7 @@ package org.intelligentrobots.oarkcontroller.streams;
  */
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 
 import android.util.Log;
 
@@ -32,7 +33,7 @@ public class RtpH264 {
      * TODO: Find out if there are hardware decoders that will crash
      * if they are present.
      */
-    private final static byte[] SYNC_BYTES = {0, 0, 1};
+    private final static byte[] SYNC_BYTES = {0, 0, 0, 1};
 
     /**
      * Are we currently processing a fragmented NAL unit across packets.
@@ -51,6 +52,17 @@ public class RtpH264 {
      */
     private boolean mDiscardBuffer;
 
+    /**
+     * SPS/PPS
+     *
+     * These byte arrays contain the format information for H264. These are passed in the middle
+     * of the stream.
+     */
+    private byte[] mSps = null;
+    private byte[] mPps = null;
+
+    private boolean mIsPpsSps = false;
+
     private String TAG = "NewRtp:";
 
     static public enum ProcessResult {
@@ -65,6 +77,8 @@ public class RtpH264 {
         mOutputBuffer = new ByteArrayOutputStream();
         mProcessingFragmentPacket = false;
         mLastSequenceNo = -1;
+        mSps = null;
+        mPps = null;
     }
 
     /**
@@ -102,6 +116,8 @@ public class RtpH264 {
         boolean continueProcessing = true;
 
         ProcessResult result = ProcessResult.BUFFER_PROCESSED_OK;
+
+        mIsPpsSps = false;
 
         if (startBit) {
             /*
@@ -150,6 +166,22 @@ public class RtpH264 {
         //
         mOutputBuffer.write(SYNC_BYTES, 0, SYNC_BYTES.length);
         mOutputBuffer.write(inPayload, 0, inPayload.length);
+
+        // If the NAL type is 7 or 8, set the SPS/PPS
+        if (inNalUnitType == 7) {
+            // SPS
+            mSps = new byte[SYNC_BYTES.length + inPayload.length];
+            System.arraycopy(SYNC_BYTES, 0, mSps, 0, SYNC_BYTES.length);
+            System.arraycopy(inPayload, 0, mSps, SYNC_BYTES.length, inPayload.length);
+            Log.d(TAG, "Found SPS");
+            mIsPpsSps = true;
+        } else if (inNalUnitType == 8) {
+            mPps = new byte[SYNC_BYTES.length + inPayload.length];
+            System.arraycopy(SYNC_BYTES, 0, mPps, 0, SYNC_BYTES.length);
+            System.arraycopy(inPayload, 0, mPps, SYNC_BYTES.length, inPayload.length);
+            Log.d(TAG, "Found PPS");
+            mIsPpsSps = true;
+        }
 
         return ProcessResult.BUFFER_PROCESSED_OK;
     }
@@ -230,4 +262,16 @@ public class RtpH264 {
     public void clear() { mOutputBuffer.reset(); }
 
     public void discardBuffer() { mDiscardBuffer = true; }
+
+    public byte[] getSps() {
+        return mSps;
+    }
+
+    public byte[] getPps() {
+        return mPps;
+    }
+
+    public boolean isConfigPacket() {
+        return mIsPpsSps;
+    }
 }
