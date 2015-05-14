@@ -16,9 +16,17 @@ Supervisor: Hannes Herrmann
 
 The directory layout is as follows:
 
+### android
+
+The android application for controlling the robot and receiving the video from the onboard camera.
+
 ### build-tools
 
 Contains the scripts and tools for compiling and building the OARK kit image.
+
+### camera
+
+Information for getting the video stream from the Raspberry Pi.
 
 ### doc
 
