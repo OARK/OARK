@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">EmuMini2</string>
+
+    <string name="splash_text">Emu Mini 2 Controller!</string>
+
+    <string name="title_activity_splash">SplashActivity</string>
+    <string name="title_activity_ip">IPActivity</string>
+
+    <string name="ip_string">Please enter IP of Raspberry PI:</string>
+    <string name="action_settings">Settings</string>
+</resources>

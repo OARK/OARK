@@ -1,4 +1,4 @@
-package sep_17.fourwwcontrol;
+package sep_17.emumini2;
 
 import android.content.Context;
 import android.content.res.TypedArray;

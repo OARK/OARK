@@ -19,13 +19,21 @@
             namespace: dxl_manager
             serial_ports:
                 pi_out_port:
-                    port_name: "/dev/ttyUSB0"
-                    baud_rate: 1000000
+                    port_name: "/dev/ttyAMA0"
+                    baud_rate: 115200
                     min_motor_id: 1
                     max_motor_id: 7
                     update_rate: 20
         </rosparam>
     </node>
 	<rosparam command="load" file="$(find dynamite)/launch/controllers.yaml" />
+
+<!--
+	<node
+		name="em2_node"
+		pkg="dynamite"
+		type="em2.py"
+		required="true"
+		output="screen"/>-->
 </launch>
 

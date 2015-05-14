@@ -1,10 +1,13 @@
-package sep_17.fourwwcontrol;
+package sep_17.emumini2;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.SurfaceView;
 import android.widget.SeekBar;
 import android.widget.Toast;
+
+import sep_17.intelligentrobots.oarkcontroller.VideoRenderer;
 
 
 public class ControlActivity extends Activity {
@@ -22,12 +25,25 @@ public class ControlActivity extends Activity {
     private double curLeft = 0;
     private double curRight = 0;
 
+    private SurfaceView testSurfaceView;
+
+    private VideoRenderer testVideoRenderer;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_control);
 
+        /* Initialise video */
+        testSurfaceView = (SurfaceView) findViewById(R.id.robotCameraView);
+
+        testVideoRenderer = new VideoRenderer(testSurfaceView, 5000);
+
+        testSurfaceView.getHolder().addCallback(testVideoRenderer);
+
+        /* Initialise controls */
         final AnalogStickView leftAnalog = (AnalogStickView) findViewById(R.id.left_analog_stick);
         final AnalogStickView rightAnalog = (AnalogStickView) findViewById(R.id.right_analog_stick);
         final SeekBar handSeek = (SeekBar) findViewById(R.id.handSeek);
