@@ -67,7 +67,6 @@ public class VideoRenderer implements SurfaceHolder.Callback {
                 }
 
                 streamRenderer.start();
-
             }
         };
 

@@ -9,10 +9,18 @@ package sep_17.intelligentrobots.oarkcontroller.streams;
  *
  * It only implements a limited subset of the spec, just enough to get
  * the specific payload from the OARK camera at time of writing.
+ *
+ * Basically you keep passing it the payload from RTP packets, via
+ * doProcess(). Check the value returned,
+ * ProcessResult.BUFFER_PROCESSED_OK means that the RTP packet was
+ * read without error, however it doesn't necessarily mean a complete
+ * NAL unit is ready. ready() will return true if a complete NAL unit is ready.
+ *
+ * Depending on the decoder, SPS/PPS packets may have to be passed
+ * before the decoder can be used, these can be checked.
  */
 
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
 
 import android.util.Log;
 
@@ -63,7 +71,7 @@ public class RtpH264 {
 
     private boolean mIsPpsSps = false;
 
-    private String TAG = "NewRtp:";
+    private String TAG = "RtpH264:";
 
     static public enum ProcessResult {
         BUFFER_PROCESSED_OK,
@@ -157,29 +165,32 @@ public class RtpH264 {
     /**
      * Extract a single (complete) NAL unit from RTP payload.
      *
+     * Some decoders on Android devices require the SPS and PPS
+     * information as the first packets in the decode buffers. With
+     * these packet types, the buffer processing is exactly as per
+     * normal, however they will be cached and can be accessed via
+     * getSps() and getPps().
+     *
      * @param inNalUnitType unit type of NAL.
      * @param inPayload RTP payload.
      */
     private ProcessResult processSingleNALUnitPacket(
                                                      int inNalUnitType,
                                                      byte[] inPayload) {
-        //
         mOutputBuffer.write(SYNC_BYTES, 0, SYNC_BYTES.length);
         mOutputBuffer.write(inPayload, 0, inPayload.length);
 
-        // If the NAL type is 7 or 8, set the SPS/PPS
         if (inNalUnitType == 7) {
             // SPS
             mSps = new byte[SYNC_BYTES.length + inPayload.length];
             System.arraycopy(SYNC_BYTES, 0, mSps, 0, SYNC_BYTES.length);
             System.arraycopy(inPayload, 0, mSps, SYNC_BYTES.length, inPayload.length);
-            Log.d(TAG, "Found SPS");
             mIsPpsSps = true;
         } else if (inNalUnitType == 8) {
+            // PPS
             mPps = new byte[SYNC_BYTES.length + inPayload.length];
             System.arraycopy(SYNC_BYTES, 0, mPps, 0, SYNC_BYTES.length);
             System.arraycopy(inPayload, 0, mPps, SYNC_BYTES.length, inPayload.length);
-            Log.d(TAG, "Found PPS");
             mIsPpsSps = true;
         }
 
@@ -231,7 +242,6 @@ public class RtpH264 {
 
                 if (mDiscardBuffer) {
                     mProcessingFragmentPacket = false;
-                    Log.d(TAG, "Discarding buffer.");
                     mOutputBuffer.reset();
                 }
             }
@@ -240,10 +250,19 @@ public class RtpH264 {
         return result;
     }
 
+    /**
+     * Returns a byte array that represents the NAL unit parsed so
+     * far. The buffer will have the H264 sync bytes at the start as
+     * per Annex B in the H264 spec.
+     */
     public byte[] getOutputBuffer() {
         return mOutputBuffer.toByteArray();
     }
 
+    /**
+     * Resets the parser, to be used in the case of a corrupt packet,
+     * incorrect sequence, etc.
+     */
     private ProcessResult reset() {
         mProcessingFragmentPacket = false;
         mOutputBuffer.reset();
@@ -263,15 +282,34 @@ public class RtpH264 {
 
     public void discardBuffer() { mDiscardBuffer = true; }
 
+    /**
+     * Return the H264 SPS information.
+     */
     public byte[] getSps() {
         return mSps;
     }
 
+    /**
+     * Return the H264 PPS information.
+     */
     public byte[] getPps() {
         return mPps;
     }
 
+    /**
+     * Is the current packet just the SPS/PPS information.
+     */
     public boolean isConfigPacket() {
         return mIsPpsSps;
+    }
+
+    /**
+     * Config Ready
+     *
+     * Returns true if both the SPS and PPS information has been
+     * parsed and is available to be read.
+     */
+    public boolean isConfigReady() {
+        return (mSps != null) && (mPps != null);
     }
 }
