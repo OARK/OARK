@@ -157,7 +157,6 @@ public class VideoStream extends Thread {
 
                 if (inputBufferIndex >= 0) {
                     inputBuffer = inputBuffers[inputBufferIndex];
-                    // inputBuffer = mCodec.getInputBuffer(inputBufferIndex);
 
                     boolean bufferNotReady = true;
                     do {
@@ -184,6 +183,7 @@ public class VideoStream extends Thread {
                     Log.d(TAG, "Transferring Packet Size: " + rtpH264Depacket.getOutputBuffer().length);
                     byte[] transferArray = rtpH264Depacket.getOutputBuffer();
 
+                    inputBuffer.clear();
                     inputBuffer.put(transferArray);
 
                     mCodec.queueInputBuffer(inputBufferIndex, 0, transferArray.length, 0, 0);
