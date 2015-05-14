@@ -4,6 +4,7 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaCodec.BufferInfo;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceView;
@@ -43,17 +44,19 @@ public class VideoStream extends Thread {
     private MediaCodec mCodec;
 
     private final static String TAG = "VideoStream: ";
+
     /**
-     * RptStreamReceiver
+     * VideoStream
+     *
+     * Doesn't make sense to build an instance without socket and
+     * output surface.
      */
-    public VideoStream(SipdroidSocket socket) {
+    private VideoStream() {};
+
+    public VideoStream(SipdroidSocket socket, SurfaceView outputSurfaceView) throws IOException {
         if (socket != null) {
             mRtpSocket = new RtpSocket(socket);
         }
-    }
-
-    public VideoStream(SipdroidSocket socket, SurfaceView outputSurfaceView) throws IOException {
-        this(socket);
 
         mSurface = outputSurfaceView.getHolder().getSurface();
         mCodec = MediaCodec.createDecoderByType("video/avc");
@@ -116,8 +119,6 @@ public class VideoStream extends Thread {
         byte[] buffer = new byte[BUFFER_SIZE];
         mRtpPacket = new RtpPacket(buffer, 0);
 
-        boolean formatReady = false;
-
         do {
             try {
                 mRtpSocket.receive(mRtpPacket);
@@ -128,17 +129,10 @@ public class VideoStream extends Thread {
                 Log.d(TAG, "IO Exception" + ex.toString());
                 rtpH264Depacket.discardBuffer();
             }
-
-            if (rtpH264Depacket.doProcess(mRtpPacket) == RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
-                Log.d(TAG, "Buffer Processed OK");
-                formatReady = (rtpH264Depacket.getPps() != null) && (rtpH264Depacket.getSps() != null);
-            }
-
-        } while (!formatReady);
+        } while (!rtpH264Depacket.isConfigReady());
 
         format.setByteBuffer("csd-0", ByteBuffer.wrap(rtpH264Depacket.getSps()));
         format.setByteBuffer("csd-1", ByteBuffer.wrap(rtpH264Depacket.getPps()));
-
 
         mCodec.configure(format, mSurface, null, 0);
         mCodec.start();
@@ -169,11 +163,11 @@ public class VideoStream extends Thread {
                             rtpH264Depacket.discardBuffer();
                         }
 
-                        if (rtpH264Depacket.doProcess(mRtpPacket) == RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
-                            bufferNotReady = !rtpH264Depacket.ready() && !rtpH264Depacket.isConfigPacket();
-                            if (rtpH264Depacket.isConfigPacket()) {
-                                Log.d(TAG, "Is config packet.");
-                            }
+                        if (rtpH264Depacket.doProcess(mRtpPacket) ==
+                            RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
+
+                            bufferNotReady = !rtpH264Depacket.ready() &&
+                                !rtpH264Depacket.isConfigPacket();
                         }
 
                     } while (bufferNotReady);
@@ -195,7 +189,8 @@ public class VideoStream extends Thread {
                         Log.d("DecodeActivity", "New format " + mCodec.getOutputFormat());
                         break;
                     case MediaCodec.INFO_TRY_AGAIN_LATER:
-                        Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
+                        // Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
+                        // This is not an error, just means decoder isn't ready.
                         break;
                     default:
                         mCodec.releaseOutputBuffer(outIndex, (info.size != 0));
