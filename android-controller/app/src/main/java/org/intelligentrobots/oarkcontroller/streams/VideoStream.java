@@ -120,7 +120,6 @@ public class VideoStream extends Thread {
 
         do {
             try {
-                Log.d(TAG, "Trying to read packet.");
                 mRtpSocket.receive(mRtpPacket);
             } catch (InterruptedIOException ex) {
                 Log.d(TAG, "Interrupted IO Exception: " + ex.toString());
@@ -161,7 +160,6 @@ public class VideoStream extends Thread {
                     boolean bufferNotReady = true;
                     do {
                         try {
-                            Log.d(TAG, "Trying to read packet.");
                             mRtpSocket.receive(mRtpPacket);
                         } catch (InterruptedIOException ex) {
                             Log.d(TAG, "Interrupted IO Exception: " + ex.toString());
@@ -180,7 +178,6 @@ public class VideoStream extends Thread {
 
                     } while (bufferNotReady);
 
-                    Log.d(TAG, "Transferring Packet Size: " + rtpH264Depacket.getOutputBuffer().length);
                     byte[] transferArray = rtpH264Depacket.getOutputBuffer();
 
                     inputBuffer.clear();
