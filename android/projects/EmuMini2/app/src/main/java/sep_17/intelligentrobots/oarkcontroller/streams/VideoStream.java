@@ -14,6 +14,8 @@ import sep_17.sipdroid.net.SipdroidSocket;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 /**
@@ -32,6 +34,8 @@ public class VideoStream extends Thread {
     public static final int DEFAULT_WIDTH = 640;
     public static final int DEFAULT_HEIGHT = 480;
 
+    private int mPortNumber;
+    private SipdroidSocket mSocket;
     private RtpSocket mRtpSocket;
     private RtpPacket mRtpPacket;
 
@@ -51,13 +55,34 @@ public class VideoStream extends Thread {
      */
     private VideoStream() {};
 
-    public VideoStream(SipdroidSocket socket, SurfaceView outputSurfaceView) throws IOException {
-        if (socket != null) {
-            mRtpSocket = new RtpSocket(socket);
+    public VideoStream(int inPortNumber, SurfaceView outputSurfaceView) throws IOException {
+
+        mSocket = null;
+        mPortNumber = inPortNumber;
+
+        try {
+            mSocket = new SipdroidSocket(mPortNumber);
+        } catch (SocketException | UnknownHostException e) {
+            e.printStackTrace();
         }
+
+        mRtpSocket = new RtpSocket(mSocket);
 
         mSurface = outputSurfaceView.getHolder().getSurface();
         mCodec = MediaCodec.createDecoderByType("video/avc");
+    }
+
+    private void openRtpSocket() {
+        mRtpSocket.close();
+        mSocket.close();
+
+        try {
+            mSocket = new SipdroidSocket(mPortNumber);
+            mRtpSocket = new RtpSocket(mSocket);
+            mRtpSocket.getDatagramSocket().setSoTimeout(SO_TIMEOUT);
+        } catch (SocketException | UnknownHostException e) {
+            e.printStackTrace();
+        }
     }
 
     /** Thread running? */
@@ -66,39 +91,9 @@ public class VideoStream extends Thread {
     }
 
     /**
-     * Empty the video stream.
-     */
-    void empty() {
-        try {
-            mRtpSocket.getDatagramSocket().setSoTimeout(1);
-
-            /*
-             * This relies on throwing an exception when there's no more data
-             * left.
-             *
-             * TODO: Fix it.
-             */
-            while(true) {
-                mRtpSocket.receive(mRtpPacket);
-            }
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            mRtpSocket.getDatagramSocket().setSoTimeout(SO_TIMEOUT);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Run the thread for handling the video stream.
      */
     public void run() {
-        Log.d(TAG, "Running");
         if (mRtpSocket == null) {
             Log.d(TAG, "Rtp Socket is null");
             return;
@@ -110,35 +105,13 @@ public class VideoStream extends Thread {
             e.printStackTrace();
         }
 
-        Log.d(TAG, "Setting format");
-
-        MediaFormat format = MediaFormat.createVideoFormat("video/avc",
-                                                           DEFAULT_WIDTH,
-                                                           DEFAULT_HEIGHT);
-
         RtpH264 rtpH264Depacket = new RtpH264();
 
-        byte[] buffer = new byte[BUFFER_SIZE];
-        mRtpPacket = new RtpPacket(buffer, 0);
+        mRtpPacket = new RtpPacket(new byte[BUFFER_SIZE], 0);
 
-        do {
-            try {
-                mRtpSocket.receive(mRtpPacket);
-            } catch (InterruptedIOException ex) {
-                Log.d(TAG, "Interrupted IO Exception: " + ex.toString());
-            } catch (IOException ex) {
-                // If we get an exception, just clear out the MediaCodec buffers.
-                Log.d(TAG, "IO Exception" + ex.toString());
-                rtpH264Depacket.discardBuffer();
-            }
-
-
-            rtpH264Depacket.doProcess(mRtpPacket);
-
-        } while (!rtpH264Depacket.isConfigReady());
-
-        format.setByteBuffer("csd-0", ByteBuffer.wrap(rtpH264Depacket.getSps()));
-        format.setByteBuffer("csd-1", ByteBuffer.wrap(rtpH264Depacket.getPps()));
+        MediaFormat format = waitForConfigPackets(mRtpSocket,
+                                                  mRtpPacket,
+                                                  rtpH264Depacket);
 
         mCodec.configure(format, mSurface, null, 0);
         mCodec.start();
@@ -159,15 +132,8 @@ public class VideoStream extends Thread {
 
                     boolean bufferNotReady = true;
                     do {
-                        try {
-                            mRtpSocket.receive(mRtpPacket);
-                        } catch (InterruptedIOException ex) {
-                            Log.d(TAG, "Interrupted IO Exception: " + ex.toString());
-                        } catch (IOException ex) {
-                            // If we get an exception, just clear out the MediaCodec buffers.
-                            Log.d(TAG, "IO Exception" + ex.toString());
-                            rtpH264Depacket.discardBuffer();
-                        }
+                        receiveRtpPacket(mRtpSocket, mRtpPacket,
+                                         rtpH264Depacket);
 
                         if (rtpH264Depacket.doProcess(mRtpPacket) ==
                             RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
@@ -203,5 +169,47 @@ public class VideoStream extends Thread {
                     }
                 }
         }
+    }
+
+    // Receive RTP packet.
+    private void receiveRtpPacket(RtpSocket rtpSocket,
+                                         RtpPacket rtpPacket,
+                                         RtpH264 rtpH264) {
+        try {
+            rtpSocket.receive(rtpPacket);
+        } catch (SocketTimeoutException ex) {
+            Log.d(TAG, "Socket timed out." + ex.toString());
+            this.openRtpSocket();
+        } catch (InterruptedIOException ex) {
+            Log.d(TAG, "Interrupted IO Exception: " + ex.toString());
+        } catch (IOException ex) {
+            // If we get an exception, just clear out the MediaCodec buffers.
+            Log.d(TAG, "IO Exception" + ex.toString());
+            rtpH264.discardBuffer();
+        }
+    }
+
+    // Ensure that the decoder has the config packets before trying to
+    // show the video stream.
+    private MediaFormat waitForConfigPackets(RtpSocket rtpSocket,
+                                                    RtpPacket rtpPacket,
+                                                    RtpH264 rtpH264) {
+
+        do {
+            receiveRtpPacket(rtpSocket, rtpPacket, rtpH264);
+            rtpH264.doProcess(rtpPacket);
+        } while (!rtpH264.isConfigReady());
+
+        MediaFormat format = MediaFormat.createVideoFormat("video/avc",
+                                                           DEFAULT_WIDTH,
+                                                           DEFAULT_HEIGHT);
+
+        /*
+         * Some decoders require the config information for the stream
+         * before anything else.
+         */
+        format.setByteBuffer("csd-0", ByteBuffer.wrap(rtpH264.getSps()));
+        format.setByteBuffer("csd-1", ByteBuffer.wrap(rtpH264.getPps()));
+        return format;
     }
 }

@@ -49,19 +49,10 @@ public class VideoRenderer implements SurfaceHolder.Callback {
 
         mCodecThread = new Thread() {
             public void run() {
-                SipdroidSocket listenSocket = null;
-
-                try {
-                    listenSocket = new SipdroidSocket(mPortNumber);
-                } catch (SocketException e) {
-                    e.printStackTrace();
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                }
 
                 VideoStream streamRenderer = null;
                 try {
-                    streamRenderer = new VideoStream(listenSocket, mSurfaceView);
+                    streamRenderer = new VideoStream(mPortNumber, mSurfaceView);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
