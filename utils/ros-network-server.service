@@ -1,0 +1,11 @@
+[Unit]
+Description=Starts the service for network comms with ROS.
+Requires=motor-driver.service
+After=motor-driver.service
+
+[Service]
+ExecStart=/bin/bash /home/aldredmr/Projects/oark/utils/start-ros-network-server.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

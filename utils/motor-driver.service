@@ -1,0 +1,8 @@
+[Unit]
+Description=Starts the ROS drivers for the Dynamixel motors.
+
+[Service]
+ExecStart=/bin/bash /home/aldredmr/Projects/oark/utils/start-motor-drivers.sh
+
+[Install]
+WantedBy=multi-user.target
