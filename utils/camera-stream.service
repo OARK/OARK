@@ -2,7 +2,7 @@
 Description=Starts the video stream from the OARK robot.
 
 [Service]
-ExecStart=/bin/bash ~aldredmr/Projects/oark/utils/stream-video.sh
+ExecStart=/bin/bash /home/aldredmr/Projects/oark/utils/stream-video.sh
 
 [Install]
 WantedBy=multi-user.target
