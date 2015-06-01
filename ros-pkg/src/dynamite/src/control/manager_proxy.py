@@ -145,7 +145,7 @@ class ManagerProxy:
         self._cmds[controller_name].publish(std_msgs.msg.Float64(value))
 
     def set_state_callback(self, controller_name, callback):
-        rospy.Subscriber(controller_name + '/state', JointState, callback)
+        rospy.Subscriber(controller_name + '/state', MotorState, callback)
         
 
 
