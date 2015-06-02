@@ -66,3 +66,15 @@ index 4118436..08861e5 100644
  	select CPU_32v6
  	select CPU_ABRT_EV6
  	select CPU_CACHE_V6
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 3e7abcd..3dae049 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -6,7 +6,7 @@ comment "MMC/SD/SDIO Host Controller Drivers"
+
+ config MMC_BCM2835
+        tristate "MMC support on BCM2835"
+-       depends on MACH_BCM2708 || MACH_BCM2709 || ARCH_BCM2835
++       depends on MACH_BCM2708 || MACH_BCM2709 || ARCH_BCM2835 || ARCH_VERSTILE_PB || ARCH_VERSATILE_AB
+        help
+          This selects the MMC Interface on BCM2835.
