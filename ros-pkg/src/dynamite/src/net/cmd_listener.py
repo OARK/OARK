@@ -58,19 +58,18 @@ class CmdListener:
         af_inet_addr = (interface, port)
 
         try:
-            #Create TCP socket
+            #Create blocking (default) TCP socket
             self.sock_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock_fd.settimeout(None)
             self.sock_fd.bind(af_inet_addr)
 
             #Allow connections
             self.sock_fd.listen(1)
 
-            #Need to block when there is no data
-            self.sock_fd.setblocking(1)
         except socket.timeout, t:
-            raise ConnectionInception("Could not connect socket")
+            raise ConnectionException("Could not connect socket")
         except Exception, e:
-            raise NetworkInception("Could not initialise socket")
+            raise NetworkException("Could not initialise socket")
 
         try:
             #Create thread to frequently poll socket
@@ -79,7 +78,7 @@ class CmdListener:
             self.listener_thread = threading.Thread(target=self.listen, name=self.listener_name)
             self.listener_thread.start()
         except threading.ThreadError, t:
-            raise CmdListenerInception("Could not start new listener thread")
+            raise CmdListenerException("Could not start new listener thread")
 
     def __del__(self):
         self.shutdown()
@@ -142,20 +141,19 @@ class CmdListener:
 
 
 
-Inception = Exception
-class ConnectionInception(Inception):
+class ConnectionException(Exception):
     def __init__(self, value):
         self.value = "Connection timeout: " + str(value)
     def __str__(self):
         return repr(self.value)
 
-class NetworkInception(Inception):
+class NetworkException(Exception):
     def __init__(self, value):
         self.value = "Network fault: " + str(value)
     def __str__(self):
         return repr(self.value)
 
-class CmdListenerInception(Inception):
+class CmdListenerException(Exception):
     def __init__(self, value):
         self.value = "Command Listener: " + str(value)
     def __str__(self):
@@ -169,4 +167,3 @@ def print_msg(msg):
 if __name__ == '__main__':
     lis = CmdListener('')
     lis.add_data_listener(print_msg)
-
