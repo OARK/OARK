@@ -35,16 +35,6 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
 
-            <Space
-                android:layout_width="20px"
-                android:layout_height="20px"
-                android:layout_column="3" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -64,16 +54,6 @@
                 android:id="@+id/handSeek"
                 android:layout_column="3"
                 android:layout_span="2" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-
-            <Space
-                android:layout_width="20px"
-                android:layout_height="20px"
-                android:layout_column="3" />
         </TableRow>
 
         <TableRow
@@ -125,16 +105,6 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
 
-            <Space
-                android:layout_width="20px"
-                android:layout_height="20px"
-                android:layout_column="3" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -154,36 +124,6 @@
                 android:id="@+id/elbowSeek"
                 android:layout_column="3"
                 android:layout_span="2" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-
-            <Space
-                android:layout_width="20px"
-                android:layout_height="20px"
-                android:layout_column="3" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-
-            <Space
-                android:layout_width="20px"
-                android:layout_height="20px"
-                android:layout_column="3" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-
-            <Space
-                android:layout_width="20px"
-                android:layout_height="20px"
-                android:layout_column="3" />
         </TableRow>
 
         <TableRow

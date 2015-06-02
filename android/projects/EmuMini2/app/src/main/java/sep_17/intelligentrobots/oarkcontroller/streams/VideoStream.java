@@ -12,7 +12,6 @@ import sep_17.sipdroid.net.RtpSocket;
 import sep_17.sipdroid.net.SipdroidSocket;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -31,6 +30,9 @@ public class VideoStream extends Thread {
     /** Maximum blocking time, spent waiting for reading new bytes (ms) */
     public static final int SO_TIMEOUT = 1000;
 
+    /** Max time allowed to decode a frame. */
+    public static final int DECODE_TIMEOUT = 1000;
+
     public static final int DEFAULT_WIDTH = 640;
     public static final int DEFAULT_HEIGHT = 480;
 
@@ -41,11 +43,11 @@ public class VideoStream extends Thread {
 
     private boolean mRunning;
 
+    /** Surface video frames are rendered onto. */
     private Surface mSurface;
 
+    /** Video decoder. */
     private MediaCodec mCodec;
-
-    private final static String TAG = "VideoStream: ";
 
     /**
      * VideoStream
@@ -72,6 +74,10 @@ public class VideoStream extends Thread {
         mCodec = MediaCodec.createDecoderByType("video/avc");
     }
 
+    /*
+     * Open a new socket for receiving Rtp packets. It's expected that
+     * mPortNumber is correctly set.
+     */
     private void openRtpSocket() {
         mRtpSocket.close();
         mSocket.close();
@@ -85,20 +91,10 @@ public class VideoStream extends Thread {
         }
     }
 
-    /** Thread running? */
-    public boolean isRunning() {
-        return mRunning;
-    }
-
     /**
      * Run the thread for handling the video stream.
      */
     public void run() {
-        if (mRtpSocket == null) {
-            Log.d(TAG, "Rtp Socket is null");
-            return;
-        }
-
         try {
             mRtpSocket.getDatagramSocket().setSoTimeout(SO_TIMEOUT);
         } catch (SocketException e) {
@@ -121,6 +117,7 @@ public class VideoStream extends Thread {
         rtpH264Depacket = new RtpH264();
         BufferInfo info = new BufferInfo();
 
+        /** Buffers to push data into for the codec to decode and display. */
         ByteBuffer[] inputBuffers = mCodec.getInputBuffers();
 
         while (mRunning) {
@@ -128,6 +125,7 @@ public class VideoStream extends Thread {
                 ByteBuffer inputBuffer;
 
                 if (inputBufferIndex >= 0) {
+                    // Input buffer available
                     inputBuffer = inputBuffers[inputBufferIndex];
 
                     boolean bufferNotReady = true;
@@ -137,6 +135,8 @@ public class VideoStream extends Thread {
 
                         if (rtpH264Depacket.doProcess(mRtpPacket) ==
                             RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
+
+                            // Skip
                             bufferNotReady = !rtpH264Depacket.ready() &&
                                 !rtpH264Depacket.isConfigPacket();
                         }
@@ -151,19 +151,22 @@ public class VideoStream extends Thread {
                     mCodec.queueInputBuffer(inputBufferIndex, 0, transferArray.length, 0, 0);
                     rtpH264Depacket.clear();
 
-                    int outIndex = mCodec.dequeueOutputBuffer(info, 10000);
+                    int outIndex = mCodec.dequeueOutputBuffer(info, DECODE_TIMEOUT);
 
                     switch (outIndex) {
                     case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
+                        // Depreciated, but still a result, so this is
+                        // here to catch the case so default doesn't
+                        // have to check for this result.
                         break;
                     case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
                         Log.d("DecodeActivity", "New format " + mCodec.getOutputFormat());
                         break;
                     case MediaCodec.INFO_TRY_AGAIN_LATER:
-                        // Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
                         // This is not an error, just means decoder isn't ready.
                         break;
                     default:
+                        // Something in the buffer, render it to the surface.
                         mCodec.releaseOutputBuffer(outIndex, (info.size != 0));
                         break;
                     }
@@ -173,18 +176,16 @@ public class VideoStream extends Thread {
 
     // Receive RTP packet.
     private void receiveRtpPacket(RtpSocket rtpSocket,
-                                         RtpPacket rtpPacket,
-                                         RtpH264 rtpH264) {
+                                  RtpPacket rtpPacket,
+                                  RtpH264 rtpH264) {
         try {
             rtpSocket.receive(rtpPacket);
         } catch (SocketTimeoutException ex) {
-            Log.d(TAG, "Socket timed out." + ex.toString());
-            this.openRtpSocket();
-        } catch (InterruptedIOException ex) {
-            Log.d(TAG, "Interrupted IO Exception: " + ex.toString());
+            // It seems that when we have a timeout we have no choice
+            // but to close and open a new socket.
+            openRtpSocket();
         } catch (IOException ex) {
             // If we get an exception, just clear out the MediaCodec buffers.
-            Log.d(TAG, "IO Exception" + ex.toString());
             rtpH264.discardBuffer();
         }
     }
@@ -192,8 +193,8 @@ public class VideoStream extends Thread {
     // Ensure that the decoder has the config packets before trying to
     // show the video stream.
     private MediaFormat waitForConfigPackets(RtpSocket rtpSocket,
-                                                    RtpPacket rtpPacket,
-                                                    RtpH264 rtpH264) {
+                                             RtpPacket rtpPacket,
+                                             RtpH264 rtpH264) {
 
         do {
             receiveRtpPacket(rtpSocket, rtpPacket, rtpH264);

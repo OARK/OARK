@@ -4,11 +4,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import sep_17.intelligentrobots.oarkcontroller.streams.VideoStream;
-import sep_17.sipdroid.net.SipdroidSocket;
 
 import java.io.IOException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 
 /**
  * This is expected to be added to the callback of the surface that is

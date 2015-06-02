@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
+import android.view.WindowManager;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -11,7 +12,7 @@ import sep_17.intelligentrobots.oarkcontroller.VideoRenderer;
 
 
 public class ControlActivity extends Activity {
-    private String targetIP = "192.168.12.2";
+    private String targetIP = "192.168.12.1";
 
     private Talker talker;
 
@@ -35,6 +36,9 @@ public class ControlActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_control);
+
+        /* Stop screen dimming */
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         /* Initialise video */
         testSurfaceView = (SurfaceView) findViewById(R.id.robotCameraView);

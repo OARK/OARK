@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This view is of a basic analog stick. The analog stick can be
