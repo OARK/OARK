@@ -23,7 +23,7 @@
                     baud_rate: 115200
                     min_motor_id: 1
                     max_motor_id: 7
-                    update_rate: 20
+                    update_rate: 4 
         </rosparam>
     </node>
 	<rosparam command="load" file="$(find dynamite)/launch/controllers.yaml" />

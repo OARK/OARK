@@ -33,6 +33,7 @@ from net.msg import *
 from control.pos_controller import PosController
 from control.torque_controller import TorqueController
 import control.manager_proxy as proxy
+from .utils import ax12_to_rad
 
 
 controllers = {}
@@ -53,8 +54,7 @@ def msg_received(msg):
         upper = 850
 
         ax12_coords = (msg.get_value() / 127.0) * (upper - lower) + lower
-        result = (ax12_coords / 1023.0 - 0.5) * (300 * 3.1415926 / 180)
-        controllers['arm_base'].set_position(result)
+        controllers['arm_base'].set_position(ax12_to_rad(ax12_coords))
 
     elif msg.get_type() == WRIST_GO:
         #Value is between 0 and 127. Wrist goes from 173 - 820 (AX12 Units)
@@ -62,20 +62,15 @@ def msg_received(msg):
         upper = 820
 
         ax12_coords = (msg.get_value() / 127.0) * (upper - lower) + lower
-        result = (ax12_coords / 1023.0 - 0.5) * (300 * 3.1415926 / 180)
-        controllers['arm_wrist'].set_position(result)
+        controllers['arm_wrist'].set_position(ax12_to_rad(ax12_coords))
 
     elif msg.get_type() == HAND_GO:
-        #Value is between 0 and 127. Hand goes from 570-1023 (AX12 Units)
+        #Value is between 0 and 127. Hand goes from 150-870 (AX12 Units)
         lower = 150 
         upper = 870 
 
-        print "127 Coords: ", msg.get_value()
         ax12_coords = (msg.get_value() / 127.0) * (upper - lower) + lower
-        print "ax12_coords: ", ax12_coords
-        result = (ax12_coords / 1023.0 - 0.5) * (300 * 3.1415926 / 180)
-        controllers['arm_hand'].set_position(result)
-        print "Moving hand to pos: ", result
+        controllers['arm_hand'].set_position(ax12_to_rad(result))
     else:
         print str(msg)
 
@@ -90,9 +85,6 @@ def client_dc():
 
 
 if __name__ == '__main__':
-    #args = rospy.myargv(argv=sys.argv)
-    #parser = argparse.ArgumentParser(description='Four Wheel Wonder control program')
-
     port_ns = 'pi_out_port'
     manager_ns = 'dxl_manager'
 
