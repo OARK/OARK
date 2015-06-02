@@ -33,7 +33,7 @@ getScriptDirectory() {
 buildKernel() {
     if [[ ! -f $(getScriptDirectory)/../kernel/build/qemu/qemu-kernel ]]; then
         echo "Building QEMU Kernel"
-        $(getScriptDirectory)/../kernel/setup.sh
+        $(getScriptDirectory)/../kernel/setup.sh build
     fi
 }
 
