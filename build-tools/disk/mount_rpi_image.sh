@@ -22,6 +22,14 @@ function getByteOffset()
     echo $(expr $1 \* 512)
 }
 
+# Displays the help text
+help() {
+    echo "mount_rpi_image.sh - Mount a Raspberry Pi image."
+    echo
+    echo "    mount_rpi_image.sh <image> <mount point>"
+    echo "    mount_rpi_image.sh help - This help text."
+}
+
 if [[ $(id -u) != 0 ]]; then
     echo "Must be root."
 elif [[ ! -d $2 ]]; then

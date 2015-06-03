@@ -18,4 +18,13 @@ updateLdPreload() {
     sed -i -e "/libcofi_rpi/s/^/#/g" $1/etc/ld.so.preload
 }
 
+updateUdevDisks() {
+    cat <<EOF > $1/etc/udev/rules.d/90-qemu.rules
+KERNEL=="sda", SYMLINK+="mmcblk0"
+KERNEL=="sda?", SYMLINK+="mmcblk0p%n"
+KERNEL=="sda2", SYMLINK+="root"
+EOF
+}
+
 updateLdPreload $1
+updateUdevDisks $1
