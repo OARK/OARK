@@ -9,6 +9,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# Local port for SSH access into the emulated system.
+SSH_PORT=10022
+
 # I want to be sure that operations are done relative to this scripts directory,
 # not from current directory someone may have when running it.
 #
@@ -43,4 +46,6 @@ qemu-system-arm -machine versatilepb \
                 -cpu arm1176 -m 256 -no-reboot -serial stdio \
                 -kernel $(getScriptDirectory)/../kernel/build/qemu/qemu-kernel \
                 -append "root=/dev/sda2 panic=1 rw" \
-                -hda $1
+                -hda $1 \
+                -net user,hostfwd=tcp::${SSH_PORT}-:22 \
+                -net nic

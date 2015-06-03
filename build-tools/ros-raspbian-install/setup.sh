@@ -69,14 +69,17 @@ apt-get -y source -b lz4
 # quilt refresh
 # quilt pop -a
 
-# Add info into changelog
+# # Add info into changelog
 # dch -n
 
-# build the package
+# # Build the package
 # debuild -uc -us
+# cd ..
 
 sudo dpkg -i liblz4-*.deb
 
+# Apparently the failure of the three packages to install in the final
+# stages of this step can be ignored.
 cd ~/Projects/ros_catkin_ws
 rosdep install --from-paths src --ignore-src --rosdistro indigo -y -r \
     --os=debian:wheezy
