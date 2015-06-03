@@ -56,6 +56,25 @@ sudo dpkg -i libconsole-bridge0.2_*.deb libconsole-bridge-dev_*.deb
 # This will take a long time, because of the unit tests.
 # TODO, apply patch to remove slowest unit test (fuzzy)
 apt-get -y source -b lz4
+
+# # Have to remove -b from above line
+# cd lz4-0.0~r122
+# export QUILT_PATCHES=debian/patches
+# # Push all patches
+# quilt push -a
+# # Add our own patch
+# quilt new 0002-Remove-fuzzy-test.patch
+# quilt add programs/Makefile
+# # Modify the file in your favourite text editor.
+# quilt refresh
+# quilt pop -a
+
+# Add info into changelog
+# dch -n
+
+# build the package
+# debuild -uc -us
+
 sudo dpkg -i liblz4-*.deb
 
 cd ~/Projects/ros_catkin_ws
