@@ -40,7 +40,7 @@ getScriptDirectory() {
 # build the kernel.
 buildKernel() {
     if [[ ! -f $(getScriptDirectory)/../kernel/build/qemu/qemu-kernel ]]; then
-        echo "${COLOUR_PROGRESS}Building QEMU Kernel${NC}"
+        echo -e "${COLOUR_PROGRESS}Building QEMU Kernel${NC}"
         $(getScriptDirectory)/../kernel/setup.sh build
     fi
 }
@@ -61,6 +61,8 @@ if [ $# -eq 0 ]; then
     help
 else
     buildKernel
+
+    echo -e "${COLOUR_PROGRESS}Starting emulator...${NC}"
 
     # Start the emulation, there is no Raspberry Pi system in QEMU, so
     # have to use the VersatilePB system. Doesn't support multicore, or
