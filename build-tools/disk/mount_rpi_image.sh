@@ -36,7 +36,9 @@ elif [[ ! -d $2 ]]; then
     echo "Mount point $2 does not exist."
 else
     if [[ -f $1 ]]; then
-        if [[ "$(file -kb $1 | awk -F ';' '{print $1}')" == "DOS/MBR boot sector" ]]; then
+        boot_sector_test="$(file -kb $1 | awk -F ';' '{print $1}')"
+        if [[ "${boot_sector_test}" == "DOS/MBR boot sector" ]] ||
+           [[ "${boot_sector_test}" == "x86 boot sector" ]]; then
 
             IFS=' ' read -a sectorSizeArray <<< "$(getSectors $1)"
 
@@ -47,6 +49,7 @@ else
                 echo "Not exactly two partitions, is it a standard Pi image?"
             fi
         else
+            echo "File is ${boot_sector_test}"
             echo "Doesn't start with DOS/MBR boot sector, not Raspbian image?"
         fi
     else
