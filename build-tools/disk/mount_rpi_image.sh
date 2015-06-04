@@ -12,7 +12,7 @@ IFS=$'\n\t'
 # Get the starting sectors of each partition in the image.
 function getSectors()
 {
-    local result="$(file -b $1 | xargs -n1 -d',' | awk '/startsector/ {print $2}')"
+    local result="$(file -kb $1 | xargs -n1 -d',' | awk '/startsector/ {print $2}')"
     echo $result
 }
 
@@ -36,7 +36,7 @@ elif [[ ! -d $2 ]]; then
     echo "Mount point $2 does not exist."
 else
     if [[ -f $1 ]]; then
-        if [[ "$(file -b $1 | awk -F ';' '{print $1}')" == "DOS/MBR boot sector" ]]; then
+        if [[ "$(file -kb $1 | awk -F ';' '{print $1}')" == "DOS/MBR boot sector" ]]; then
 
             IFS=' ' read -a sectorSizeArray <<< "$(getSectors $1)"
 
@@ -46,6 +46,8 @@ else
             else
                 echo "Not exactly two partitions, is it a standard Pi image?"
             fi
+        else
+            echo "Doesn't start with DOS/MBR boot sector, not Raspbian image?"
         fi
     else
         echo "$1 isn't a file."
