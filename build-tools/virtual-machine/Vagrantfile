@@ -34,6 +34,6 @@ Vagrant.configure(2) do |config|
   # archive is likely to be.
   if File.exist?("../emulation/raspbian_latest.zip") then
     config.vm.provision :file, source: "../emulation/raspbian_latest.zip",
-                        destination: "Projects/oark/build-tools/emulation"
+                        destination: "Projects/oark/build-tools/emulation/raspbian_latest.zip"
   end
 end
