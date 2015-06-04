@@ -70,6 +70,11 @@ else
 
     # Local port SSH_PORT is forwarded for SSH access, and VNC server is
     # on local port 5905 for gfx access if needed.
+
+    # We redirect stderr to /dev/null because QEMU can't find some
+    # audio devices under the Vagrant guest. This means to causes what
+    # looks to be serious errors, but everything is fine.
+    # If there are issues starting the emulator, remove the redirection.
     qemu-system-arm -machine versatilepb \
                     -cpu arm1176 -m 256 -no-reboot \
                     -daemonize \
@@ -78,5 +83,7 @@ else
                     -append "root=/dev/sda2 panic=1 rw" \
                     -hda $1 \
                     -net user,hostfwd=tcp::${SSH_PORT}-:22 \
-                    -net nic
+                    -net nic 2>/dev/null
+
+    echo -e "${COLOUR_SUCCESS}Emulator started.${NC}"
 fi

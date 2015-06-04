@@ -9,4 +9,4 @@ cd ~/Projects/oark/build-tools/emulation/
 
 ./download_prepare_raspbian.sh
 
-# start.sh 2015-05-05-raspbian-wheezy.img
+./start.sh 2015-05-05-raspbian-wheezy.img
