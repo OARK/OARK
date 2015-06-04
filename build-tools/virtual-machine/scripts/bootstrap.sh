@@ -15,3 +15,6 @@ apt-get install -y qemu-system-arm
 
 # For installation scripting on the Pi virtual machine.
 apt-get install -y ansible sshpass
+
+# For the Ansible hosts file added later.
+echo "export ANSIBLE_INVENTORY=~/.ansible_hosts" >> .bashrc

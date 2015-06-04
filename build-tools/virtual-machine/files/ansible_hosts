@@ -1,0 +1,2 @@
+[pi_emu]
+localhost:10022 ansible_connection=ssh ansible_ssh_user=pi

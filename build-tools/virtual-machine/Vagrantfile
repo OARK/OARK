@@ -44,4 +44,11 @@ Vagrant.configure(2) do |config|
 
   # Get the emulator started for the Pi.
   config.vm.provision :shell, privileged: false, path: "scripts/start-emulator.sh"
+
+  # Copy the Ansible host file for talking to the emulator.
+  config.vm.provision :file, source: "files/ansible_hosts",
+                      destination: ".ansible_hosts"
+
+  config.vm.provision :file, source: "files/playbooks",
+                      destination: "ansible_playbooks"
 end

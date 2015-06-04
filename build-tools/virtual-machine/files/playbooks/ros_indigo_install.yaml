@@ -1,0 +1,12 @@
+---
+- hosts: pi_emu
+  tasks:
+  - name: Add ROS repositories
+    apt_repository: repo='deb http://packages.ros.org/ros/ubuntu wheezy main' state=present
+    sudo: yes
+  - name: Add src repositories
+    apt_repository: repo='deb-src http://mirrordirector.raspbian.org/raspbian/ testing main contrib non-free rpi' state=present
+    sudo: yes
+  - name: Add in the keys for the repositories
+    apt_key: url=http://packages.ros.org/ros.key state=present
+    sudo: yes
