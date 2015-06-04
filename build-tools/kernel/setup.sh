@@ -12,6 +12,11 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# Colour codes
+COLOUR_SUCCESS=`tput setaf 2` # Green
+COLOUR_PROGRESS=`tput setaf 3` # Orange
+NC=`tput sgr0` # No Color
+
 # I want to be sure that operations are done relative to this scripts directory,
 # not from current directory someone may have when running it.
 #
@@ -66,12 +71,12 @@ pullGitRepo() {
 # Be sure we have the cross compilation toolchain.
 # This assumes no modification to repo from upstream.
 ensureToolchain() {
-    echo "Toolchain"
+    echo "${COLOUR_PROGRESS}Fetching toolchain...${NC}"
     pullGitRepo $(toolChainDirectory) https://github.com/raspberrypi/tools
 }
 
 ensureKernel() {
-    echo "Kernel"
+    echo "${COLOUR_PROGRESS}Fetching kernel source...${NC}"
     pullGitRepo $(kernelDirectory) https://github.com/raspberrypi/linux --depth=1
 }
 
@@ -81,12 +86,13 @@ ensureKernel() {
 # versatile system. However, the kernel config options don't give us the
 # necessary options, this patch enables them.
 patchKernel() {
-    echo "Patch kernel"
+    echo "${COLOUR_PROGRESS}Patching kernel...${NC}"
     patch -p1 -d $(kernelDirectory) < $(getScriptDirectory)/linux-arm-qemu.patch
 }
 
 # Build the QEMU kernel
 buildQEMUKernel() {
+    echo "${COLOUR_PROGRESS}Building kernel...${NC}"
     export PATH=$(toolChainDirectory)/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin:$PATH
 
     local oldDirectory=$(getScriptDirectory)
@@ -127,6 +133,8 @@ elif [ "$1" = "build" ]; then
 
     patchKernel
     buildQEMUKernel
+
+    echo "${COLOUR_SUCCESS}Kernel built successfully.${NC}"
 else
     help
 fi

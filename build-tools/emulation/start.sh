@@ -9,6 +9,11 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# Colour codes
+COLOUR_SUCCESS=`tput setaf 2` # Green
+COLOUR_PROGRESS=`tput setaf 3` # Orange
+NC=`tput sgr0` # No Color
+
 # Local port for SSH access into the emulated system.
 SSH_PORT=10022
 
@@ -35,24 +40,40 @@ getScriptDirectory() {
 # build the kernel.
 buildKernel() {
     if [[ ! -f $(getScriptDirectory)/../kernel/build/qemu/qemu-kernel ]]; then
-        echo "Building QEMU Kernel"
+        echo "${COLOUR_PROGRESS}Building QEMU Kernel${NC}"
         $(getScriptDirectory)/../kernel/setup.sh build
     fi
 }
 
-buildKernel
+# Displays the help text.
+help() {
+    echo "start.sh - Script for starting a QEMU instance for a Raspberry Pi image."
+    echo
+    echo "    Port ${SSH_PORT} on localhost will be forwarded to SSH port of guest."
+    echo "    VNC port 5905 is available for gfx interface."
+    echo
+    echo "    start.sh <image file> - Start the emulator instance using image file."
+}
 
-# Start the emulation, there is no Raspberry Pi system in QEMU, so
-# have to use the VersatilePB system. Doesn't support multicore, or
-# more mem than 256.
+# No parameters to script, then show help, since image to use must be
+# provided.
+if [ $# -eq 0 ]; then
+    help
+else
+    buildKernel
 
-# Local port SSH_PORT is forwarded for SSH access, and VNC server is
-# on local port 5905 for gfx access if needed.
-qemu-system-arm -machine versatilepb \
-                -cpu arm1176 -m 256 -no-reboot -serial stdio \
-                -vnc :5 \
-                -kernel $(getScriptDirectory)/../kernel/build/qemu/qemu-kernel \
-                -append "root=/dev/sda2 panic=1 rw" \
-                -hda $1 \
-                -net user,hostfwd=tcp::${SSH_PORT}-:22 \
-                -net nic
+    # Start the emulation, there is no Raspberry Pi system in QEMU, so
+    # have to use the VersatilePB system. Doesn't support multicore, or
+    # more mem than 256.
+
+    # Local port SSH_PORT is forwarded for SSH access, and VNC server is
+    # on local port 5905 for gfx access if needed.
+    qemu-system-arm -machine versatilepb \
+                    -cpu arm1176 -m 256 -no-reboot -serial stdio \
+                    -vnc :5 \
+                    -kernel $(getScriptDirectory)/../kernel/build/qemu/qemu-kernel \
+                    -append "root=/dev/sda2 panic=1 rw" \
+                    -hda $1 \
+                    -net user,hostfwd=tcp::${SSH_PORT}-:22 \
+                    -net nic
+fi
