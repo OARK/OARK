@@ -29,3 +29,6 @@ local.properties
 .DS_Store
 build
 
+# Ignore any Rasbian images
+*raspbian*.img
+*raspbian*.zip
