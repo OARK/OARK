@@ -42,8 +42,15 @@ buildKernel() {
 
 buildKernel
 
+# Start the emulation, there is no Raspberry Pi system in QEMU, so
+# have to use the VersatilePB system. Doesn't support multicore, or
+# more mem than 256.
+
+# Local port SSH_PORT is forwarded for SSH access, and VNC server is
+# on local port 5905 for gfx access if needed.
 qemu-system-arm -machine versatilepb \
                 -cpu arm1176 -m 256 -no-reboot -serial stdio \
+                -vnc :5 \
                 -kernel $(getScriptDirectory)/../kernel/build/qemu/qemu-kernel \
                 -append "root=/dev/sda2 panic=1 rw" \
                 -hda $1 \
