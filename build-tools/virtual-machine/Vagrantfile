@@ -14,7 +14,7 @@ Vagrant.configure(2) do |config|
   # boxes at https://atlas.hashicorp.com/search.
   config.vm.box = "puppetlabs/ubuntu-14.04-64-nocm"
 
-  config.vm.provision "shell", path: "scripts/bootstrap.sh"
+  config.vm.provision :shell, path: "scripts/bootstrap.sh"
 
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
@@ -22,6 +22,14 @@ Vagrant.configure(2) do |config|
   # argument is a set of non-required options.
   # config.vm.synced_folder "../data", "/vagrant_data"
 
-  config.vm.provision "file", source: "files/hgrc", destination: ".hgrc"
-  config.vm.provision "shell", path: "scripts/pull-repo.sh"
+  # Kiln Agent Auth settings so it can pull down the latest version.
+  config.vm.provision :file, source: "hgrc", destination: ".hgrc"
+  config.vm.provision :shell, privileged: false, path: "scripts/pull-repo.sh"
+
+  # If we have a Raspbian image in the files directory already then
+  # copy it into the virtual machine to save time.
+  if File.exist?("./files/raspbian_latest.zip") then
+    config.vm.provision :file, source: "files/raspbian_latest.zip",
+                        destination: "Projects/oark/build-tools/emulation"
+  end
 end
