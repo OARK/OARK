@@ -10,9 +10,9 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Colour codes
-COLOUR_SUCCESS=`tput setaf 2` # Green
-COLOUR_PROGRESS=`tput setaf 3` # Orange
-NC=`tput sgr0` # No Color
+COLOUR_SUCCESS='\033[0;32m'
+COLOUR_PROGRESS='\033[0;33m'
+NC='\033[0m' # No Color
 
 # Local port for SSH access into the emulated system.
 SSH_PORT=10022
@@ -71,7 +71,8 @@ else
     # Local port SSH_PORT is forwarded for SSH access, and VNC server is
     # on local port 5905 for gfx access if needed.
     qemu-system-arm -machine versatilepb \
-                    -cpu arm1176 -m 256 -no-reboot -serial stdio \
+                    -cpu arm1176 -m 256 -no-reboot \
+                    -daemonize \
                     -vnc :5 \
                     -kernel $(getScriptDirectory)/../kernel/build/qemu/qemu-kernel \
                     -append "root=/dev/sda2 panic=1 rw" \

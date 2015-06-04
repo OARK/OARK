@@ -26,5 +26,15 @@ KERNEL=="sda2", SYMLINK+="root"
 EOF
 }
 
+addSSHKeys() {
+    mkdir -p $1/home/pi/.ssh
+    cp ~/.ssh/id_rsa.pub $1/home/pi/.ssh/authorized_keys
+
+    chmod 700 $1/home/pi/.ssh
+    chmod 644 $1/home/pi/.ssh/authorized_keys
+
+    chown -R 1000:1000 $1/home/pi/.ssh
+}
+
 updateLdPreload $1
 updateUdevDisks $1

@@ -22,6 +22,11 @@ Vagrant.configure(2) do |config|
   # argument is a set of non-required options.
   # config.vm.synced_folder "../data", "/vagrant_data"
 
+  # Generate SSH keypair, we will copy this into the Raspberry Pi image
+  # so we don't need a password to SSH in.
+  config.vm.provision :shell, privileged: false,
+                      path: "scripts/generate-ssh-key.sh"
+
   # Kiln Agent Auth settings so it can pull down the latest version.
   config.vm.provision :file, source: "files/hgrc", destination: ".hgrc"
   config.vm.provision :shell, privileged: false, path: "scripts/pull-repo.sh"

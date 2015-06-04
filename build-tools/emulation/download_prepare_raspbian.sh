@@ -14,6 +14,7 @@ NC='\033[0m' # No Color
 echo -e "${COLOUR_PROGRESS}Download and prepare Raspbian image."
 echo -e "${COLOUR_PROGRESS}Starting download...${NC}"
 wget -q http://downloads.raspberrypi.org/raspbian_latest -c -O raspbian_latest.zip
+echo -e "${COLOUR_SUCCESS}Downloaded${NC}"
 
 unzip -o raspbian_latest.zip
 
@@ -29,4 +30,4 @@ sudo ./update_raspbian_image.sh raspbian_mount/
 echo -e "${COLOUR_PROGRESS}Unmounting image...${NC}"
 sudo umount raspbian_mount
 
-echo -e "${COLOUR_SUCCESS}Success.${NC}"
+echo -e "${COLOUR_SUCCESS}Raspbian image downloaded and prepared for emulator.${NC}"
