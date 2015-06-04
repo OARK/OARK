@@ -11,8 +11,9 @@ COLOUR_SUCCESS='\033[0;32m'
 COLOUR_PROGRESS='\033[0;33m'
 NC='\033[0m' # No Color
 
+echo -e "${COLOUR_PROGRESS}Download and prepare Raspbian image."
 echo -e "${COLOUR_PROGRESS}Starting download...${NC}"
-wget http://downloads.raspberrypi.org/raspbian_latest -c -O raspbian_latest.zip
+wget -q http://downloads.raspberrypi.org/raspbian_latest -c -O raspbian_latest.zip
 
 unzip -o raspbian_latest.zip
 
