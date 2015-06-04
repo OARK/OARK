@@ -3,6 +3,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# Assume we live in Western Australia
+sed -i 's/http:\/\/us\.archive\.ubuntu\.com/http:\/\/ftp.iinet.net.au\/linux/g' /etc/apt/sources.list
+
 # Bootstrap the development environment
 apt-get update
 
