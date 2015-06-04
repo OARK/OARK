@@ -49,6 +49,10 @@ Vagrant.configure(2) do |config|
   config.vm.provision :file, source: "files/ansible_hosts",
                       destination: ".ansible_hosts"
 
+  # Disble SSH host key checking, since we're automating.
+  config.vm.provision :file, source: "files/ansible.cfg",
+                      destination: ".ansible.cfg"
+
   config.vm.provision :file, source: "files/playbooks",
                       destination: "ansible_playbooks"
 end
