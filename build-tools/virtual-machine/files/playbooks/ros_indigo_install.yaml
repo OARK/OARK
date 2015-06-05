@@ -1,12 +1,115 @@
 ---
+# As per guide: http://wiki.ros.org/ROSberryPi/Installing%20ROS%20Indigo%20on%20Raspberry%20Pi
 - hosts: pi_emu
+  sudo: yes
   tasks:
   - name: Add ROS repositories
     apt_repository: repo='deb http://packages.ros.org/ros/ubuntu wheezy main' state=present
-    sudo: yes
   - name: Add src repositories
     apt_repository: repo='deb-src http://mirrordirector.raspbian.org/raspbian/ testing main contrib non-free rpi' state=present
-    sudo: yes
   - name: Add in the keys for the repositories
     apt_key: url=http://packages.ros.org/ros.key state=present
-    sudo: yes
+  - name: Upgrade any packages in new repositories
+    apt: update_cache=yes upgrade=yes
+  - name: Pull in required Python packages
+    apt: name=python-setuptools,python-pip,python-yaml,python-argparse,python-distribute,python-docutils,python-dateutil,python-six state=present
+  - name: Pull in Python packages using pip
+    command: pip install rosdep rosinstall_generator wstool rosinstall
+  - name: Initialise rosdep
+    command: rosdep init
+    args:
+      creates: /etc/ros/rosdep/sources.list.d/20-default.list
+  - name: Update rosdep
+    command: rosdep update
+    sudo: no
+  - name: Create ROS Catkin workspace directory
+    file: path=~/Projects/ros_catkin_ws state=directory
+    sudo: no
+  - name: Install ROS-Comm
+    shell: rosinstall_generator ros_comm --rosdistro indigo --deps --wet-only --exclude roslisp --tar > indigo-ros_comm-wet.rosinstall
+    args:
+      chdir: ~/Projects/ros_catkin_ws
+      creates: ~/Projects/ros_catkin_ws/indigo-ros_comm-wet.rosinstall
+    sudo: no
+  - name: Run wstool for ROS-Comm
+    command: wstool init src indigo-ros_comm-wet.rosinstall
+    args:
+      chdir: ~/Projects/ros_catkin_ws
+    sudo: no
+  - name: Pull in packages for building external sources for ROS
+    apt: name=checkinstall,cmake,quilt state=present
+  - name: Pull in everything needed to build console-bridge
+    command: apt-get -y build-dep console-bridge
+  - name: Create external source directory
+    file: path=~/Projects/ros_catkin_ws/external_src state=directory
+    sudo: no
+  - name: Build libconsole-bridge-dev
+    command: apt-get -y source -b console-bridge
+    args:
+      chdir: ~/Projects/ros_catkin_ws/external_src
+    sudo: no
+  - name: Install libconsole-bridge-dev
+    shell: dpkg -i libconsole-bridge0.2_*.deb libconsole-bridge-dev_*.deb
+    args:
+      chdir: ~pi/Projects/ros_catkin_ws/external_src
+  - name: Get lz4 source
+    command: apt-get -y source lz4
+    args:
+      chdir: ~/Projects/ros_catkin_ws/external_src
+    sudo: no
+  - name: Create new patch for lz4
+    command: quilt new 0002-Remove-fuzzer-test.patch
+    args:
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122
+    environment:
+      QUILT_PATCHES: debian/patches
+    sudo: no
+  - name: Define file being patched
+    command: quilt add programs/Makefile
+    args:
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122
+    environment:
+      QUILT_PATCHES: debian/patches
+    sudo: no
+  - name: Patch lz4 Makefile - Remove fuzzer test
+    command: sed -i s/test-fuzzer$//g programs/Makefile
+    args:
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122/
+    sudo: no
+  - name: Patch lz4 Makefile - Remove fuzzer32 test
+    command: sed -i s/test-fuzzer32$//g programs/Makefile
+    args:
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122/
+    sudo: no
+  - name: Refresh patches
+    command: quilt refresh
+    args:
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122
+    environment:
+      QUILT_PATCHES: debian/patches
+    sudo: no
+  - name: Pop patches off lz4
+    command: quilt pop -a
+    args:
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122
+    environment:
+      QUILT_PATCHES: debian/patches
+    sudo: no
+  - name: Build lz4 - this will take awhile
+    command: dpkg-buildpackage -us -uc
+    args:
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122
+    sudo: no
+  - name: Install lz4 pkg
+    command: dpkg -i liblz4-*.deb
+    args:
+      chdir: ~pi/Projects/ros_catkin_ws/external_src
+  - name: Rosdep the ros_catkin workspace
+    command: rosdep install --from-paths src --ignore-src --rosdistro indigo -y -r --os=debian:wheezy
+    args:
+      chdir: ~/Projects/ros_catkin_ws
+    sudo: no
+  - name: Install ROS
+    command: ./src/catkin/bin/catkin_make_isolated --install -DCMAKE_BUILD_TYPE=Release --install-space /opt/ros/indigo
+    args:
+      chdir: ~/Projects/ros_catkin_ws
