@@ -101,7 +101,7 @@
       chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122
     sudo: no
   - name: Install lz4 pkg
-    command: dpkg -i liblz4-*.deb
+    shell: dpkg -i liblz4-*.deb
     args:
       chdir: ~pi/Projects/ros_catkin_ws/external_src
   - name: Rosdep the ros_catkin workspace
