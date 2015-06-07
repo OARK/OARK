@@ -1,0 +1,10 @@
+---
+# Builds the dynamite ROS module.
+- hosts: pi_emu
+  tasks:
+  - name: Copy the source code to the Pi for building
+    copy: src=~/Projects/oark/ros-pkg dest=~/Projects/
+  - name: Build the robot system
+    shell: bash build-dynamite.sh
+    args:
+      chdir: ~/Projects/ros-pkg

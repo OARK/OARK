@@ -11,10 +11,14 @@ COLOUR_SUCCESS='\033[0;32m'
 COLOUR_PROGRESS='\033[0;33m'
 NC='\033[0m' # No Color
 
+# Not getting picked up from .bashrc?
+# TODO: Must fix properly.
+ANSIBLE_INVENTORY=~/.ansible_hosts
+
 # Will return 0 if we can log onto SSH.
 testSSHServerRunning() {
     echo -e "${COLOUR_PROGRESS}Checking if emulator image is running...${NC}"
-    ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
         pi@localhost -p 10022 exit
 }
 

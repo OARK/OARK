@@ -13,8 +13,14 @@
     apt: update_cache=yes upgrade=yes
   - name: Pull in required Python packages
     apt: name=python-setuptools,python-pip,python-yaml,python-argparse,python-distribute,python-docutils,python-dateutil,python-six state=present
-  - name: Pull in Python packages using pip
-    command: pip install rosdep rosinstall_generator wstool rosinstall
+  - name: Pip install rosdep
+    pip: name=rosdep state=present
+  - name: Pip install rosinstall_generator
+    pip: name=rosinstall_generator state=present
+  - name: Pip install wstool
+    pip: name=wstool state=present
+  - name: Pip install rosinstall
+    pip: name=rosinstall state=present
   - name: Initialise rosdep
     command: rosdep init
     args:
@@ -26,7 +32,7 @@
     file: path=~/Projects/ros_catkin_ws state=directory
     sudo: no
   - name: Install ROS-Comm
-    shell: rosinstall_generator ros_comm --rosdistro indigo --deps --wet-only --exclude roslisp --tar > indigo-ros_comm-wet.rosinstall
+    shell: rosinstall_generator ros_comm actionlib --rosdistro indigo --deps --wet-only --exclude roslisp --tar > indigo-ros_comm-wet.rosinstall
     args:
       chdir: ~/Projects/ros_catkin_ws
       creates: ~/Projects/ros_catkin_ws/indigo-ros_comm-wet.rosinstall
@@ -35,6 +41,7 @@
     command: wstool init src indigo-ros_comm-wet.rosinstall
     args:
       chdir: ~/Projects/ros_catkin_ws
+      creates: ~/Projects/ros_catkin_ws/src/.rosinstall
     sudo: no
   - name: Pull in packages for building external sources for ROS
     apt: name=checkinstall,cmake,quilt state=present
@@ -96,7 +103,7 @@
       QUILT_PATCHES: debian/patches
     sudo: no
   - name: Build lz4 - this will take awhile
-    command: dpkg-buildpackage -us -uc
+    command: dpkg-buildpackage -j -us -uc
     args:
       chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122
     sudo: no
@@ -104,12 +111,16 @@
     shell: dpkg -i liblz4-*.deb
     args:
       chdir: ~pi/Projects/ros_catkin_ws/external_src
+  # Install ROS, this command will raise errors, but the packages were
+  # installed via pip, so they can be ignored.
+  # However, we also ignore valid errors.
   - name: Rosdep the ros_catkin workspace
     command: rosdep install --from-paths src --ignore-src --rosdistro indigo -y -r --os=debian:wheezy
     args:
       chdir: ~/Projects/ros_catkin_ws
     sudo: no
+    ignore_errors: yes
   - name: Install ROS
-    command: ./src/catkin/bin/catkin_make_isolated --install -DCMAKE_BUILD_TYPE=Release --install-space /opt/ros/indigo
+    shell: ./src/catkin/bin/catkin_make_isolated --install -DCMAKE_BUILD_TYPE=Release --install-space /opt/ros/indigo
     args:
-      chdir: ~/Projects/ros_catkin_ws
+      chdir: ~pi/Projects/ros_catkin_ws
