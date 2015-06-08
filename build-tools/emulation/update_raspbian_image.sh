@@ -35,7 +35,7 @@ EOF
 # This is to make scripting the guest VM easier.
 addSSHKeys() {
     mkdir -p $1/home/pi/.ssh
-    cp ~/.ssh/id_rsa.pub $1/home/pi/.ssh/authorized_keys
+    cat ~/.ssh/id_rsa.pub  >> $1/home/pi/.ssh/authorized_keys
 
     chmod 700 $1/home/pi/.ssh
     chmod 644 $1/home/pi/.ssh/authorized_keys
