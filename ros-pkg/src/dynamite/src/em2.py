@@ -33,7 +33,7 @@ from net.msg import *
 from control.pos_controller import PosController
 from control.torque_controller import TorqueController
 import control.manager_proxy as proxy
-from .utils import ax12_to_rad
+from utils import ax12_to_rad
 
 
 controllers = {}
