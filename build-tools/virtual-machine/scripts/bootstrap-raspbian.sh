@@ -36,7 +36,7 @@ do
     echo -e "${COLOUR_PROGRESS}Not running, sleeping.${NC}"
     sleep 10
     testSSHServerRunning || test_emulator_running=$?
-    echo -e "Return code is ${test_smulator_running}"
+    echo -e "Return code is ${test_emulator_running}"
 done
 
 echo -e "${COLOUR_SUCCESS}Emulator booted.${NC}"
