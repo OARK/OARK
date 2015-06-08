@@ -13,4 +13,10 @@
       lineinfile: dest=/boot/config.txt line="start_x=1"
     - name: User must be part of video group
       user: name=pi groups=video append=yes
-    - name
+    - name: Add module options
+      lineinfile: dest=/etc/modprobe.d/camera.conf line="options bcm2835-v4l2 gst_v4l2src_is_broken=1" create=yes
+    - name: Add module
+      lineinfile: dest=/etc/modules line="bcm2835-v4l2"
+    - name: Set permissions
+      lineinfile: dest=/etc/udev/rules.d/99-camera.rules line="KERNEL==\"vchiq\", SUBSYSTEM==\"vchiq\", GROUP=\"video\", MODE=\"0660\"" create=yes
+
