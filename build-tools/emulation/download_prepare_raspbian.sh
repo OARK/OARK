@@ -18,6 +18,11 @@ echo -e "${COLOUR_SUCCESS}Downloaded${NC}"
 
 unzip -o raspbian_latest.zip
 
+echo -e "${COLOUR_PROGRESS}Kill any running emulator tasks.${NC}"
+killall -9 qemu-system-arm || true
+
+sleep 3
+
 echo -e "${COLOUR_PROGRESS}Creating mountpoint directory.${NC}"
 mkdir -p raspbian_mount
 
