@@ -24,18 +24,10 @@ Host localhost
   LogLevel QUIET
 EOF
 
-# Will return 0 if we can log onto SSH.
-testSSHServerRunning() {
-    echo -e "${COLOUR_PROGRESS}Checking if emulator image is running...${NC}"
-    ssh localhost -p 10022 exit
-    echo $?
-}
-
 # Be sure to clear out known_hosts
 rm -f ~/.ssh/known_hosts
 
-test_emulator_running=0
-testSSHServerRunning || test_emulator_running=$?
+test_emulator_running=255
 
 # It takes awhile for the emulator to start and for it to be
 # responsive, so keep doing a simple looping test on SSH until it
@@ -44,8 +36,9 @@ until [ $test_emulator_running -eq 0 ]
 do
     echo -e "${COLOUR_PROGRESS}Not running, sleeping.${NC}"
     sleep 10
-    testSSHServerRunning || test_emulator_running=$?
-    echo -e "Return code is ${test_emulator_running}"
+
+    echo -e "${COLOUR_PROGRESS}Checking if emulator image is running...${NC}"
+    ssh localhost -p 10022 exit || test_emulator_running=$?
 done
 
 echo -e "${COLOUR_SUCCESS}Emulator booted.${NC}"
