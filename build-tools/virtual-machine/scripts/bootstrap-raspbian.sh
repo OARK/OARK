@@ -15,11 +15,20 @@ NC='\033[0m' # No Color
 # TODO: Must fix properly.
 ANSIBLE_INVENTORY=~/.ansible_hosts
 
+# The ssh keys can change often.
+cat <<EOF > ~/.ssh/config
+Host localhost
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+  User pi
+  LogLevel QUIET
+EOF
+
 # Will return 0 if we can log onto SSH.
 testSSHServerRunning() {
     echo -e "${COLOUR_PROGRESS}Checking if emulator image is running...${NC}"
-    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
-        pi@localhost -p 10022 exit
+    ssh localhost -p 10022 exit
+    echo $?
 }
 
 # Be sure to clear out known_hosts
