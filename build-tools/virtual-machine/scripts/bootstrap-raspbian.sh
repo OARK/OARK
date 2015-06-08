@@ -32,13 +32,12 @@ test_emulator_running=255
 # It takes awhile for the emulator to start and for it to be
 # responsive, so keep doing a simple looping test on SSH until it
 # responds.
-until [ $test_emulator_running -eq 0 ]
+until ssh localhost -p 10022 exit
 do
     echo -e "${COLOUR_PROGRESS}Not running, sleeping.${NC}"
     sleep 10
 
     echo -e "${COLOUR_PROGRESS}Checking if emulator image is running...${NC}"
-    ssh localhost -p 10022 exit || test_emulator_running=$?
 done
 
 echo -e "${COLOUR_SUCCESS}Emulator booted.${NC}"
