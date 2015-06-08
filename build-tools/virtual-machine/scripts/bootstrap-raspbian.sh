@@ -15,28 +15,29 @@ NC='\033[0m' # No Color
 # TODO: Must fix properly.
 ANSIBLE_INVENTORY=~/.ansible_hosts
 
-# Will return 0 if we can log onto SSH.
-testSSHServerRunning() {
-    echo -e "${COLOUR_PROGRESS}Checking if emulator image is running...${NC}"
-    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
-        pi@localhost -p 10022 exit
-}
+# The ssh keys can change often.
+cat <<EOF > ~/.ssh/config
+Host localhost
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+  User pi
+  LogLevel QUIET
+EOF
 
 # Be sure to clear out known_hosts
 rm -f ~/.ssh/known_hosts
 
-test_emulator_running=0
-testSSHServerRunning || test_emulator_running=$?
+test_emulator_running=255
 
 # It takes awhile for the emulator to start and for it to be
 # responsive, so keep doing a simple looping test on SSH until it
 # responds.
-until [ $test_emulator_running -eq 0 ]
+until ssh localhost -p 10022 exit
 do
     echo -e "${COLOUR_PROGRESS}Not running, sleeping.${NC}"
     sleep 10
-    testSSHServerRunning || test_emulator_running=$?
-    echo -e "Return code is ${test_emulator_running}"
+
+    echo -e "${COLOUR_PROGRESS}Checking if emulator image is running...${NC}"
 done
 
 echo -e "${COLOUR_SUCCESS}Emulator booted.${NC}"
