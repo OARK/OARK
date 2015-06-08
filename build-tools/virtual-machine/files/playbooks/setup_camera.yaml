@@ -1,0 +1,16 @@
+---
+# Enable the camera
+- hosts: pi_emu
+  sudo: yes
+  tasks:
+    - name: Make sure the GPU mem is at least 128
+      lineinfile: dest=/boot/config.txt line="gpu_mem=128"
+    - name: StartX should not be in startup
+      shell: sed /boot/config.txt -i -e "s/^start/#startx/"
+    - name: Fixup should not be enabled
+      shell: sed /boot/config.txt -i -e "s/^fixup_file/#fixup_file/"
+    - name: Start_x must be different and is need
+      lineinfile: dest=/boot/config.txt line="start_x=1"
+    - name: User must be part of video group
+      user: name=pi groups=video append=yes
+    - name

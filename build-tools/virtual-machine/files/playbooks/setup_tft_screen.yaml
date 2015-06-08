@@ -1,0 +1,13 @@
+---
+# Install the custom kernel for screen setup.
+- hosts: pi_emu
+  sudo: yes
+  tasks:
+    - name: Add the repositories
+      shell: curl -SLs https://apt.adafruit.com/add | bash
+    - name: Install the TFT packages
+      apt: name=raspberrypi-bootloader-adafruit-pitft state=present
+    - name: Install the setup helper
+      apt: name=adafruit-pitft-helper state=present
+    - name: Setup the screen
+      shell: echo "y" | adafruit-pitft-helper -t 35r
