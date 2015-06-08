@@ -8,3 +8,9 @@
     shell: bash build-dynamite.sh
     args:
       chdir: ~/Projects/ros-pkg
+  - name: Add Pi user to tty group for serial
+    user: name=pi groups=tty append=yes
+    sudo: yes
+  - name: Remove the console from the hardware serial port
+    shell: sed -i s/console=ttyAMA0,115200//g /boot/cmdline.txt
+    sudo: yes

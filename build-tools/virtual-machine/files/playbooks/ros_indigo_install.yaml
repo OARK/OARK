@@ -32,7 +32,7 @@
     file: path=~/Projects/ros_catkin_ws state=directory
     sudo: no
   - name: Install ROS-Comm
-    shell: rosinstall_generator ros_comm actionlib --rosdistro indigo --deps --wet-only --exclude roslisp --tar > indigo-ros_comm-wet.rosinstall
+    shell: rosinstall_generator ros_comm actionlib dynamixel_controllers --rosdistro indigo --deps --wet-only --exclude roslisp --tar > indigo-ros_comm-wet.rosinstall
     args:
       chdir: ~/Projects/ros_catkin_ws
       creates: ~/Projects/ros_catkin_ws/indigo-ros_comm-wet.rosinstall
@@ -67,45 +67,45 @@
   - name: Create new patch for lz4
     command: quilt new 0002-Remove-fuzzer-test.patch
     args:
-      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r130
     environment:
       QUILT_PATCHES: debian/patches
     sudo: no
   - name: Define file being patched
     command: quilt add programs/Makefile
     args:
-      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r130
     environment:
       QUILT_PATCHES: debian/patches
     sudo: no
   - name: Patch lz4 Makefile - Remove fuzzer test
-    command: sed -i s/test-fuzzer$//g programs/Makefile
+    command: sed -i s/^test:.*test-fuzzer/test:/g programs/Makefile
     args:
-      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122/
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r130/
     sudo: no
   - name: Patch lz4 Makefile - Remove fuzzer32 test
-    command: sed -i s/test-fuzzer32$//g programs/Makefile
+    command: sed -i s/^test:.*test-fuzzer32/test32:/g programs/Makefile
     args:
-      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122/
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r130/
     sudo: no
   - name: Refresh patches
     command: quilt refresh
     args:
-      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r130
     environment:
       QUILT_PATCHES: debian/patches
     sudo: no
   - name: Pop patches off lz4
     command: quilt pop -a
     args:
-      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r130
     environment:
       QUILT_PATCHES: debian/patches
     sudo: no
   - name: Build lz4 - this will take awhile
     command: dpkg-buildpackage -j -us -uc
     args:
-      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r122
+      chdir: ~/Projects/ros_catkin_ws/external_src/lz4-0.0~r130
     sudo: no
   - name: Install lz4 pkg
     shell: dpkg -i liblz4-*.deb
