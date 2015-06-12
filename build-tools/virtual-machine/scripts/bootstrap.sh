@@ -6,12 +6,22 @@ IFS=$'\n\t'
 # Assume we live in Western Australia
 sed -i 's/http:\/\/us\.archive\.ubuntu\.com/http:\/\/ftp.iinet.net.au\/linux/g' /etc/apt/sources.list
 
+# Update package lists
+apt-get update
+
+# Add in Ansibles PPA, we want latest releases for bug fixes, etc.
+apt-get install -y software-properties-common
+apt-add-repository ppa:ansible/ansible
+
 # Bootstrap the development environment
 apt-get update
 
 # Build essential is needed because we might want local machine unit testing.
 # Unit testing with Arduino hardware is difficult.
 apt-get install -y bc build-essential git mercurial unzip
+
+# For formatting file systems in created disk image files.
+apt-get install -y multipath-tools
 
 # For Pi emulation
 apt-get install -y qemu-system-arm
