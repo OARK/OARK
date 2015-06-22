@@ -1,0 +1,109 @@
+* Robot Middlewares
+There are a number of robot middlewares that are available, and it would make
+sense to build on code already proven. However, the decision about which one of
+choose (or even roll our own), is not a decision to take lightly. So we have
+decided to check the features of each, in order to try and make a decision based
+on....
+
+** Features
+
+Features we could evaluate on, just a brain dump until we understand how
+relevant features are.
+
+Kinematic support.
+Can define hierarchy of parts and movement.
+Language wrote in.
+Languages supported for using.
+Library, or framework (what's the difference?)
+Driver support.
+Platforms (Will it work on Ardiuno or Rasberry Pi?)
+Debugging support.
+Ease of automating image generation.
+Ease of unit testing.
+Ease of use.
+Supporting tools (GUIs for generating or debugging, etc)
+Is the project active.
+Licence (GPL, etc)
+Documentation.
+Camera support.
+Controller support.
+How clean is the code.
+Robot simulation.
+
+*** Carmen (carmen.sourceforge.net)
+
+Platforms: Red Hat, SuSE Linux, (Possible Pi support)
+Languages: C
+Last updated: 2008-10-23
+Licence: GPL
+
+Notes:
+
+Seems to be a navigation library, supports a few mobile robot bases, possibly
+difficult to add support for custom designs.
+(http://carmen.sourceforge.net/hardware.html)
+
+Has robot simulation, but this appears to just be a simulation of navigation
+functions, for example give it mapping data and test how it navigates.
+
+*** Mobile Robot Programming Toolkit (www.mrpt.org)
+
+Platforms: Windows, Linux, OSX, (Possible Pi support through Linux)
+Languages: C++
+
+**** Notes
+MRPT seems to be more of a navigation library, for a robot to make its own way
+around obstacles.
+
+*** OpenRDK (http://openrdk.sourceforge.net/)
+
+Platforms: Any Unix like it seems.
+Languages:
+Last updated: 2010-06-28
+Licence: Hard to find.
+
+**** Notes
+No updates to the site since 2010?
+
+*** Orca (http://orca-robotics.sourceforge.net/)
+
+Platforms: Debian, Slackware, Fedora, QNX, Windows XP, OSX, Solaris.
+Languages: C++, Java, PHP, Python
+Last updated: 2009-11-18
+Licence: LGPL, GPL, some used with permission from 3rd party.
+
+*** Orocos Project
+
+Platforms: C++ libraries
+Languages: C++ (supports other languages for use: Java/Python/PHP)
+Last updated: 2012-12-03
+Licence: LGPL
+
+**** Notes
+Kinematic chain library. Looks like it may be used as a support library for ROS.
+Java support via JOrocos (https://github.com/Robotics-UniBG/JOrocos/wiki)
+
+*** Robot Construction Kit (http://rock-robotics.org/)
+
+Platforms: Ubuntu, Debian. Experimental, Gentoo, Arch Linux, OpenSuSE, Fedora.
+(Possible Pi support though Linux)
+
+Languages: C++, Ruby
+Last updated:
+
+**** Notes
+ROS integration support is planned. Has options to simulate a robot. Based on
+Orocos. Has a simulator, and seems to support physics modeling of the robot
+though MARS. (http://rock-robotics.org/master/api/simulation/mars/doc/)
+
+*** ROS
+
+Platforms: Linux (Ubuntu), also on Pi. Experimental, Arch Linux, OSX, Debian.
+Languages: Java, Python
+Licence: BSD, but submodules may have different licences.
+
+Random thoughts: Seems to have support for designing and defining new robot
+types from the ground up (URDT). Also things like kinematics.
+
+Also has it's own support pages (running their own Stackoverflow server it
+seems)
