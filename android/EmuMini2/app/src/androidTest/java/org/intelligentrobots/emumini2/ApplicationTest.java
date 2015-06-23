@@ -1,4 +1,4 @@
-package org.emumini2;
+package org.intelligentrobots.emumini2;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

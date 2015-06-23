@@ -5,7 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import org.emumini2.R;
+import org.intelligentrobots.R;
 
 import java.util.Timer;
 import java.util.TimerTask;

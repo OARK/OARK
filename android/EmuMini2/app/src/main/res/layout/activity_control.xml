@@ -1,5 +1,5 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res/sep_17.emumini2"
+    xmlns:app="http://schemas.android.com/apk/res/org.intelligentrobots.emumini2"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:background="#003300"
     tools:context=".ControlActivity">

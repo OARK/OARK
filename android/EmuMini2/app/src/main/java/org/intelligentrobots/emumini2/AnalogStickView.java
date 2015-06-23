@@ -9,7 +9,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.MotionEvent;
 
-import org.emumini2.R;
+import org.intelligentrobots.R;
 
 import java.util.ArrayList;
 

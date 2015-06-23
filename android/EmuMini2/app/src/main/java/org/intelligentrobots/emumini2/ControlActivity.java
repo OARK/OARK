@@ -8,7 +8,7 @@ import android.view.WindowManager;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import org.emumini2.R;
+import org.intelligentrobots.R;
 
 
 public class ControlActivity extends Activity {
