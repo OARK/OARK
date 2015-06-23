@@ -55,7 +55,7 @@ public class ControlActivity extends Activity {
         final SeekBar elbowSeek = (SeekBar) findViewById(R.id.elbowSeek);
 
         /* Connect to raspberry pi server */
-        targetIP = getIntent().getStringExtra("IP_ADDRESS");
+        // targetIP = getIntent().getStringExtra("IP_ADDRESS");
         try {
             talker = new Talker(targetIP);
         }

@@ -34,10 +34,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="org.intelligentrobots.emumini2.IPActivity"
-            android:label="@string/title_activity_ip" >
-        </activity>
     </application>
 
 </manifest>
