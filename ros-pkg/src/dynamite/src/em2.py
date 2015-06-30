@@ -27,13 +27,14 @@
 import rospy
 import sys
 import argparse
+from math import radians
 
 import net.cmd_listener as net_listen
 from net.msg import *
 from control.pos_controller import PosController
 from control.torque_controller import TorqueController
 import control.manager_proxy as proxy
-from utils import ax12_to_rad
+from utils import rescale
 
 
 controllers = {}
@@ -53,24 +54,30 @@ def msg_received(msg):
         lower = 200
         upper = 850
 
-        ax12_coords = (msg.get_value() / 127.0) * (upper - lower) + lower
-        controllers['arm_base'].set_position(ax12_to_rad(ax12_coords))
+        result = rescale(msg.get_value(), 0, 127, 
+                         0, (upper - lower) / 1023.0 * radians(300))
+
+        controllers['arm_base'].set_position(result)
 
     elif msg.get_type() == WRIST_GO:
         #Value is between 0 and 127. Wrist goes from 173 - 820 (AX12 Units)
         lower = 173
         upper = 820
 
-        ax12_coords = (msg.get_value() / 127.0) * (upper - lower) + lower
-        controllers['arm_wrist'].set_position(ax12_to_rad(ax12_coords))
+        result = rescale(msg.get_value(), 0, 127, 
+                         0, (upper - lower) / 1023.0 * radians(300))
+
+        controllers['arm_wrist'].set_position(result)
 
     elif msg.get_type() == HAND_GO:
         #Value is between 0 and 127. Hand goes from 150-870 (AX12 Units)
         lower = 150 
         upper = 870 
 
-        ax12_coords = (msg.get_value() / 127.0) * (upper - lower) + lower
-        controllers['arm_hand'].set_position(ax12_to_rad(result))
+        result = rescale(msg.get_value(), 0, 127, 
+                         0, (upper - lower) / 1023.0 * radians(300))
+
+        controllers['arm_hand'].set_position(result)
     else:
         print str(msg)
 
@@ -101,14 +108,14 @@ if __name__ == '__main__':
         listener.add_data_listener(msg_received)
         listener.add_dc_listener(client_dc)
 
-        controllers['fl'] = TorqueController(man, 'wheel_fl', 'pi_out_port')
-        controllers['fr'] = TorqueController(man, 'wheel_fr', 'pi_out_port')
-        controllers['bl'] = TorqueController(man, 'wheel_bl', 'pi_out_port')
-        controllers['br'] = TorqueController(man, 'wheel_br', 'pi_out_port')
+        controllers['fl'] = TorqueController(man, 'wheel_fl', port_ns)
+        controllers['fr'] = TorqueController(man, 'wheel_fr', port_ns)
+        controllers['bl'] = TorqueController(man, 'wheel_bl', port_ns)
+        controllers['br'] = TorqueController(man, 'wheel_br', port_ns)
 
-        controllers['arm_base'] = PosController(man, 'arm_base', 'pi_out_port')
-        controllers['arm_wrist'] = PosController(man, 'arm_wrist', 'pi_out_port')
-        controllers['arm_hand'] = PosController(man, 'arm_hand', 'pi_out_port')
+        controllers['arm_base'] = PosController(man, 'arm_base', port_ns)
+        controllers['arm_wrist'] = PosController(man, 'arm_wrist', port_ns)
+        controllers['arm_hand'] = PosController(man, 'arm_hand', port_ns)
 
         rospy.spin()
 

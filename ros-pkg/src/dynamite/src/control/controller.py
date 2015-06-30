@@ -71,7 +71,7 @@ class Controller:
         #Ensure that state gets updated
         self.joint_state = None
         self.joint_mutex = threading.Lock()
-        self.proxy.set_state_callback(controller_name, self._state_callback)
+        #self.proxy.set_state_callback(controller_name, self._state_callback)
 
     def get_name(self):
         return self.controller_name
