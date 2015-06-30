@@ -1,9 +1,9 @@
-package org.intelligentrobots.emumini2;
+package org.oarkit.emumini2;
 
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import org.intelligentrobots.emumini2.streams.VideoStream;
+import org.oarkit.emumini2.streams.VideoStream;
 
 import java.io.IOException;
 

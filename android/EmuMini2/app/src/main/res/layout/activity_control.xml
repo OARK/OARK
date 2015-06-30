@@ -133,7 +133,7 @@
             <view
                 android:layout_width="180dp"
                 android:layout_height="180dp"
-                class="org.intelligentrobots.emumini2.AnalogStickView"
+                class="org.oarkit.emumini2.AnalogStickView"
                 android:id="@+id/left_analog_stick"
 
                 app:pointerColor="#CCFF1111"
@@ -148,7 +148,7 @@
             <view
                 android:layout_width="180dp"
                 android:layout_height="180dp"
-                class="org.intelligentrobots.emumini2.AnalogStickView"
+                class="org.oarkit.emumini2.AnalogStickView"
                 android:id="@+id/right_analog_stick"
 
                 app:pointerColor="#CCFF1111"

@@ -1,11 +1,11 @@
-package org.intelligentrobots.emumini2;
+package org.oarkit.emumini2;
 
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import org.intelligentrobots.R;
+import org.oarkit.R;
 
 import java.util.Timer;
 import java.util.TimerTask;

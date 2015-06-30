@@ -1,4 +1,4 @@
-package org.intelligentrobots.emumini2;
+package org.oarkit.emumini2;
 
 import java.io.DataOutputStream;
 import java.io.IOException;

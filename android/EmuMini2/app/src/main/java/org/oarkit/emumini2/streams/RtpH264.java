@@ -1,4 +1,4 @@
-package org.intelligentrobots.emumini2.streams;
+package org.oarkit.emumini2.streams;
 
 /*
  * This class handled the encapsulation of H264 frames in RTP packets.

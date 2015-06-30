@@ -1,4 +1,4 @@
-package org.intelligentrobots.emumini2;
+package org.oarkit.emumini2;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -8,7 +8,7 @@ import android.view.WindowManager;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import org.intelligentrobots.R;
+import org.oarkit.R;
 
 
 public class ControlActivity extends Activity {

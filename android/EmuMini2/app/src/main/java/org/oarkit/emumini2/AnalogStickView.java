@@ -1,4 +1,4 @@
-package org.intelligentrobots.emumini2;
+package org.oarkit.emumini2;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -9,7 +9,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.MotionEvent;
 
-import org.intelligentrobots.R;
+import org.oarkit.R;
 
 import java.util.ArrayList;
 
