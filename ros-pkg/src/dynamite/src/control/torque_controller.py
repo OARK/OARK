@@ -28,19 +28,28 @@ class TorqueController(controller.Controller):
 
         #Create controller
         proxy.start_torque_cont(controller_name, port_ns)
+        self.hardware_init = True
 
-    def destroy(self):
+    def __del__(self):
         self.proxy.stop_torque_cont(self.controller_name, self.port_ns)
 
-    def command(self, value):
-        self.proxy.command(self.controller_name, value)
+    def _torque_to_cmd(self, torque):
+        """Translates a torque value to a controller command. The format
+        of this method will determine the units that the torque is
+        supplied in."""
+        return torque
 
     #TODO - Specify torque in sensible unit
     def set_torque(self, torque):
-        self.command(torque)
+        self.command(self._torque_to_cmd(torque))
+
+    def set_torque_buffered(self, torque):
+        """Buffers a command to set the torque of the controller.
+        The command will not be executed until flush_cmd is called."""
+        self.torque_buffer(self._torque_to_cmd(torque))
 
     def stop(self):
-        self.set_torque(0)
+        self.set_torque(self._torque_to_cmd(0))
 
 
 

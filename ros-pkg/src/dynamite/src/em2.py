@@ -23,10 +23,12 @@
 # types. This will hopefully be changed before release.
 #
 
+#TODO: Remove constants
 
 import rospy
 import sys
 import argparse
+import threading
 from math import radians
 
 import net.cmd_listener as net_listen
@@ -38,51 +40,51 @@ from utils import rescale
 
 
 controllers = {}
+cmd_mutex = threading.Lock()
 
 def msg_received(msg):
-    if msg.get_type() == LEFT_GO:
-        controllers['fl'].set_torque(msg.get_value())
-        controllers['bl'].set_torque(msg.get_value())
+    with cmd_mutex:
+        if msg.get_type() == LEFT_GO:
+            controllers['fl'].set_torque(msg.get_value())
+            controllers['bl'].set_torque(msg.get_value())
 
-    elif msg.get_type() == RIGHT_GO:
-        #Value has to be negated because servos oriented differently
-        controllers['fr'].set_torque(-msg.get_value())
-        controllers['br'].set_torque(-msg.get_value())
+        elif msg.get_type() == RIGHT_GO:
+            #Value has to be negated because servos oriented differently
+            controllers['fr'].set_torque(-msg.get_value())
+            controllers['br'].set_torque(-msg.get_value())
 
-    elif msg.get_type() == ARM_GO:
-        #Value is between 0 and 127. Arm goes from 200-850 (AX12 Units)
-        lower = 200
-        upper = 850
+        elif msg.get_type() == ARM_GO:
+            #Value is between 0 and 127. Arm goes from 200-850 (AX12 Units)
+            lower = 200
+            upper = 850
 
-        result = rescale(msg.get_value(), 0, 127, 
-                         0, (upper - lower) / 1023.0 * radians(300))
+            result = rescale(msg.get_value(), 0, 127, 
+                             0, (upper - lower) / 1023.0 * radians(300))
 
-        controllers['arm_base'].set_position(result)
+            controllers['arm_base'].set_position_buffered(result)
 
-    elif msg.get_type() == WRIST_GO:
-        #Value is between 0 and 127. Wrist goes from 173 - 820 (AX12 Units)
-        lower = 173
-        upper = 820
+        elif msg.get_type() == WRIST_GO:
+            #Value is between 0 and 127. Wrist goes from 173 - 820 (AX12 Units)
+            lower = 173
+            upper = 820
 
-        result = rescale(msg.get_value(), 0, 127, 
-                         0, (upper - lower) / 1023.0 * radians(300))
+            result = rescale(msg.get_value(), 0, 127, 
+                             0, (upper - lower) / 1023.0 * radians(300))
 
-        controllers['arm_wrist'].set_position(result)
+            controllers['arm_wrist'].set_position_buffered(result)
 
-    elif msg.get_type() == HAND_GO:
-        #Value is between 0 and 127. Hand goes from 150-870 (AX12 Units)
-        lower = 150 
-        upper = 870 
+        elif msg.get_type() == HAND_GO:
+            #Value is between 0 and 127. Hand goes from 150-870 (AX12 Units)
+            lower = 150 
+            upper = 870 
 
-        result = rescale(msg.get_value(), 0, 127, 
-                         0, (upper - lower) / 1023.0 * radians(300))
+            result = rescale(msg.get_value(), 0, 127, 
+                             0, (upper - lower) / 1023.0 * radians(300))
 
-        controllers['arm_hand'].set_position(result)
-    else:
-        print str(msg)
+            controllers['arm_hand'].set_position_buffered(result)
+        else:
+            print str(msg)
 
-def msg_received_test(msg):
-    print str(msg)
 
 def client_dc():
     #Stop all motors
@@ -117,7 +119,12 @@ if __name__ == '__main__':
         controllers['arm_wrist'] = PosController(man, 'arm_wrist', port_ns)
         controllers['arm_hand'] = PosController(man, 'arm_hand', port_ns)
 
-        rospy.spin()
+        choose_func = lambda q: return [] if q else [q[-1]]
+        while not rospy.is_shutdown():
+            time.sleep(0.05)
+
+            for name, cont in controllers:
+                cont.flush_cmd(choose=choose_func)
 
         listener.shutdown()
 
