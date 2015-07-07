@@ -1,4 +1,4 @@
-package org.intelligentrobots.emumini2;
+package org.oarkit.emumini2;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -8,7 +8,7 @@ import android.view.WindowManager;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import org.emumini2.R;
+import org.oarkit.R;
 
 
 public class ControlActivity extends Activity {
@@ -55,7 +55,7 @@ public class ControlActivity extends Activity {
         final SeekBar elbowSeek = (SeekBar) findViewById(R.id.elbowSeek);
 
         /* Connect to raspberry pi server */
-        targetIP = getIntent().getStringExtra("IP_ADDRESS");
+        // targetIP = getIntent().getStringExtra("IP_ADDRESS");
         try {
             talker = new Talker(targetIP);
         }

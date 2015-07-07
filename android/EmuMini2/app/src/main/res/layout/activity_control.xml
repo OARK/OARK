@@ -1,5 +1,5 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res/sep_17.emumini2"
+    xmlns:app="http://schemas.android.com/apk/res/org.intelligentrobots.emumini2"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:background="#003300"
     tools:context=".ControlActivity">
@@ -133,7 +133,7 @@
             <view
                 android:layout_width="180dp"
                 android:layout_height="180dp"
-                class="org.intelligentrobots.emumini2.AnalogStickView"
+                class="org.oarkit.emumini2.AnalogStickView"
                 android:id="@+id/left_analog_stick"
 
                 app:pointerColor="#CCFF1111"
@@ -148,7 +148,7 @@
             <view
                 android:layout_width="180dp"
                 android:layout_height="180dp"
-                class="org.intelligentrobots.emumini2.AnalogStickView"
+                class="org.oarkit.emumini2.AnalogStickView"
                 android:id="@+id/right_analog_stick"
 
                 app:pointerColor="#CCFF1111"

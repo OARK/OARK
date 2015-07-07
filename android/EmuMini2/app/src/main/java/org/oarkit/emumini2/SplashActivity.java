@@ -1,11 +1,11 @@
-package org.intelligentrobots.emumini2;
+package org.oarkit.emumini2;
 
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import org.emumini2.R;
+import org.oarkit.R;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,8 +26,8 @@ public class SplashActivity extends Activity {
         Timer startTimer = new Timer();
         startTimer.schedule(new TimerTask() {
             public void run() {
-                Intent intent = new Intent(SplashActivity.this, IPActivity.class);
-                startActivity(intent);
+                Intent activityStarter = new Intent(getBaseContext(), ControlActivity.class);
+                startActivity(activityStarter);
                 finish();
             }
         }, 2000 );

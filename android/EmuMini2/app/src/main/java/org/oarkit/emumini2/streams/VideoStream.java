@@ -1,4 +1,4 @@
-package org.intelligentrobots.emumini2.streams;
+package org.oarkit.emumini2.streams;
 
 import android.media.MediaCodec;
 import android.media.MediaFormat;
