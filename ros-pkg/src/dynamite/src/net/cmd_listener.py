@@ -159,6 +159,10 @@ class CmdListenerException(Exception):
     def __str__(self):
         return repr(self.value)
 
+
+
+
+#A small test harness for this file
 def print_msg(msg):
     print str(msg)
 

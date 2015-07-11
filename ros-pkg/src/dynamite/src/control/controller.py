@@ -69,6 +69,7 @@ class Controller:
         self.proxy = proxy
 
         self.hardware_init = False
+        self.cmd_mutex = threading.Lock()
         self.cmd_queue = []
 
         #Ensure that state gets updated
@@ -83,21 +84,23 @@ class Controller:
         raise NotImplementedError
 
     def command(self, value):
-        if self.hardware_init = True:
+        if self.hardware_init:
             self.proxy.command(self.controller_name, value)
         else:
             raise EnvironmentError('Controller in driver not initiated')
 
     #TODO: Add time 
     def queue_cmd(self, cmd):
-        self.cmd_queue.append(cmd)
+        with self.cmd_mutex:
+            self.cmd_queue.append(cmd)
 
     def flush_cmd(self, choose=lambda q: q):
-        to_flush = choose(self.cmd_queue)
-        for cmd in to_flush:
-            self.command(cmd)
+        with self.cmd_mutex:
+            to_flush = choose(self.cmd_queue)
+            for cmd in to_flush:
+                self.command(cmd)
 
-        self.queue = []
+            self.queue = []
 
     #Must be thread-safe
     def _state_callback(self, state):

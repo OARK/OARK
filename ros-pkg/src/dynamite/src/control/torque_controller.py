@@ -46,7 +46,7 @@ class TorqueController(controller.Controller):
     def set_torque_buffered(self, torque):
         """Buffers a command to set the torque of the controller.
         The command will not be executed until flush_cmd is called."""
-        self.torque_buffer(self._torque_to_cmd(torque))
+        self.queue_cmd(self._torque_to_cmd(torque))
 
     def stop(self):
         self.set_torque(self._torque_to_cmd(0))

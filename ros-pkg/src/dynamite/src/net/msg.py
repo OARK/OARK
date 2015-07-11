@@ -38,7 +38,6 @@ HAND_GO = 10
 
 class Msg:
     def __init__(self, net_data):
-        print len(net_data)
         (self.type,
          self.id, 
          self.val, 

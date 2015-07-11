@@ -27,8 +27,8 @@
 
 import rospy
 import sys
-import argparse
 import threading
+import time
 from math import radians
 
 import net.cmd_listener as net_listen
@@ -45,13 +45,13 @@ cmd_mutex = threading.Lock()
 def msg_received(msg):
     with cmd_mutex:
         if msg.get_type() == LEFT_GO:
-            controllers['fl'].set_torque(msg.get_value())
-            controllers['bl'].set_torque(msg.get_value())
+            controllers['fl'].set_torque_buffered(msg.get_value())
+            controllers['bl'].set_torque_buffered(msg.get_value())
 
         elif msg.get_type() == RIGHT_GO:
             #Value has to be negated because servos oriented differently
-            controllers['fr'].set_torque(-msg.get_value())
-            controllers['br'].set_torque(-msg.get_value())
+            controllers['fr'].set_torque_buffered(-msg.get_value())
+            controllers['br'].set_torque_buffered(-msg.get_value())
 
         elif msg.get_type() == ARM_GO:
             #Value is between 0 and 127. Arm goes from 200-850 (AX12 Units)
@@ -83,11 +83,13 @@ def msg_received(msg):
 
             controllers['arm_hand'].set_position_buffered(result)
         else:
+            print 'Unexpected message'
             print str(msg)
 
 
 def client_dc():
     #Stop all motors
+    print 'Client has disconnected!'
     for cont in controllers:
         controllers[cont].command(0)
 
@@ -119,15 +121,17 @@ if __name__ == '__main__':
         controllers['arm_wrist'] = PosController(man, 'arm_wrist', port_ns)
         controllers['arm_hand'] = PosController(man, 'arm_hand', port_ns)
 
-        choose_func = lambda q: return [] if q else [q[-1]]
+        choose_func = lambda q: ([q[-1]] if q else [])
         while not rospy.is_shutdown():
             time.sleep(0.05)
 
-            for name, cont in controllers:
+            for name, cont in controllers.items():
                 cont.flush_cmd(choose=choose_func)
 
         listener.shutdown()
 
     except rospy.ROSInterruptException, r:
+        print str(r)
+        print 'ROSInterruptException occurred. Exiting...'
         pass
 
