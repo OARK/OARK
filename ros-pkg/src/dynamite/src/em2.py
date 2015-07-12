@@ -29,6 +29,7 @@ import rospy
 import sys
 import threading
 import time
+import signal
 from math import radians
 
 import net.cmd_listener as net_listen
@@ -87,15 +88,28 @@ def msg_received(msg):
             print str(msg)
 
 
-def client_dc():
+def client_dc(cmd_listener):
     #Stop all motors
     print 'Client has disconnected!'
+    print 'Restarting listener'
     for cont in controllers:
         controllers[cont].command(0)
 
+    cmd_listener.start_listen()
+
+
+#Handles interrupts by exiting. Shuts down the network
+#connection
+def sigint_handler(signal, frame):
+    print 'Exiting'
+    sys.exit(0)
 
 
 if __name__ == '__main__':
+    #Register handlers
+    signal.signal(signal.SIGINT, sigint_handler)
+
+
     port_ns = 'pi_out_port'
     manager_ns = 'dxl_manager'
 

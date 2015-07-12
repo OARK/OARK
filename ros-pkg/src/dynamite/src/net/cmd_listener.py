@@ -71,14 +71,11 @@ class CmdListener:
         except Exception, e:
             raise NetworkException("Could not initialise socket")
 
-        try:
-            #Create thread to frequently poll socket
-            self.run_listener = True
-            self.listener_name = name
-            self.listener_thread = threading.Thread(target=self.listen, name=self.listener_name)
-            self.listener_thread.start()
-        except threading.ThreadError, t:
-            raise CmdListenerException("Could not start new listener thread")
+        #Begin listening for new connections on the socket
+        self.run_listener = False
+        self.listener_name = name
+        self.start_listen()
+
 
     def __del__(self):
         self.shutdown()
@@ -87,6 +84,20 @@ class CmdListener:
         self.run_listener = False
         self.listener_thread.join()
         self.sock_fd.close()
+
+
+    #This function will begin listening for connections/data again only if
+    #it is not already listening
+    def start_listen(self):
+        if self.run_listener == False:
+            try:
+                #Create thread to frequently poll socket
+                self.run_listener = True
+                self.listener_thread = threading.Thread(target=self.listen, name=self.listener_name)
+                self.listener_thread.start()
+            except threading.ThreadError, t:
+                raise CmdListenerException("Could not start new listener thread")
+
 
     def listen(self):
         #Wait for connection
@@ -102,7 +113,7 @@ class CmdListener:
                 self.run_listener = False
                 #Inform observers
                 for callback in self.dc_listeners:
-                    callback()
+                    callback(self)
 
             else:
                 msg_len = ord(first_byte)
@@ -129,6 +140,8 @@ class CmdListener:
         except:
             pass
 
+    #dc listeners are passed this instance so that they can restart listening
+    #if they wish
     def add_dc_listener(self, callback):
         if callback not in self.dc_listeners:
             self.dc_listeners.append(callback)
