@@ -16,151 +16,105 @@
         android:layout_height="match_parent"
         android:id="@+id/robotCameraView" />
 
-    <TableLayout android:layout_width="match_parent" android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
-        android:layout_gravity="left|center_vertical"
-        android:id="@+id/tableLayout">
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-            <Space
-                android:layout_width="20px"
-                android:layout_height="20px"
-                android:layout_column="3" />
-        </TableRow>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Hand"
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:id="@+id/handText"
+            android:layout_marginTop="@dimen/abc_text_size_medium_material"
+            android:layout_centerHorizontal="true" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Hand"
-                android:id="@+id/handText"
-                android:layout_column="3" />
-        </TableRow>
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/handSeek"
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_below="@+id/handText"
+            android:alpha="0.5" />
 
-            <SeekBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/handSeek"
-                android:layout_column="3"
-                android:layout_span="2" />
-        </TableRow>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Wrist"
+            android:id="@+id/wristText"
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_below="@+id/handSeek"
+            android:layout_marginTop="@dimen/abc_text_size_medium_material"
+            android:layout_centerHorizontal="true" />
 
-            <Space
-                android:layout_width="20px"
-                android:layout_height="20px"
-                android:layout_column="3" />
-        </TableRow>
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/wristSeek"
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_below="@+id/wristText"
+            android:alpha="0.5" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Wrist"
-                android:id="@+id/wristText"
-                android:layout_column="3" />
-        </TableRow>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Elbow"
+            android:id="@+id/elbowText"
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_below="@+id/wristSeek"
+            android:layout_marginTop="@dimen/abc_text_size_medium_material"
+            android:layout_centerHorizontal="true" />
 
-            <SeekBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/wristSeek"
-                android:layout_column="3"
-                android:layout_span="2" />
-        </TableRow>
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/elbowSeek"
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_below="@+id/elbowText"
+            android:alpha="0.5" />
 
-            <Space
-                android:layout_width="20px"
-                android:layout_height="20px"
-                android:layout_column="3" />
-        </TableRow>
+        <view
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            class="org.oarkit.emumini2.AnalogStickView"
+            android:id="@+id/left_analog_stick"
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            app:pointerColor="#CCFF1111"
+            app:backColor="#000000"
+            app:transparent="true"
+            app:pointerRad="100.0"
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="Elbow"
-                android:id="@+id/elbowText"
-                android:layout_column="3" />
-        </TableRow>
+            app:effects="true"
+            app:axes="Y"
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="@dimen/activity_vertical_margin"
+            android:layout_marginBottom="@dimen/activity_horizontal_margin" />
 
-            <SeekBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/elbowSeek"
-                android:layout_column="3"
-                android:layout_span="2" />
-        </TableRow>
+        <view
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            class="org.oarkit.emumini2.AnalogStickView"
+            android:id="@+id/right_analog_stick"
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            app:pointerColor="#CCFF1111"
+            app:backColor="#000000"
+            app:transparent="true"
+            app:pointerRad="100.0"
 
-            <view
-                android:layout_width="180dp"
-                android:layout_height="180dp"
-                class="org.oarkit.emumini2.AnalogStickView"
-                android:id="@+id/left_analog_stick"
+            app:effects="true"
+            app:axes="Y"
 
-                app:pointerColor="#CCFF1111"
-                app:backColor="#000000"
-                app:transparent="true"
-                app:pointerRad="100.0"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="@dimen/activity_vertical_margin"
+            android:layout_marginBottom="@dimen/activity_horizontal_margin" />
 
-                app:effects="true"
-                app:axes="Y"
-                android:layout_column="3" />
-
-            <view
-                android:layout_width="180dp"
-                android:layout_height="180dp"
-                class="org.oarkit.emumini2.AnalogStickView"
-                android:id="@+id/right_analog_stick"
-
-                app:pointerColor="#CCFF1111"
-                app:backColor="#000000"
-                app:transparent="true"
-                app:pointerRad="100.0"
-
-                app:effects="true"
-                app:axes="Y"
-                android:layout_column="0" />
-        </TableRow>
-
-    </TableLayout>
+    </RelativeLayout>
 
 </FrameLayout>
