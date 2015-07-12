@@ -87,8 +87,10 @@ def msg_received(msg):
             print 'Unexpected message'
             print str(msg)
 
+disconnected = False
 
 def client_dc(cmd_listener):
+    global disconnected
     #Stop all motors
     print 'Client has disconnected!'
     print 'Restarting listener'
@@ -96,6 +98,7 @@ def client_dc(cmd_listener):
         controllers[cont].command(0)
 
     cmd_listener.start_listen()
+    disconnected = True
 
 
 #Handles interrupts by exiting. Shuts down the network
@@ -141,6 +144,15 @@ if __name__ == '__main__':
 
             for name, cont in controllers.items():
                 cont.flush_cmd(choose=choose_func)
+
+            if disconnected:
+                try:
+                    listener = net_listen.CmdListener(interfaces)
+                    listener.add_data_listener(msg_received)
+                    listener.add_dc_listener(client_dc)
+                    disconnected = False
+                except Exception, e:
+                    print 'Could not reconnect: ' + str(e)
 
         listener.shutdown()
 

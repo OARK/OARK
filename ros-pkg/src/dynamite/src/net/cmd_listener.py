@@ -71,10 +71,14 @@ class CmdListener:
         except Exception, e:
             raise NetworkException("Could not initialise socket")
 
-        #Begin listening for new connections on the socket
-        self.run_listener = False
-        self.listener_name = name
-        self.start_listen()
+        try:
+            #Create thread to frequently poll socket
+            self.run_listener = True
+            self.listener_name = name
+            self.listener_thread = threading.Thread(target=self.listen, name=self.listener_name)
+            self.listener_thread.start()
+        except threading.ThreadError, t:
+            raise CmdListenerException("Could not start new listener thread")
 
 
     def __del__(self):
@@ -84,19 +88,6 @@ class CmdListener:
         self.run_listener = False
         self.listener_thread.join()
         self.sock_fd.close()
-
-
-    #This function will begin listening for connections/data again only if
-    #it is not already listening
-    def start_listen(self):
-        if self.run_listener == False:
-            try:
-                #Create thread to frequently poll socket
-                self.run_listener = True
-                self.listener_thread = threading.Thread(target=self.listen, name=self.listener_name)
-                self.listener_thread.start()
-            except threading.ThreadError, t:
-                raise CmdListenerException("Could not start new listener thread")
 
 
     def listen(self):
