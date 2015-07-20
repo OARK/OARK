@@ -45,14 +45,17 @@ cmd_mutex = threading.Lock()
 
 def msg_received(msg):
     with cmd_mutex:
+        scale_func = lambda val: val * 0.5
         if msg.get_type() == LEFT_GO:
-            controllers['fl'].set_torque_buffered(msg.get_value())
-            controllers['bl'].set_torque_buffered(msg.get_value())
+            speed = scale_func(msg.get_value())
+            controllers['fl'].set_torque_buffered(speed)
+            controllers['bl'].set_torque_buffered(speed)
 
         elif msg.get_type() == RIGHT_GO:
             #Value has to be negated because servos oriented differently
-            controllers['fr'].set_torque_buffered(-msg.get_value())
-            controllers['br'].set_torque_buffered(-msg.get_value())
+            speed = -scale_func(msg.get_value())
+            controllers['fr'].set_torque_buffered(speed)
+            controllers['br'].set_torque_buffered(speed)
 
         elif msg.get_type() == ARM_GO:
             #Value is between 0 and 127. Arm goes from 200-850 (AX12 Units)
