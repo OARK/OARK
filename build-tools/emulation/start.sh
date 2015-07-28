@@ -80,11 +80,8 @@ else
                     -net user,hostfwd=tcp::${SSH_PORT}-:22 \
                     -net nic \
                     -vnc :5 \
-                    -serial stdio
-
-                    # -daemonize \
-
-                    # -net nic 2>/dev/null
+                    -daemonize \
+                    -net nic 2>/dev/null
 
     echo -e "${COLOUR_SUCCESS}Emulator started.${NC}"
 fi
