@@ -9,18 +9,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Get the starting sectors of each partition in the image.
-function getSectors()
-{
-    local result="$(file -kb $1 | xargs -n1 -d',' | awk '/startsector/ {print $2}')"
-    echo $result
-}
-
-# The mount command uses byte offsets, the default sector size is 512.
-function getByteOffset()
-{
-    echo $(expr $1 \* 512)
-}
+# Include the common functions.
+source ./disk_utils.sh
 
 # Displays the help text
 help() {
@@ -30,29 +20,37 @@ help() {
     echo "    mount_rpi_image.sh help - This help text."
 }
 
-if [[ $(id -u) != 0 ]]; then
-    echo "Must be root."
-elif [[ ! -d $2 ]]; then
-    echo "Mount point $2 does not exist."
-else
-    if [[ -f $1 ]]; then
-        boot_sector_test="$(file -kb $1 | awk -F ';' '{print $1}')"
-        if [[ "${boot_sector_test}" == "DOS/MBR boot sector" ]] ||
-           [[ "${boot_sector_test}" == "x86 boot sector" ]]; then
-
-            IFS=' ' read -a sectorSizeArray <<< "$(getSectors $1)"
-
-            if [[ "${#sectorSizeArray[@]}" = 2 ]]; then
-                # We only care about the second parition that holds the OS.
-                mount -t ext4 -o loop,offset=$(getByteOffset ${sectorSizeArray[1]}) $1 $2
-            else
-                echo "Not exactly two partitions, is it a standard Pi image?"
-            fi
-        else
-            echo "File is ${boot_sector_test}"
-            echo "Doesn't start with DOS/MBR boot sector, not Raspbian image?"
-        fi
+main() {
+  if [ $# -eq 0 ]; then
+    help
+  else
+    if [[ $(id -u) != 0 ]]; then
+      echo "Must be root." >&2
+    elif [[ ! -d $2 ]]; then
+      echo "Mount point $2 does not exist." >&2
     else
-        echo "$1 isn't a file."
+      if [[ -f $1 ]]; then
+        if disk_utils::is_disk_image $1; then
+          IFS=' ' read -a sectorSizeArray <<< \
+             "$(disk_utils::get_starting_sectors $1)"
+
+          if [[ "${#sectorSizeArray[@]}" = 2 ]]; then
+            # We only care about the second parition that holds the
+            # OS.
+            mount -t ext4 -o loop,offset=$(disk_utils::get_byte_offset \
+                                             ${sectorSizeArray[1]}) $1 $2
+          else
+            echo "Not exactly two partitions, is it a standard Pi image?" &>2
+          fi
+        else
+          echo "File is ${boot_sector_test}" &>2
+          echo "Doesn't start with DOS/MBR boot sector, not Raspbian image?" &>2
+        fi
+      else
+        echo "$1 isn't a file." &>2
+      fi
     fi
-fi
+  fi
+}
+
+main "$@"

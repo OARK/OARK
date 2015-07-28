@@ -9,10 +9,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Colour codes
-COLOUR_SUCCESS='\033[0;32m'
-COLOUR_PROGRESS='\033[0;33m'
-NC='\033[0m' # No Color
+source ../common-functions.sh
 
 # Local port for SSH access into the emulated system.
 SSH_PORT=10022
@@ -33,15 +30,15 @@ getScriptDirectory() {
     done
     local DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-    echo $DIR
+    echo "$DIR"
 }
 
 # Will check to see if the kernel file exists, if it doesn't, it will try to
 # build the kernel.
 buildKernel() {
-    if [[ ! -f $(getScriptDirectory)/../kernel/build/qemu/qemu-kernel ]]; then
+    if [[ ! -f $(common::get_script_directory)/kernel/build/qemu/qemu-kernel ]]; then
         echo -e "${COLOUR_PROGRESS}Building QEMU Kernel${NC}"
-        $(getScriptDirectory)/../kernel/setup.sh build
+        "$(common::get_script_directory)/kernel/setup.sh" build
     fi
 }
 
@@ -75,15 +72,19 @@ else
     # audio devices under the Vagrant guest. This means to causes what
     # looks to be serious errors, but everything is fine.
     # If there are issues starting the emulator, remove the redirection.
-    qemu-system-arm -machine versatilepb \
-                    -cpu arm1176 -m 256 -no-reboot \
-                    -daemonize \
-                    -vnc :5 \
-                    -kernel $(getScriptDirectory)/../kernel/build/qemu/qemu-kernel \
-                    -append "root=/dev/sda2 panic=1 rw" \
-                    -hda $1 \
+    qemu-system-arm -machine vexpress-a9 \
+                    -cpu cortex-a9 -m 1024 -smp 4\
+                    -kernel "$(common::get_script_directory)/kernel/build/qemu/qemu-kernel" \
+                    -append "root=/dev/mmcblk0p2 panic=1 rw console=ttyAMA0" \
+                    -sd "$1" \
                     -net user,hostfwd=tcp::${SSH_PORT}-:22 \
-                    -net nic 2>/dev/null
+                    -net nic \
+                    -vnc :5 \
+                    -serial stdio
+
+                    # -daemonize \
+
+                    # -net nic 2>/dev/null
 
     echo -e "${COLOUR_SUCCESS}Emulator started.${NC}"
 fi
