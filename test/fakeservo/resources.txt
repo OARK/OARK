@@ -1,0 +1,18 @@
+The following are *very* useful resources used in the creation of this
+'emulator':
+
+AX-12 Memory Summary
+http://support.robotis.com/en/product/dynamixel/ax_series/dxl_ax_actuator.htm
+
+AX-12 Manual
+http://www.agaverobotics.com/products/servos/robotis/ax12/docs/AX-12.pdf
+
+AX-12 Instruction/Status Packet Reference
+http://support.robotis.com/en/product/dynamixel/communication/dxl_packet.htm
+
+AX-12 Instruction Reference 
+http://support.robotis.com/en/product/dynamixel/communication/dxl_instruction.htm
+
+
+Pseudo-terminals and fake serial ports:
+http://stackoverflow.com/questions/2500420/fake-serial-communication-under-linux
