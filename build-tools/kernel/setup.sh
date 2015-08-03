@@ -12,105 +12,106 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Colour codes
-COLOUR_SUCCESS='\033[0;32m'
-COLOUR_PROGRESS='\033[0;33m'
-NC='\033[0m' # No Color
+source ../common-functions.sh
 
-# I want to be sure that operations are done relative to this scripts directory,
-# not from current directory someone may have when running it.
+script_directory="$(common::get_script_directory)/kernel"
+
+toolchain_directory() {
+  echo "$script_directory/toolchain"
+}
+
+kernel_directory() {
+  echo "$script_directory/linux"
+}
+
+build_directory="$script_directory/build/qemu/linux"
+
+# Clone the given Git repo if the directory doesn't exist, otherwise
+# try to update to the latest version. Will not consider if the repo
+# has been modified, merging it needed, etc.
 #
-# http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
-getScriptDirectory() {
-    local SOURCE="${BASH_SOURCE[0]}"
-    while [ -h "$SOURCE" ]; do
-        # Resolve $SOURCE until the file is no longer a symlink
-        local DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-        local SOURCE="$(readlink "$SOURCE")"
-         # If $SOURCE was a relative symlink, we need to resolve it relative to
-         # the path where the symlink file was located
-        [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-    done
-    local DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-
-    echo $DIR
-}
-
-toolChainDirectory() {
-    echo $(getScriptDirectory)/toolchain
-}
-
-kernelDirectory() {
-    echo $(getScriptDirectory)/linux
-}
-
-# Clone the given Git repo if the directory doesn't exist, otherwise try to
-# update to the latest version.
-# Will not consider if the repo has been modified, merging it needed, etc.
-#
-# A hard reset is performed, because to apply the kernel patch, we're assuming
-# unmodified sources. We could probably just ignore the error raised when
-# patching.
+# A hard reset is performed, because to apply the kernel patch, we're
+# assuming unmodified sources. We could probably just ignore the error
+# raised when patching.
 
 # $1 - Directory to repo.
 # $2 - URL to upstream repo.
 # $3 - Misc options when pulling updates.
 pullGitRepo() {
-    if [[ ! -e $1 ]]; then
-        if [ $# -eq 3 ]; then
-            git clone $3 $2 $1
-        else
-            git clone $2 $1
-        fi
+  if [[ ! -e $1 ]]; then
+    if [ $# -eq 3 ]; then
+      git clone "$3" "$2" "$1"
     else
-        git -C $1 pull
-        git -C $1 reset --hard
+      git clone "$2" "$1"
     fi
+  else
+    git -C "$1" pull
+    git -C "$1" reset --hard
+  fi
 }
 
 # Be sure we have the cross compilation toolchain.
 # This assumes no modification to repo from upstream.
 ensureToolchain() {
-    echo -e "${COLOUR_PROGRESS}Fetching toolchain...${NC}"
-    pullGitRepo $(toolChainDirectory) https://github.com/raspberrypi/tools
+  echo -e "${COLOUR_PROGRESS}Fetching toolchain...${NC}"
+  pullGitRepo "$(toolchain_directory)" https://github.com/raspberrypi/tools
 }
 
-ensureKernel() {
-    echo -e "${COLOUR_PROGRESS}Fetching kernel source...${NC}"
-    pullGitRepo $(kernelDirectory) https://github.com/raspberrypi/linux --depth=1
+# When called, will pull the latest Raspberry Pi kernel.
+ensurePiKernel() {
+  echo -e "${COLOUR_PROGRESS}Fetching kernel source...${NC}"
+  pullGitRepo "$(kernel_directory)" https://github.com/raspberrypi/linux --depth=1
 }
 
-# Patch kernel
+# For QEMU, we use the Vexpress machine for emulation. It seems that
+# compilation for this machine is broken in the Raspberry Pi Linux
+# kernel sources. So get the normal Linux source.
 #
-# QEMU doesn't support the Raspberry Pi as a system, so instead we use the
-# versatile system. However, the kernel config options don't give us the
-# necessary options, this patch enables them.
-patchKernel() {
-    echo -e "${COLOUR_PROGRESS}Patching kernel...${NC}"
-    patch -p1 -d $(kernelDirectory) < $(getScriptDirectory)/linux-arm-qemu.patch
+# Expects the kernel version number to be passed in for which kernel
+# to download.
+ensureVanillaKernel() {
+  echo -e "${COLOUR_PROGRESS}Removing old kernel sources...${NC}"
+  rm -fr "$(kernel_directory)"
+  echo -e "${COLOUR_PROGRESS}Fetching vanilla kernel source...${NC}"
+  wget "http://www.kernel.org/pub/linux/kernel/v3.0/linux-$1.tar.xz" -c \
+       -P "$script_directory"
+  tar xf "$script_directory/linux-$1.tar.xz" \
+      -C "$script_directory"
+  mv "$script_directory/linux-$1" "$script_directory/linux"
+}
+
+# Setup cross compile path
+setup_cross_compile_path() {
+  export PATH=$(toolchain_directory)/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin:$PATH
+}
+
+# Setup the kernel build process
+setup_kernel_build() {
+  cd "$(kernel_directory)"
+  make O="$build_directory" ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- \
+       vexpress_defconfig
 }
 
 # Build the QEMU kernel
 buildQEMUKernel() {
-    echo -e "${COLOUR_PROGRESS}Building kernel...${NC}"
-    export PATH=$(toolChainDirectory)/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin:$PATH
+  echo -e "${COLOUR_PROGRESS}Building kernel...${NC}"
 
-    local oldDirectory=$(getScriptDirectory)
-    local buildDirectory=$(getScriptDirectory)/build/qemu/linux
+  cd "$build_directory"
+  make "-j$(nproc)" ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
 
-    cd $(kernelDirectory)
+  cp arch/arm/boot/zImage ../qemu-kernel
 
-    make O=$buildDirectory ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- versatile_defconfig
+  make "-j$(nproc)" ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- \
+       INSTALL_MOD_PATH=../modules modules_install
+}
 
-    cp $oldDirectory/qemu-kernel.config $buildDirectory/.config
-
-    cd $buildDirectory
-
-    make -j`nproc` ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
-
-    cp arch/arm/boot/zImage ../qemu-kernel
-
-    make -j`nproc` ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=../modules modules_install
+# Turn on the settings we require in the kernel config.
+#
+# $1 - The config file to patch.
+#
+# Expects to be in the directory of the sed file.
+patchKernelConfig() {
+  sed -i -rf "$script_directory/vexpress-config.sed" "$1"
 }
 
 # Displays the help text.
@@ -124,17 +125,18 @@ help() {
 
 # No parameters to script, assume getting build tools only.
 if [ $# -eq 0 ]; then
-    ensureToolchain
-    ensureKernel
+  ensureToolchain
+  ensureVanillaKernel 3.18.16
 elif [ "$1" = "build" ]; then
+  ensureToolchain
+  ensureVanillaKernel 3.18.16
 
-    ensureToolchain
-    ensureKernel
+  setup_cross_compile_path
+  setup_kernel_build
 
-    patchKernel
-    buildQEMUKernel
-
-    echo -e "${COLOUR_SUCCESS}Kernel built successfully.${NC}"
+  patchKernelConfig "$build_directory/.config"
+  buildQEMUKernel
+  echo -e "${COLOUR_SUCCESS}Kernel built successfully.${NC}"
 else
-    help
+  help
 fi

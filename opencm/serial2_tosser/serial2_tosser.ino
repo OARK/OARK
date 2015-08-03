@@ -38,6 +38,9 @@ void setup()
   pinMode(BOARD_LED_PIN, OUTPUT);
 }
 
+byte aByte=0;
+uint8 aUint8;
+
 void loop() 
 {    
   if (Serial2.available())
