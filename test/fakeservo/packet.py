@@ -30,8 +30,10 @@ class Packet(object):
         are supplied. The checksum is very similar between packets,
         it just includes different fields.
         """
+        print 'Fields are: ', self._get_fields()
+        print (~(sum(self._get_fields()) - 1) % 0xFF)
 
-        return (~sum(self._get_fields()) % 0xFF)
+        return (~(sum(self._get_fields()) - 1) % 0xFF)
 
 
     #Creates a list-of-bytes representation of the packet
@@ -48,7 +50,7 @@ class Packet(object):
 
 
 
-class InstructionPacket(Packet):
+class InstPacket(Packet):
     """
     Represents a standard AX12 instruction packet. The format
     of the packet is as follows
@@ -129,7 +131,7 @@ class StatusPacket(Packet):
         if length is not None:
             self.length = length
         else:
-            self.length = len(params) + 2
+            self.length = len(self.params) + 2
 
         if checksum is not None:
             self.checksum = checksum
