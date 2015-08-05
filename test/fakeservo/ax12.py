@@ -11,6 +11,8 @@
 # noted in the code.
 #
 # Written by Tim Peskett
+#
+# TODO: Ability to add errors to status packets
 
 import time
 
@@ -44,6 +46,9 @@ class MemByte(object):
 
         self.value = self.default
         self.is_resolved = (self.ref is not None)
+
+    def is_writable(self):
+        return 'W' in self.access
 
 
 
@@ -116,6 +121,21 @@ class AX12(object):
         self.dyn_id = dyn_id
         #Buffer used to store data when issued a regwrite command
         self.regwrite_buffer = None
+
+
+    def get_memory(self):
+        """Returns an iterable containing all of the values of memory
+        in order.
+        """
+        return tuple(map(lambda m: m.value, self.mem))
+
+    def set_memory(self, new_mem):
+        """Sets the value of the first len(new_mem) bytes of memory using the
+        bytes of new_mem.
+        """
+        for val, mem_byte in new_mem, self.mem:
+            mem_byte.value = val
+
 
 
     def receive(self, packet):
@@ -350,12 +370,95 @@ class AX12Error(Exception):
 
 
 
+def packet_to_string(packet):
+    """Makes a packet into a nicely formatted
+       hexadecimal string
+       It is expected that this function will only be used for
+       debugging.
+    """
+    if packet is None:
+        return 'No packet'
+    else:
+        return ", ".join(map(hex, packet))
+
+
+
 #Test Case
+#These tests are pulled directly from the AX12 manual. Some of the results
+#may not match up because of different values in the AX12's memory at running
+#time.
 if __name__ == '__main__':
     ax12 = AX12(1, 'MyMotor')
 
-    byte_string = raw_input('Enter raw packet string (comma separated hex values e.g 0xFF,0xFF,...): ')
+
+    print '\n\nTESTING PING'
+    print 'Pinging motor 1'
+    packet = [0xFF,0xFF,0X01,0x02,0x01,0xFB]
+    expected_response = [0xFF,0xFF,0x01,0x02,0x00,0xFC]
+    print 'Sending instruction packet: ', packet_to_string(packet)
+    response = ax12.receive(packet)
+    print 'Received: ', packet_to_string(response)
+    if response == expected_response:
+        print 'Test Passed! Response is as expected'
+    else:
+        print 'Test failed. Response does not match ', packet_to_string(expected_response)
+
+
+    print '\n\nTESTING READ'
+    print 'Reading one byte from address 0x2B of motor 1'
+    old_byte = ax12.get_byte(0x2B)
+    ax12.set_byte_force(0x2B, 0x20)
+    packet = [0xFF,0xFF,0X01,0x04,0x02,0x2B,0x01,0xCC]
+    expected_response = [0xFF,0xFF,0x01,0x03,0x00,0x20,0xDB]
+    print 'Sending instruction packet: ', packet_to_string(packet)
+    response = ax12.receive(packet)
+    print 'Received: ', packet_to_string(response)
+    if response == expected_response:
+        print 'Test Passed! Response is as expected'
+    else:
+        print 'Test failed. Response does not match ', packet_to_string(expected_response)
+    ax12.set_byte_force(0x2B, old_byte)
+
+
+    print '\n\nTESTING WRITE'
+    print 'Writing 1 to address 3 of the control table'
+    old_byte = ax12.get_byte(0x03)
+    packet = [0xFF,0xFF,0xFE,0x04,0x03,0x03,0x01,0xF6]
+    print 'Sending instruction packet: ', packet_to_string(packet)
+    response = ax12.receive(packet)
+    print 'Received: ', packet_to_string(response)
+    if ax12.get_byte(0x03) == 0x01:
+        print 'Test Passed! Value in memory is correct'
+    else:
+        print 'Test failed. Value in memory is ', ax12.get_byte(0x03)
+    ax12.set_byte_force(0x03, old_byte)
+
+
+    print '\n\nTESTING RESET'
+    print 'Resetting motor 1'
+    packet = [0xFF,0xFF,0x01,0x02,0x01,0xFB]
+    expected_response = [0xFF,0xFF,0x01,0x02,0x00,0xFC]
+    print 'Sending instruction packet: ', packet_to_string(packet)
+    response = ax12.receive(packet)
+    print 'Received: ', packet_to_string(response)
+
+    #Test status packet
+    if response == expected_response:
+        print 'Test Passed! Correct response received'
+    else:
+        print 'Test Failed! Incorrect response ', packet_to_string(expected_response)
+
+    #Test memory
+    new_ax = AX12(2, 'NewMotor')
+    if new_ax.get_memory() == ax12.get_memory():
+        print 'Test Passed! Memory is the same for reset ax12 and factory ax12'
+    else:
+        print 'Test failed. Both memories are printed below'
+        print 'Reset ax12:', ax12.get_memory()
+        print 'New   ax12:', new_ax.get_memory()
+
+
+    byte_string = raw_input('\n\nEnter raw packet string (comma separated hex values e.g 0xFF,0xFF,...): ')
     bytes = map(lambda byte: int(byte, 16), byte_string.split(','))
     print 'Using bytes: ', bytes
-
     print 'Response: ', ax12.receive(bytes)

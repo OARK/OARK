@@ -30,10 +30,8 @@ class Packet(object):
         are supplied. The checksum is very similar between packets,
         it just includes different fields.
         """
-        print 'Fields are: ', self._get_fields()
-        print (~(sum(self._get_fields()) - 1) % 0xFF)
 
-        return (~(sum(self._get_fields()) - 1) % 0xFF)
+        return 0xFF - sum(self._get_fields()) % 0x100
 
 
     #Creates a list-of-bytes representation of the packet
