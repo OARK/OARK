@@ -1,0 +1,11 @@
+---
+# Pulls in gstreamer for the video streaming.
+- hosts: pi_emu
+  sudo: yes
+  tasks:
+    - name: Pull in necessary gstreamer modules
+      apt: name=gstreamer1.0-tools,gstreamer1.0-omx state=present
+    - name: Gstreamer good (for v4l2src)
+      apt: name=gstreamer1.0-plugins-good state=present
+    - name: Gstreamer bad (for h264parse)
+      apt: name=gstreamer1.0-plugins-bad state=present
