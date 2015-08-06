@@ -75,7 +75,7 @@ else
     qemu-system-arm -machine vexpress-a9 \
                     -cpu cortex-a9 -m 1024 -smp 4\
                     -kernel "$(common::get_script_directory)/kernel/build/qemu/qemu-kernel" \
-                    -append "root=/dev/mmcblk0p2 panic=1 rw console=ttyAMA0" \
+                    -append "root=/dev/mmcblk0p2 panic=1 rw" \
                     -sd "$1" \
                     -net user,hostfwd=tcp::${SSH_PORT}-:22 \
                     -net nic \

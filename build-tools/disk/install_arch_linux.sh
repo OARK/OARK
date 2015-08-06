@@ -31,19 +31,19 @@ mount_system() {
   echo -e "${COLOUR_PROGRESS}Mounting system partition...${NC}"
   mkdir -p "$1"
   mount -t ext4 -o loop,offset=$(disk_utils::get_byte_offset \
-                                   ${sector_size_array[1]}) $2 $1
+                                        ${sector_size_array[1]}) $2 $1
   echo -e "${COLOUR_SUCCESS}System partition mounted.${NC}"
 
   echo -e "${COLOUR_PROGRESS}Mounting boot partition...${NC}"
   # Mount the boot partition
   mkdir -p "$1/boot"
   mount -t vfat -o loop,offset=$(disk_utils::get_byte_offset \
-                                   ${sector_size_array[0]}) $2 $1/boot
+                                        ${sector_size_array[0]}) $2 $1/boot
   echo -e "${COLOUR_SUCCESS}Boot partition mounted.${NC}"
 
   # Download the latest Arch
   # wget http://archlinuxarm.org/os/ArchLinuxARM-rpi-2-latest.tar.gz -c
-  sudo tar zxf ArchLinuxARM-rpi-2-latest.tar.gz -C "$1"
+  tar zxf ArchLinuxARM-rpi-2-latest.tar.gz -C "$1"
 
   # Bootstrap Arch so it works under QEMU, changes will have to be undone so it will work under a normal Raspberry Pi.
   # Comment out the boot partition, it won't boot otherwise.
@@ -52,12 +52,17 @@ mount_system() {
   cp "$1/etc/netctl/examples/ethernet-dhcp" "$1/etc/netctl/"
   # Set up the systemd links and netctl links.
   cd "$1/etc/systemd/system/multi-user.target.wants/"
-  # ln -s ../../../../usr/lib/systemd/system/netctl.service
-  ln -s '../../../../etc/systemd/system/netctl@ethernet\x2ddhcp.service'
+  ln -s "./../../../etc/systemd/system/netctl@ethernet\x2ddhcp.service"
+
   # Copy across SSH keys.
+  cd ../../../../..
+
+  mkdir -p "$1/root/.ssh"
+  chmod 700 "$1/root/.ssh"
+  cp "id_rsa.pub" "$1/root/.ssh/authorized_keys"
 
   # Unmount
-  sudo umount "$1/boot" "$1"
+  umount "$1/boot" "$1"
 }
 
 main() {
