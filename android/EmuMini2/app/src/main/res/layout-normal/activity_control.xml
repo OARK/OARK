@@ -1,8 +1,14 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#003300"
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res/org.intelligentrobots.emumini2"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:background="#003300"
-    tools:context=".ControlActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".emumini2.ControlActivity">
+    >
 
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
@@ -28,7 +34,6 @@
             android:text="Hand"
 
             android:id="@+id/handText"
-            android:layout_marginTop="@dimen/abc_text_size_medium_material"
             android:layout_centerHorizontal="true" />
 
         <SeekBar
@@ -47,7 +52,6 @@
             android:id="@+id/wristText"
 
             android:layout_below="@+id/handSeek"
-            android:layout_marginTop="@dimen/abc_text_size_medium_material"
             android:layout_centerHorizontal="true" />
 
         <SeekBar
@@ -66,7 +70,6 @@
             android:id="@+id/elbowText"
 
             android:layout_below="@+id/wristSeek"
-            android:layout_marginTop="@dimen/abc_text_size_medium_material"
             android:layout_centerHorizontal="true" />
 
         <SeekBar
@@ -78,43 +81,38 @@
             android:alpha="0.5" />
 
         <view
-            android:layout_width="180dp"
-            android:layout_height="180dp"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             class="org.oarkit.emumini2.AnalogStickView"
             android:id="@+id/left_analog_stick"
 
             app:pointerColor="#CCFF1111"
             app:backColor="#000000"
             app:transparent="true"
-            app:pointerRad="100.0"
+            app:pointerRad="80.0"
 
             app:effects="true"
             app:axes="Y"
 
             android:layout_alignParentLeft="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginLeft="@dimen/activity_vertical_margin"
-            android:layout_marginBottom="@dimen/activity_horizontal_margin" />
+            android:layout_alignParentBottom="true" />
 
         <view
-            android:layout_width="180dp"
-            android:layout_height="180dp"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             class="org.oarkit.emumini2.AnalogStickView"
             android:id="@+id/right_analog_stick"
 
             app:pointerColor="#CCFF1111"
             app:backColor="#000000"
             app:transparent="true"
-            app:pointerRad="100.0"
+            app:pointerRad="80.0"
 
             app:effects="true"
             app:axes="Y"
 
             android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginRight="@dimen/activity_vertical_margin"
-            android:layout_marginBottom="@dimen/activity_horizontal_margin" />
+            android:layout_alignParentBottom="true" />
 
     </RelativeLayout>
-
 </FrameLayout>

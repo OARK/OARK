@@ -24,21 +24,29 @@ class PosController(controller.Controller):
 
         #Create controller
         proxy.start_pos_cont(controller_name, port_ns)
-        
-    def destroy(self):
+        self.hardware_init = True
+
+    def __del__(self):
         self.proxy.stop_pos_cont(self.controller_name, self.port_ns)
+        
+    def _pos_to_cmd(self, position):
+        """Translates a position value to a controller command. The format
+        of this method will determine the units that the torque is
+        supplied in."""
+        return position
 
-    def command(self, value):
-        self.proxy.command(self.controller_name, value)
-
-    #TODO - Specifiy position in a sensible unit
+    #TODO - Specify position in a sensible unit
     def set_position(self, position):
-        self.command(position)
+        self.command(self._pos_to_cmd(position))
 
+    def set_position_buffered(self, position):
+        """Buffers a command to set the position of the controller.
+        The command will not be executed until flush_cmd is called."""
+        self.queue_cmd(self._pos_to_cmd(position))
+
+    #TODO: Implement meaningfully
     def stop(self):
-        self.set_position(0)
-
-
+        pass
 
 
 #Used only for testing

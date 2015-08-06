@@ -69,37 +69,48 @@ class CmdListener:
         except socket.timeout, t:
             raise ConnectionException("Could not connect socket")
         except Exception, e:
+            print str(e)
             raise NetworkException("Could not initialise socket")
 
-        try:
-            #Create thread to frequently poll socket
-            self.run_listener = True
-            self.listener_name = name
-            self.listener_thread = threading.Thread(target=self.listen, name=self.listener_name)
-            self.listener_thread.start()
-        except threading.ThreadError, t:
-            raise CmdListenerException("Could not start new listener thread")
+        #Start listening on new socket
+        self.disconnected = True
+        self.listener_name = name
+        self.begin_listen()
+
 
     def __del__(self):
         self.shutdown()
 
     def shutdown(self):
-        self.run_listener = False
         self.listener_thread.join()
         self.sock_fd.close()
+        self.disconnected = True
 
-    def listen(self):
+
+    def begin_listen(self):
+        if self.disconnected:
+            try:
+                #Create thread to frequently poll socket
+                self.listener_thread = threading.Thread(target=self._listen, name=self.listener_name)
+                self.listener_thread.start()
+                self.disconnected = False
+            except threading.ThreadError, t:
+                raise CmdListenerException("Could not start new listener thread")
+
+
+
+    def _listen(self):
         #Wait for connection
         self.recv_sock, self.remote_addr = self.sock_fd.accept()
         print "Accepted connection!"
 
         #Update observers while running
-        while self.run_listener:
+        while not self.disconnected:
             first_byte = self.recv_sock.recv(1)
 
             #Test whether client has dropped 
             if not first_byte:
-                self.run_listener = False
+                self.disconnected = True
                 #Inform observers
                 for callback in self.dc_listeners:
                     callback()
@@ -129,6 +140,8 @@ class CmdListener:
         except:
             pass
 
+    #dc listeners are passed this instance so that they can restart listening
+    #if they wish
     def add_dc_listener(self, callback):
         if callback not in self.dc_listeners:
             self.dc_listeners.append(callback)
@@ -159,6 +172,10 @@ class CmdListenerException(Exception):
     def __str__(self):
         return repr(self.value)
 
+
+
+
+#A small test harness for this file
 def print_msg(msg):
     print str(msg)
 

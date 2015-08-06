@@ -68,10 +68,14 @@ class Controller:
         self.port_ns = port_ns
         self.proxy = proxy
 
+        self.hardware_init = False
+        self.cmd_mutex = threading.Lock()
+        self.cmd_queue = []
+
         #Ensure that state gets updated
         self.joint_state = None
         self.joint_mutex = threading.Lock()
-        self.proxy.set_state_callback(controller_name, self._state_callback)
+        #self.proxy.set_state_callback(controller_name, self._state_callback)
 
     def get_name(self):
         return self.controller_name
@@ -80,7 +84,23 @@ class Controller:
         raise NotImplementedError
 
     def command(self, value):
-        raise NotImplementedError('Command not implemented. Use subclass')
+        if self.hardware_init:
+            self.proxy.command(self.controller_name, value)
+        else:
+            raise EnvironmentError('Controller in driver not initiated')
+
+    #TODO: Add time 
+    def queue_cmd(self, cmd):
+        with self.cmd_mutex:
+            self.cmd_queue.append(cmd)
+
+    def flush_cmd(self, choose=lambda q: q):
+        with self.cmd_mutex:
+            to_flush = choose(self.cmd_queue)
+            for cmd in to_flush:
+                self.command(cmd)
+
+            self.queue = []
 
     #Must be thread-safe
     def _state_callback(self, state):
