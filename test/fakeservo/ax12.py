@@ -245,12 +245,40 @@ class AX12(object):
             raise AX12Exception('Bad instruction received')
     
         #Return a status if it is required
-        if status is not None:
+        if status is not None and inst_pack.dyn_id != const.ID_BROADCAST:
             #Sleep in microseconds
             time.sleep(self.get_delay_time() / 1000000)
             return status.serialize()
         else:
             return None
+
+
+    def simulate(self, period):
+        """This function will simulate the operation of the AX12
+        through until it stops moving. This means that if the AX12 is
+        in wheel mode, then it will be animated forever. 
+        The period is the granularity (in seconds) with which to simulate
+        the ax12. For example, a period of 1 means that the simulation will
+        update once per second. It will, regardless, update to where the 
+        dynamixel would be in after that second.
+        """
+
+        def step(self, dt):
+            """This function will take a time delta (dt) and simulate
+            the AX12 through that time step. *The simulation occurs
+            instantaneously even though it simulates through the time
+            dt*
+            """
+            if self.get_mode() == const.WHEEL_MODE:
+
+            else if self.get_mode() == const.POSITION_MODE: #POSITION_MODE
+
+            else:
+                raise AX12Error('AX12 Mode not recognised. Fatal error')
+
+
+        while simulating:
+
 
 
     def get_byte(self, addr):
@@ -300,10 +328,33 @@ class AX12(object):
         """
         return self.get_byte(const.ADDR_BAUDRATE) * 2
 
-    
     def get_status_return(self):
+        """Returns the status byte. The status byte determines
+        whether a status packet is sent in response to an instruction
+        """
         return self.get_byte(const.ADDR_STATUSRETURNLEVEL)
 
+    def get_cw_angle_limit(self):
+        cw_angle_limit_l = self.get_byte(const.ADDR_CWANGLELIMIT_L)
+        cw_angle_limit_h = self.get_byte(const.ADDR_CWANGLELIMIT_H)
+
+        return cw_angle_limit_l | (cw_angle_limit_h << 8)
+
+    def get_ccw_angle_limit(self):
+        ccw_angle_limit_l = self.get_byte(const.ADDR_CCWANGLELIMIT_L)
+        ccw_angle_limit_h = self.get_byte(const.ADDR_CCWANGLELIMIT_H)
+
+        return ccw_angle_limit_l | (ccw_angle_limit_h << 8)
+
+
+    def get_mode(self):
+        """Returns WHEEL_MODE or POSITION_MODE depending on the mode of
+        the dynamixel
+        """
+        if self.get_ccw_angle_limit() == self.get_cw_angle_limit():
+            return const.WHEEL_MODE
+        else:
+            return const.POSITION_MODE
     
     def _resolve_refs(self):
         """Resolves all references to initialise memory. Some of the bytes
