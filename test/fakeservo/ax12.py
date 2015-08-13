@@ -15,6 +15,7 @@
 # TODO: Ability to add errors to status packets
 
 import time
+from functools import wraps
 
 import const
 from packet import InstPacket, StatusPacket
@@ -53,7 +54,7 @@ class MemByte(object):
 
 
 class AX12(object):
-    """ Simulates an AX12 servomotor. Takes instruction packets and returns
+    """Simulates an AX12 servomotor. Takes instruction packets and returns
     status packets based on the values in its memory.
     """
 
@@ -72,6 +73,7 @@ class AX12(object):
             MemByte('CW Angle Limit(H)', desc='Highest byte of clockwise Angle Limit'),
             MemByte('CCW Angle Limit(L)', default=255, desc='Lowest byte of counterclockwise Angle Limit'),
             MemByte('CCW Angle Limit(H)', default=3, desc='Highest byte of counterclockwise Angle Limit'),
+            MemByte('Padding#1'),
             MemByte('Highest Limit Temperature', default= 70, desc='Internal Limit Temperature'),
             MemByte('Lowest Limit Voltage', default=60),
             MemByte('Highest Limit Voltage', default=140),
@@ -81,11 +83,11 @@ class AX12(object):
             MemByte('Alarm LED', default=36, desc='LED for Alarm'),
             MemByte('Alarm Shutdown', default=36, desc='Shutdown for Alarm'),
             #Padding Bytes
-            MemByte('Padding#1'),
             MemByte('Padding#2'),
             MemByte('Padding#3'),
             MemByte('Padding#4'),
             MemByte('Padding#5'),
+            MemByte('Padding#6'),
             #End padding
             MemByte('Torque Enable', desc='Torque On/Off'),
             MemByte('LED', desc='LED On/Off'),
@@ -108,6 +110,7 @@ class AX12(object):
             MemByte('Present Voltage', access='R', desc='Current Voltage'),
             MemByte('Present Temperature', access='R', desc='Current Temperature'),
             MemByte('Registered', access='R', desc='Means if Instruction is registered'),
+            MemByte('Padding#7'),
             MemByte('Moving', access='R', desc='Means if there is any movement'),
             MemByte('Lock', desc='Locking EEPROM'),
             MemByte('Punch(L)', default=32, desc='Lowest byte of Punch'),
@@ -122,6 +125,8 @@ class AX12(object):
         #Buffer used to store data when issued a regwrite command
         self.regwrite_buffer = None
 
+        self.simulating = False
+
 
     def get_memory(self):
         """Returns an iterable containing all of the values of memory
@@ -135,8 +140,6 @@ class AX12(object):
         """
         for val, mem_byte in new_mem, self.mem:
             mem_byte.value = val
-
-
 
     def receive(self, packet):
         """This function is long and complicated. This should be 
@@ -191,8 +194,8 @@ class AX12(object):
             #Write bytes to memory and return a status if necessary
             params = inst_pack.params
             start_addr = params[0]
-            for offset, byte in enumerate(params[1:]):
-                self.set_byte(start_addr + offset, byte)
+
+            self.set_bytes(start_addr, params[1:])
 
             if status_return_level == const.SRL_ALL:
                 status = StatusPacket(self.dyn_id, 0, [])
@@ -209,9 +212,8 @@ class AX12(object):
         elif inst_pack.instruction == const.INST_ACTION:
             params = self.regwrite_buffer
             start_addr = params[0]
-            for offset, byte in enumerate(params[1:]):
-                self.set_byte(start_addr + offset, byte)
 
+            self.set_bytes(start_addr, params[1:])
             self.set_byte(const.ADDR_REGISTER, 0)
 
             if status_return_level == const.SRL_ALL:
@@ -235,8 +237,7 @@ class AX12(object):
             for my_params in partition(params[2:], single_length):
                 if my_params[0] == self.dyn_id:
                     #The params are for me. Write the data!
-                    for offset, byte in enumerate(my_params[1:]):
-                        self.set_byte(start_addr + offset, byte)
+                    self.set_bytes(start_addr, my_params[1:])
 
             if status_return_level == const.SRL_ALL:
                 status = StatusPacket(self.dyn_id, 0, [])
@@ -245,12 +246,41 @@ class AX12(object):
             raise AX12Exception('Bad instruction received')
     
         #Return a status if it is required
-        if status is not None:
+        if status is not None and inst_pack.dyn_id != const.ID_BROADCAST:
             #Sleep in microseconds
             time.sleep(self.get_delay_time() / 1000000)
             return status.serialize()
         else:
             return None
+
+
+    def simulate(self, period):
+        """This function will simulate the operation of the AX12
+        through until it stops moving. This means that if the AX12 is
+        in wheel mode, then it will be animated forever. 
+        The period is the granularity (in seconds) with which to simulate
+        the ax12. For example, a period of 1 means that the simulation will
+        update once per second. It will, regardless, update to where the 
+        dynamixel would be in after that second.
+        """
+
+        def step(self, dt):
+            """This function will take a time delta (dt) and simulate
+            the AX12 through that time step. *The simulation occurs
+            instantaneously even though it simulates through the time
+            dt*. dt in seconds.
+            """
+            if self.get_mode() == const.WHEEL_MODE:
+                pass
+            elif self.get_mode() == const.POSITION_MODE: #POSITION_MODE
+                pass
+            else:
+                raise AX12Error('AX12 Mode not recognised. Fatal error')
+
+
+        while self.simulating:
+            pass
+
 
 
     def get_byte(self, addr):
@@ -273,7 +303,7 @@ class AX12(object):
         if not self.mem[addr].is_writable():
             raise AX12Exception('Address ' + hex(addr) + ' is not writable.')
 
-        self.mem[addr].value = val
+        self.mem[addr].value = val & 0xFF
 
 
     def set_byte_force(self, addr, val):
@@ -283,7 +313,32 @@ class AX12(object):
         if addr not in range(0,len(self.mem)):
             raise AX12Exception('Address ' + hex(addr) + ' is out of range.')
 
-        self.mem[addr].value = val
+        self.mem[addr].value = val & 0xFF
+
+
+    def set_bytes(self, start_addr, data):
+        """Sets many bytes of memory at once. Starts at start address
+        and writes the bytes of the iterable 'data' to memory
+        """
+        for offset, byte in enumerate(data):
+            self.set_byte(start_addr + 1, byte)
+
+
+    def get_short(self, low_addr, high_addr=None):
+        if high_addr is None:
+            high_addr = low_addr + 1
+        low_byte = self.get_byte(low_addr)
+        high_byte = self.get_byte(high_addr)
+
+        return low_byte | (high_byte << 8)
+
+
+    def set_short(self, low_addr, high_addr, value):
+        low_byte = value & 0xFF
+        high_byte = (value >> 8) & 0xFF
+
+        self.set_byte(low_addr, low_byte)
+        self.set_byte(high_addr, high_byte)
 
 
     def get_baud(self):
@@ -300,10 +355,25 @@ class AX12(object):
         """
         return self.get_byte(const.ADDR_BAUDRATE) * 2
 
-    
     def get_status_return(self):
+        """Returns the status byte. The status byte determines
+        whether a status packet is sent in response to an instruction
+        """
         return self.get_byte(const.ADDR_STATUSRETURNLEVEL)
 
+
+
+
+    def get_mode(self):
+        """Returns WHEEL_MODE or POSITION_MODE depending on the mode of
+        the dynamixel
+        """
+        ccw_angle_lim = self.get_short(const.ADDR_CCWANGLELIMIT_L)
+        cw_angle_lim = self.get_short(const.ADDR_CWANGLELIMIT_L)
+        if ccw_angle_lim == cw_angle_lim:
+            return const.WHEEL_MODE
+        else:
+            return const.POSITION_MODE
     
     def _resolve_refs(self):
         """Resolves all references to initialise memory. Some of the bytes
@@ -457,6 +527,8 @@ if __name__ == '__main__':
         print 'Reset ax12:', ax12.get_memory()
         print 'New   ax12:', new_ax.get_memory()
 
+    print 'Print speed: ', ax12.get_move_speed()
+    print 'Manual speed: ', ax12.get_byte(const.ADDR_MOVINGSPEED_L) | (ax12.get_byte(const.ADDR_MOVINGSPEED_L) << 8)
 
     byte_string = raw_input('\n\nEnter raw packet string (comma separated hex values e.g 0xFF,0xFF,...): ')
     bytes = map(lambda byte: int(byte, 16), byte_string.split(','))
