@@ -1,3 +1,9 @@
+/*
+ * Class for handling H264 RTP packets being send to a known UDP port.
+ *
+ * Copyright (c) 2015 - Open Academic Robot Kit
+ */
+
 package org.oarkit.emumini2.streams;
 
 import android.media.MediaCodec;
@@ -9,12 +15,9 @@ import android.view.SurfaceView;
 
 import org.sipdroid.net.RtpPacket;
 import org.sipdroid.net.RtpSocket;
-import org.sipdroid.net.SipdroidSocket;
 
 import java.io.IOException;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 /**
@@ -27,21 +30,13 @@ public class VideoStream extends Thread {
      */
     public static final int BUFFER_SIZE = 2048;
 
-    /** Maximum blocking time, spent waiting for reading new bytes (ms) */
-    public static final int SO_TIMEOUT = 1000;
-
     /** Max time allowed to decode a frame. */
     public static final int DECODE_TIMEOUT = 1000;
 
     public static final int DEFAULT_WIDTH = 640;
     public static final int DEFAULT_HEIGHT = 480;
 
-    private int mPortNumber;
-    private SipdroidSocket mSocket;
     private RtpSocket mRtpSocket;
-    private RtpPacket mRtpPacket;
-
-    private boolean mRunning;
 
     /** Surface video frames are rendered onto. */
     private Surface mSurface;
@@ -57,62 +52,27 @@ public class VideoStream extends Thread {
      */
     private VideoStream() {};
 
-    public VideoStream(int inPortNumber, SurfaceView outputSurfaceView) throws IOException {
+    public VideoStream(RtpSocket inRtpSocket,
+                       SurfaceView outputSurfaceView) throws IOException {
 
-        mSocket = null;
-        mPortNumber = inPortNumber;
-
-        try {
-            mSocket = new SipdroidSocket(mPortNumber);
-        } catch (SocketException | UnknownHostException e) {
-            e.printStackTrace();
-        }
-
-        mRtpSocket = new RtpSocket(mSocket);
+        mRtpSocket = inRtpSocket;
 
         mSurface = outputSurfaceView.getHolder().getSurface();
         mCodec = MediaCodec.createDecoderByType("video/avc");
-    }
-
-    /*
-     * Open a new socket for receiving Rtp packets. It's expected that
-     * mPortNumber is correctly set.
-     */
-    private void openRtpSocket() {
-        mRtpSocket.close();
-        mSocket.close();
-
-        try {
-            mSocket = new SipdroidSocket(mPortNumber);
-            mRtpSocket = new RtpSocket(mSocket);
-            mRtpSocket.getDatagramSocket().setSoTimeout(SO_TIMEOUT);
-        } catch (SocketException | UnknownHostException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
      * Run the thread for handling the video stream.
      */
     public void run() {
-        try {
-            mRtpSocket.getDatagramSocket().setSoTimeout(SO_TIMEOUT);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
-
         RtpH264 rtpH264Depacket = new RtpH264();
-
-        mRtpPacket = new RtpPacket(new byte[BUFFER_SIZE], 0);
+        RtpPacket rtpPacket = new RtpPacket(new byte[BUFFER_SIZE], 0);
 
         MediaFormat format = waitForConfigPackets(mRtpSocket,
-                                                  mRtpPacket,
+                                                  rtpPacket,
                                                   rtpH264Depacket);
 
-        mCodec.configure(format, mSurface, null, 0);
-        mCodec.start();
-
-        mRunning = true;
+        setUpCodec(format);
 
         rtpH264Depacket = new RtpH264();
         BufferInfo info = new BufferInfo();
@@ -120,7 +80,7 @@ public class VideoStream extends Thread {
         /** Buffers to push data into for the codec to decode and display. */
         ByteBuffer[] inputBuffers = mCodec.getInputBuffers();
 
-        while (mRunning) {
+        while (!Thread.currentThread().isInterrupted()) {
                 int inputBufferIndex = mCodec.dequeueInputBuffer(-1);
                 ByteBuffer inputBuffer;
 
@@ -130,10 +90,10 @@ public class VideoStream extends Thread {
 
                     boolean bufferNotReady = true;
                     do {
-                        receiveRtpPacket(mRtpSocket, mRtpPacket,
+                        receiveRtpPacket(mRtpSocket, rtpPacket,
                                          rtpH264Depacket);
 
-                        if (rtpH264Depacket.doProcess(mRtpPacket) ==
+                        if (rtpH264Depacket.doProcess(rtpPacket) ==
                             RtpH264.ProcessResult.BUFFER_PROCESSED_OK) {
 
                             // Skip
@@ -172,6 +132,22 @@ public class VideoStream extends Thread {
                     }
                 }
         }
+
+        Log.d("VideoStream", "Clean up Codec.");
+        cleanUpCodec();
+    }
+
+    private void setUpCodec(MediaFormat format) {
+        mCodec.configure(format, mSurface, null, 0);
+        mCodec.start();
+    }
+
+    /*
+     * Clean up the codec.
+     */
+    private void cleanUpCodec() {
+        mCodec.stop();
+        mCodec.release();
     }
 
     // Receive RTP packet.
@@ -183,7 +159,7 @@ public class VideoStream extends Thread {
         } catch (SocketTimeoutException ex) {
             // It seems that when we have a timeout we have no choice
             // but to close and open a new socket.
-            openRtpSocket();
+
         } catch (IOException ex) {
             // If we get an exception, just clear out the MediaCodec buffers.
             rtpH264.discardBuffer();

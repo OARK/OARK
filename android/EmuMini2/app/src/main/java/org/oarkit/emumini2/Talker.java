@@ -18,25 +18,35 @@ public class Talker {
     private boolean init = false;
 
     private String address;
-    private int port;
+    private int port = DEFAULT_PORT;
 
     private Socket sock;
     private DataOutputStream dos;
 
+    private Thread mTalkerThread;
+
+    /*
+     * An address must be supplied in all cases.
+     */
+    private Talker() {}
+
     public Talker(String address) throws IOException {
         this.address = address;
-        port = DEFAULT_PORT;
 
-        TalkerInit ti = new TalkerInit();
-        new Thread(ti).start();
+        createAndStartThread();
     }
 
     public Talker(String address, int port) throws IOException {
         this.address = address;
         this.port = port;
 
+        createAndStartThread();
+    }
+
+    private void createAndStartThread() {
         TalkerInit ti = new TalkerInit();
-        new Thread(ti).start();
+        mTalkerThread = new Thread(ti);
+        mTalkerThread.start();
     }
 
     /* This inner class is necessary so that we don't try to get the
@@ -50,7 +60,6 @@ public class Talker {
         public void run() {
             try {
                 sock = new Socket(InetAddress.getByName(address), port);
-
                 dos = new DataOutputStream(sock.getOutputStream());
 
                 init = true;
@@ -66,9 +75,13 @@ public class Talker {
     }
 
     public void close() throws IOException {
+        dos.close();
         sock.close();
     }
 
+    /*
+     * Send a message to the robot.
+     */
     public synchronized void send(IMsg msg) throws IOException {
         dos.writeByte(msg.getSize());
         msg.serialise(dos);

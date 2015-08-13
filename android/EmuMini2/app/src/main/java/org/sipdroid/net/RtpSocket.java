@@ -25,8 +25,6 @@ import java.net.InetAddress;
 import java.net.DatagramPacket;
 import java.io.IOException;
 
-
-
 /**
  * RtpSocket implements a RTP socket for receiving and sending RTP packets.
  * <p>
@@ -86,7 +84,10 @@ public class RtpSocket {
         }
 
         /** Closes this socket */
-        public void close() { // socket.close();
+        public void close() {
+                if (socket.isClosed()) {
+                        socket.close();
+                }
         }
 
 }

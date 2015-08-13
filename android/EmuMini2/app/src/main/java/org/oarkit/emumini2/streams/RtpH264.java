@@ -216,7 +216,6 @@ public class RtpH264 {
              * number, we have to use it because the received sequence numbers
              * may have wrapped around.
              */
-            Log.d(TAG, "Missing sequence packet, clear and retry.");
             result = reset();
 
             if (result == ProcessResult.OUTPUT_BUFFER_NOT_FILLED) {
