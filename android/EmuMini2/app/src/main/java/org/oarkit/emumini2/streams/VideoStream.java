@@ -77,7 +77,10 @@ public class VideoStream extends Thread {
         rtpH264Depacket = new RtpH264();
         BufferInfo info = new BufferInfo();
 
-        /** Buffers to push data into for the codec to decode and display. */
+        /**
+         * Buffers to push data into for the codec to decode and
+         * display.
+         */
         ByteBuffer[] inputBuffers = mCodec.getInputBuffers();
 
         while (!Thread.currentThread().isInterrupted()) {
@@ -108,10 +111,12 @@ public class VideoStream extends Thread {
                     inputBuffer.clear();
                     inputBuffer.put(transferArray);
 
-                    mCodec.queueInputBuffer(inputBufferIndex, 0, transferArray.length, 0, 0);
+                    mCodec.queueInputBuffer(inputBufferIndex, 0,
+                                            transferArray.length, 0, 0);
                     rtpH264Depacket.clear();
 
-                    int outIndex = mCodec.dequeueOutputBuffer(info, DECODE_TIMEOUT);
+                    int outIndex = mCodec.dequeueOutputBuffer(info,
+                                                              DECODE_TIMEOUT);
 
                     switch (outIndex) {
                     case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
@@ -120,14 +125,16 @@ public class VideoStream extends Thread {
                         // have to check for this result.
                         break;
                     case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
-                        Log.d("DecodeActivity", "New format " + mCodec.getOutputFormat());
+                        Log.d("DecodeActivity", "New format " +
+                              mCodec.getOutputFormat());
                         break;
                     case MediaCodec.INFO_TRY_AGAIN_LATER:
                         // This is not an error, just means decoder isn't ready.
                         break;
                     default:
                         // Something in the buffer, render it to the surface.
-                        mCodec.releaseOutputBuffer(outIndex, (info.size != 0));
+                        mCodec.releaseOutputBuffer(outIndex,
+                                                   (info.size != 0));
                         break;
                     }
                 }
@@ -161,7 +168,8 @@ public class VideoStream extends Thread {
             // but to close and open a new socket.
 
         } catch (IOException ex) {
-            // If we get an exception, just clear out the MediaCodec buffers.
+            // If we get an exception, just clear out the MediaCodec
+            // buffers.
             rtpH264.discardBuffer();
         }
     }

@@ -1,11 +1,17 @@
+/*
+ * OARK Controller Software.
+ *
+ * Copyright (c) 2015 Open Academic Robot Kit.
+ */
+
 package org.oarkit.emumini2.streams;
 
 /*
  * This class handled the encapsulation of H264 frames in RTP packets.
  * This follows the RFC 6184 spec: http://tools.ietf.org/html/rfc6184.
  *
- * This class will take the payload of a RTP packet, and determine which of the
- * three payload structures it is.
+ * This class will take the payload of a RTP packet, and determine
+ * which of the three payload structures it is.
  *
  * It only implements a limited subset of the spec, just enough to get
  * the specific payload from the OARK camera at time of writing.
@@ -14,7 +20,8 @@ package org.oarkit.emumini2.streams;
  * doProcess(). Check the value returned,
  * ProcessResult.BUFFER_PROCESSED_OK means that the RTP packet was
  * read without error, however it doesn't necessarily mean a complete
- * NAL unit is ready. ready() will return true if a complete NAL unit is ready.
+ * NAL unit is ready. ready() will return true if a complete NAL unit
+ * is ready.
  *
  * Depending on the decoder, SPS/PPS packets may have to be passed
  * before the decoder can be used, these can be checked.
@@ -28,8 +35,9 @@ import org.sipdroid.net.RtpPacket;
 
 public class RtpH264 {
     /**
-     * When we reconstruct NAL units from RTP packets, we may have to build
-     * across packets, so this is a buffer that will persist across boundaries.
+     * When we reconstruct NAL units from RTP packets, we may have to
+     * build across packets, so this is a buffer that will persist
+     * across boundaries.
      */
     private ByteArrayOutputStream mOutputBuffer;
 
@@ -44,13 +52,14 @@ public class RtpH264 {
     private final static byte[] SYNC_BYTES = {0, 0, 0, 1};
 
     /**
-     * Are we currently processing a fragmented NAL unit across packets.
+     * Are we currently processing a fragmented NAL unit across
+     * packets.
      */
     private boolean mProcessingFragmentPacket = false;
 
     /**
-     * Keep track of the last sequence number so we can ignore any repeated
-     * packets, etc.
+     * Keep track of the last sequence number so we can ignore any
+     * repeated packets, etc.
      */
     private long mLastSequenceNo = -1;
 
@@ -63,8 +72,8 @@ public class RtpH264 {
     /**
      * SPS/PPS
      *
-     * These byte arrays contain the format information for H264. These are passed in the middle
-     * of the stream.
+     * These byte arrays contain the format information for H264.
+     * These are passed in the middle of the stream.
      */
     private byte[] mSps = null;
     private byte[] mPps = null;
@@ -90,7 +99,8 @@ public class RtpH264 {
     }
 
     /**
-     * Extract the fragment of a NAL unit given a FU-A, FU-B RTP packet payload.
+     * Extract the fragment of a NAL unit given a FU-A, FU-B RTP
+     * packet payload.
      *
      * @param inPayload the payload of the RTP packet.
      */
@@ -114,7 +124,8 @@ public class RtpH264 {
          */
 
 
-        byte nalHeader = (byte) ((inPayload[0] & 0xe0) | (inPayload[1] & 0x1f));
+        byte nalHeader = (byte) ((inPayload[0] & 0xe0) |
+                                 (inPayload[1] & 0x1f));
 
         boolean startBit = (inPayload[1] & 0x80) == 0x80;
         boolean endBit = (inPayload[1] & 0x40) == 0x40;
@@ -184,13 +195,15 @@ public class RtpH264 {
             // SPS
             mSps = new byte[SYNC_BYTES.length + inPayload.length];
             System.arraycopy(SYNC_BYTES, 0, mSps, 0, SYNC_BYTES.length);
-            System.arraycopy(inPayload, 0, mSps, SYNC_BYTES.length, inPayload.length);
+            System.arraycopy(inPayload, 0, mSps, SYNC_BYTES.length,
+                             inPayload.length);
             mIsPpsSps = true;
         } else if (inNalUnitType == 8) {
             // PPS
             mPps = new byte[SYNC_BYTES.length + inPayload.length];
             System.arraycopy(SYNC_BYTES, 0, mPps, 0, SYNC_BYTES.length);
-            System.arraycopy(inPayload, 0, mPps, SYNC_BYTES.length, inPayload.length);
+            System.arraycopy(inPayload, 0, mPps, SYNC_BYTES.length,
+                             inPayload.length);
             mIsPpsSps = true;
         }
 
@@ -212,9 +225,9 @@ public class RtpH264 {
         if ((mLastSequenceNo != -1) &&
             ((inRtp.getSequenceNumber() - mLastSequenceNo) != 1)) {
             /*
-             * Even if (the new) sequence number is less than the last sequence
-             * number, we have to use it because the received sequence numbers
-             * may have wrapped around.
+             * Even if (the new) sequence number is less than the last
+             * sequence number, we have to use it because the received
+             * sequence numbers may have wrapped around.
              */
             result = reset();
 

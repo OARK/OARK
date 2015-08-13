@@ -1,3 +1,9 @@
+/*
+ * OARK Controller Software.
+ *
+ * Copyright (c) 2015 Open Academic Robot Kit.
+ */
+
 package org.oarkit.emumini2;
 
 import android.content.Context;
