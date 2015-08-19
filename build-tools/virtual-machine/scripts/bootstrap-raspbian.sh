@@ -19,7 +19,7 @@ ANSIBLE_INVENTORY=~/.ansible_hosts
 
 # The ssh keys can change often, do this so we don't get warnings and
 # SSH is unable to work.
-rm ~/.ssh/config
+rm -f ~/.ssh/config
 
 echo "Host $HOST_IP"
 cat <<EOF >> ~/.ssh/config
@@ -35,8 +35,11 @@ rm -f ~/.ssh/known_hosts
 # Run a playbook when given just the name. Assumes directory structure
 # in homedir.
 runAnsiblePlaybook() {
-    ansible-playbook -i ${ANSIBLE_INVENTORY} ~/ansible_playbooks/$1
+  ansible-playbook -i ${ANSIBLE_INVENTORY} "$HOME/ansible_playbooks/$1"
 }
+
+echo -e "${COLOUR_PROGRESS}Installing SSH Key${NC}"
+echo "raspberry" | ansible-playbook -k -i ${ANSIBLE_INVENTORY} "$HOME/ansible_playbooks/01-init.yaml"
 
 echo -e "${COLOUR_PROGRESS}Slimming Raspbian image...${NC}"
 runAnsiblePlaybook 02-slimline_install.yaml

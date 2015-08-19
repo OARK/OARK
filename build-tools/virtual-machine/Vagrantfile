@@ -48,20 +48,6 @@ Vagrant.configure(2) do |config|
   config.vm.provision :file, source: "files/hgrc", destination: ".hgrc"
   config.vm.provision :shell, privileged: false, path: "scripts/pull-repo.sh"
 
-  # Check for the Raspbian image archive in the project, if it exists,
-  # then copy it to the VM. This saves the VM from downloading it.
-  #
-  # The path is the emulation directory, since if there's any local
-  # development going on the Vagrant host, then that's where the
-  # archive is likely to be.
-  if File.exist?("../emulation/raspbian_latest.zip") then
-    config.vm.provision :file, source: "../emulation/raspbian_latest.zip",
-                        destination: "Projects/oark/build-tools/emulation/raspbian_latest.zip"
-  end
-
-  # Get the emulator started for the Pi.
-  config.vm.provision :shell, privileged: false, path: "scripts/start-emulator.sh"
-
   # Copy the Ansible host file for talking to the emulator.
   config.vm.provision :file, source: "files/ansible_hosts",
                       destination: ".ansible_hosts"
