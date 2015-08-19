@@ -9,3 +9,5 @@
       apt: name=gstreamer1.0-plugins-good state=present
     - name: Gstreamer bad (for h264parse)
       apt: name=gstreamer1.0-plugins-bad state=present
+    - name: Python bindings for gstreamer
+      apt: name=python-gi,gir1.2-gst-plugins-base-1.0 state=present

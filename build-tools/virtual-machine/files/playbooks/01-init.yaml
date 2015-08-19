@@ -1,0 +1,11 @@
+---
+- hosts: all
+  user: pi
+  sudo: no
+  tags: init
+  vars:
+    - ssh_user: $ENV(USER)
+
+  tasks:
+    - name: INIT | Install ssh public key from current account
+      authorized_key: user=pi key="{{ lookup('file', '~/.ssh/id_rsa.pub')}}"

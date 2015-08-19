@@ -19,4 +19,3 @@
       lineinfile: dest=/etc/modules line="bcm2835-v4l2"
     - name: Set permissions
       lineinfile: dest=/etc/udev/rules.d/99-camera.rules line="KERNEL==\"vchiq\", SUBSYSTEM==\"vchiq\", GROUP=\"video\", MODE=\"0660\"" create=yes
-

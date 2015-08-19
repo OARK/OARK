@@ -11,13 +11,18 @@ COLOUR_SUCCESS='\033[0;32m'
 COLOUR_PROGRESS='\033[0;33m'
 NC='\033[0m' # No Color
 
+HOST_IP=10.0.1.24
+
 # Not getting picked up from .bashrc?
 # TODO: Must fix properly.
 ANSIBLE_INVENTORY=~/.ansible_hosts
 
-# The ssh keys can change often.
-cat <<EOF > ~/.ssh/config
-Host localhost
+# The ssh keys can change often, do this so we don't get warnings and
+# SSH is unable to work.
+rm ~/.ssh/config
+
+echo "Host $HOST_IP"
+cat <<EOF >> ~/.ssh/config
   StrictHostKeyChecking no
   UserKnownHostsFile /dev/null
   User pi
@@ -27,24 +32,6 @@ EOF
 # Be sure to clear out known_hosts
 rm -f ~/.ssh/known_hosts
 
-test_emulator_running=255
-
-# It takes awhile for the emulator to start and for it to be
-# responsive, so keep doing a simple looping test on SSH until it
-# responds.
-until ssh localhost -p 10022 exit
-do
-    echo -e "${COLOUR_PROGRESS}Not running, sleeping.${NC}"
-    sleep 10
-
-    echo -e "${COLOUR_PROGRESS}Checking if emulator image is running...${NC}"
-done
-
-echo -e "${COLOUR_SUCCESS}Emulator booted.${NC}"
-
-# Emulation image has booted, so now use Ansible to start building our
-# software.
-
 # Run a playbook when given just the name. Assumes directory structure
 # in homedir.
 runAnsiblePlaybook() {
@@ -52,7 +39,7 @@ runAnsiblePlaybook() {
 }
 
 echo -e "${COLOUR_PROGRESS}Slimming Raspbian image...${NC}"
-runAnsiblePlaybook slimline_install.yaml
+runAnsiblePlaybook 02-slimline_install.yaml
 echo -e "${COLOUR_SUCCESS}Raspbian image slimmed.${NC}"
 
 echo -e "${COLOUR_PROGRESS}Starting ROS install...${NC}"

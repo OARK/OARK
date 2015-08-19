@@ -20,12 +20,6 @@ apt-get update
 # Unit testing with Arduino hardware is difficult.
 apt-get install -y bc build-essential git mercurial unzip
 
-# For formatting file systems in created disk image files.
-apt-get install -y multipath-tools
-
-# For Pi emulation
-apt-get install -y qemu-system-arm
-
 # For installation scripting on the Pi virtual machine.
 apt-get install -y ansible sshpass
 
