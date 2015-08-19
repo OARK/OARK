@@ -1,0 +1,27 @@
+wheel_fl:
+    id: 1
+    mode: wheel
+
+wheel_fr:
+    id: 2
+    mode: wheel
+
+wheel_br:
+    id: 3
+    mode: wheel
+
+wheel_bl:
+    id: 4
+    mode: wheel
+
+arm_base:
+    id: 5
+    mode: position
+
+arm_wrist:
+    id: 6
+    mode: position
+
+arm_hand:
+    id: 7
+    mode: position

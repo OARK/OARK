@@ -1,3 +1,9 @@
+/*
+ * OARK Controller Software.
+ *
+ * Copyright (c) 2015 Open Academic Robot Kit.
+ */
+
 package org.oarkit.emumini2;
 
 import android.app.Activity;
@@ -9,7 +15,6 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import org.oarkit.R;
-
 
 public class ControlActivity extends Activity {
     private String targetIP = "192.168.12.1";
@@ -26,10 +31,8 @@ public class ControlActivity extends Activity {
     private double curLeft = 0;
     private double curRight = 0;
 
-    private SurfaceView testSurfaceView;
-
-    private VideoRenderer testVideoRenderer;
-
+    private SurfaceView videoSurfaceView;
+    private VideoRenderer videoRenderer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,11 +44,9 @@ public class ControlActivity extends Activity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         /* Initialise video */
-        testSurfaceView = (SurfaceView) findViewById(R.id.robotCameraView);
-
-        testVideoRenderer = new VideoRenderer(testSurfaceView, 5000);
-
-        testSurfaceView.getHolder().addCallback(testVideoRenderer);
+        videoSurfaceView = (SurfaceView) findViewById(R.id.robotCameraView);
+        videoRenderer = new VideoRenderer(videoSurfaceView, 5000);
+        videoSurfaceView.getHolder().addCallback(videoRenderer);
 
         /* Initialise controls */
         final AnalogStickView leftAnalog = (AnalogStickView) findViewById(R.id.left_analog_stick);
@@ -55,7 +56,6 @@ public class ControlActivity extends Activity {
         final SeekBar elbowSeek = (SeekBar) findViewById(R.id.elbowSeek);
 
         /* Connect to raspberry pi server */
-        // targetIP = getIntent().getStringExtra("IP_ADDRESS");
         try {
             talker = new Talker(targetIP);
         }
@@ -191,5 +191,31 @@ public class ControlActivity extends Activity {
                     public void onStopTrackingTouch(SeekBar seekBar) {}
                 }
         );
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        try {
+            videoRenderer.stopRendering();
+            // Release our talker socket.
+            talker.close();
+        } catch(Exception e) {
+            Log.e("EmuMini2", "Could not connect.");
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        try {
+            // Initialise the talker thread again.
+            talker = new Talker(targetIP);
+        } catch(Exception e) {
+            Log.e("EmuMini2", "Could not connect.");
+            finish();
+        }
     }
 }
