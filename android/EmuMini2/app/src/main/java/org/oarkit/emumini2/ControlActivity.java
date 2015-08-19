@@ -21,8 +21,9 @@ public class ControlActivity extends Activity {
 
     private Talker talker;
 
-    private final float speedEpsilon = 0.1f;
-    private final float posEpsilon = 0.05f;
+    private final float SPEED_EPSILON = 0.075f;
+    private final float POS_EPSILON = 0.05f;
+    private final float SPEED_MUL = 6f;
 
     private double curHand = 0;
     private double curWrist = 0;
@@ -74,9 +75,9 @@ public class ControlActivity extends Activity {
                     public void onAnalogStickChange(float x, float y) {
                         FourWWMsg fwm = new FourWWMsg();
 
-                        if (Math.abs(leftAnalog.getAnalogY() - curLeft) > speedEpsilon) {
+                        if (Math.abs(leftAnalog.getAnalogY() - curLeft) > SPEED_EPSILON) {
                             fwm.setType(fwm.LEFT_GO);
-                            fwm.setVal((byte)(leftAnalog.getAnalogY() * 10));
+                            fwm.setVal((byte)(leftAnalog.getAnalogY() * SPEED_MUL));
                             try {
                                 talker.send(fwm);
                             }
@@ -98,9 +99,9 @@ public class ControlActivity extends Activity {
                     public void onAnalogStickChange(float x, float y) {
                         FourWWMsg fwm = new FourWWMsg();
 
-                        if (Math.abs(rightAnalog.getAnalogY() - curRight) > speedEpsilon) {
+                        if (Math.abs(rightAnalog.getAnalogY() - curRight) > SPEED_EPSILON) {
                             fwm.setType(fwm.RIGHT_GO);
-                            fwm.setVal((byte)(rightAnalog.getAnalogY() * 10));
+                            fwm.setVal((byte)(rightAnalog.getAnalogY() * SPEED_MUL));
                             try {
                                 talker.send(fwm);
                             }
@@ -123,7 +124,7 @@ public class ControlActivity extends Activity {
                         FourWWMsg fwm = new FourWWMsg();
                         final float elbowPos = (float)progress / elbowSeek.getMax();
 
-                        if (Math.abs(elbowPos - curElbow) > posEpsilon){
+                        if (Math.abs(elbowPos - curElbow) > POS_EPSILON){
                             fwm.setType(fwm.ARM_GO);
                             fwm.setVal((byte)(elbowPos * 127));
                             try {
@@ -148,7 +149,7 @@ public class ControlActivity extends Activity {
                         FourWWMsg fwm = new FourWWMsg();
                         final float wristPos = (float)progress / wristSeek.getMax();
 
-                        if (Math.abs(wristPos - curWrist) > posEpsilon){
+                        if (Math.abs(wristPos - curWrist) > POS_EPSILON){
                             fwm.setType(fwm.WRIST_GO);
                             fwm.setVal((byte)(wristPos * 127));
                             try {
@@ -173,7 +174,7 @@ public class ControlActivity extends Activity {
                         FourWWMsg fwm = new FourWWMsg();
                         final float handPos = (float)progress / handSeek.getMax();
 
-                        if (Math.abs(handPos - curHand) > posEpsilon){
+                        if (Math.abs(handPos - curHand) > POS_EPSILON){
                             fwm.setType(fwm.HAND_GO);
                             fwm.setVal((byte)(handPos * 127));
                             try {
@@ -201,6 +202,7 @@ public class ControlActivity extends Activity {
             videoRenderer.stopRendering();
             // Release our talker socket.
             talker.close();
+            finish();
         } catch(Exception e) {
             Log.e("EmuMini2", "Could not connect.");
         }
@@ -212,7 +214,7 @@ public class ControlActivity extends Activity {
 
         try {
             // Initialise the talker thread again.
-            talker = new Talker(targetIP);
+            /*talker = new Talker(targetIP);*/
         } catch(Exception e) {
             Log.e("EmuMini2", "Could not connect.");
             finish();

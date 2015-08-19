@@ -80,14 +80,14 @@
 
         <view
             android:layout_width="180dp"
-            android:layout_height="180dp"
+            android:layout_height="300dp"
             class="org.oarkit.emumini2.AnalogStickView"
             android:id="@+id/left_analog_stick"
 
             app:pointerColor="#CCFF1111"
             app:backColor="#000000"
             app:transparent="true"
-            app:pointerRad="100.0"
+            app:pointerRad="80.0"
 
             app:effects="true"
             app:axes="Y"
@@ -99,14 +99,14 @@
 
         <view
             android:layout_width="180dp"
-            android:layout_height="180dp"
+            android:layout_height="300dp"
             class="org.oarkit.emumini2.AnalogStickView"
             android:id="@+id/right_analog_stick"
 
             app:pointerColor="#CCFF1111"
             app:backColor="#000000"
             app:transparent="true"
-            app:pointerRad="100.0"
+            app:pointerRad="80.0"
 
             app:effects="true"
             app:axes="Y"

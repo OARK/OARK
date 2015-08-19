@@ -91,6 +91,7 @@ public class Talker {
     public synchronized void send(IMsg msg) throws IOException {
         dos.writeByte(msg.getSize());
         msg.serialise(dos);
+        Log.e("EMUMINI2", "SENDING MESSAGE");
         dos.flush();
     }
 }
