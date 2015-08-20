@@ -1,0 +1,21 @@
+---
+# Set up the Pi to be a wireless access point.
+- hosts: pi_emu
+  sudo: yes
+  tasks:
+    - name: Make sure we have in the correct packages.
+      apt: name=iw,wireless-tools,hostapd,isc-dhcp-server state=present
+    - name: Download hostapd, the Adafruit version.
+      get_url: url=http://www.adafruit.com/downloads/adafruit_hostapd.zip dest=/tmp/adafruit_hostapd.zip
+    - name: Extract the hostapd archive.
+      unarchive: src=/tmp/adafruit_hostapd.zip dest=/tmp copy=no
+    - name: Rename original hostapd.
+      command: mv /usr/sbin/hostapd /usr/sbin/hostapd.ORIG
+    - name: Copy new hostapd.
+      command: mv /tmp/hostapd /usr/sbin/hostapd
+    - name: Set the permissions.
+      file: path=/usr/sbin/hostapd mode=755
+    - name: Comment out unneeded lines in DHCP conf.
+      shell: sed /etc/dhcp/dhcpd.conf -i -e "s/^option/#option/"
+    - name: DHCP is to be authoritative
+      shell: sed /etc/dhcp/dhcpd.conf -i -e "s/^#authoritative/authoritative/"

@@ -6,7 +6,11 @@
     command: apt-get -y purge xserver.* x11.* xarchiver xauth xkb-data console-setup xinit lightdm lxde.* python-tk python3-tk scratch gtk.* libgtk.* openbox libxt.* lxpanel gnome.* libqt.* libxcb.* libxfont.* lxmenu.* gvfs.* xdg-.* desktop.* tcl.* shared-mime-info penguinspuzzle omxplayer gsfonts
   - name: Autoremove anything left
     command: apt-get -y autoremove
-  - name: Make sure we have packages Ansible requires
-    command: apt-get -y install python-apt python-pycurl
+  - name: Add local Australian mirror.
+    apt_repository: repo='deb http://mirror.internode.on.net/pub/raspbian/raspbian/ wheezy main contrib non-free rpi' state=present
+  - name: Remove default Raspbian repo
+    apt_repository: repo='deb http://mirrordirector.raspbian.org/raspbian/ wheezy main contrib non-free rpi' state=absent
   - name: Upgrade packages
     apt: upgrade=yes update_cache=yes
+  - name: Make sure we have packages Ansible requires
+    command: apt-get -y install python-apt python-pycurl
