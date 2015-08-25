@@ -87,6 +87,7 @@ class Controller:
         if self.hardware_init:
             self.proxy.command(self.controller_name, value)
         else:
+            
             raise EnvironmentError('Controller in driver not initiated')
 
     #TODO: Add time 

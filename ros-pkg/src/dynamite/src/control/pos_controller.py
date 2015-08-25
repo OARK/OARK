@@ -12,23 +12,23 @@
 # currently has many thorns. It should be used with
 # caution lest the user be pricked.
 
-
+import rospy
 import controller
 import threading
 
 
 class PosController(controller.Controller):
-    def __init__(self, proxy, controller_name, port_ns):
+    def __init__(self, proxy, controller_name, port_ns, wait=True):
         #Initialise fields of parent class
         controller.Controller.__init__(self, proxy, controller_name, port_ns)
 
         #Create controller
         proxy.start_pos_cont(controller_name, port_ns)
+        if wait:
+            rospy.wait_for_service('/%s/set_speed'%(controller_name,))
+
         self.hardware_init = True
 
-    def __del__(self):
-        self.proxy.stop_pos_cont(self.controller_name, self.port_ns)
-        
     def _pos_to_cmd(self, position):
         """Translates a position value to a controller command. The format
         of this method will determine the units that the torque is
@@ -50,7 +50,6 @@ class PosController(controller.Controller):
 
 
 #Used only for testing
-import rospy
 import time
 
 #Cute little test harness.

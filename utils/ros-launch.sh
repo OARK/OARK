@@ -15,6 +15,7 @@ PROJ_PATH=/opt/oark/ros-pkg/devel/setup.bash
 
 . $ROS_PATH
 . $PROJ_PATH
+export PYTHONPATH=/opt/ros/indigo/lib/dynamixel_controllers:$PYTHONPATH
 
-#roslaunch $@
-roscore
+roslaunch $@
+#roscore
