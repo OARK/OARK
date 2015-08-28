@@ -122,6 +122,9 @@ if __name__ == '__main__':
         man = proxy.ManagerProxy(manager_ns)
 
         listener = net_listen.CmdListener(interfaces)
+
+	rospy.wait_for_service("%s/%s/start_controller"%(manager_ns,port_ns))
+
         listener.add_data_listener(msg_received)
         listener.add_dc_listener(client_dc)
 

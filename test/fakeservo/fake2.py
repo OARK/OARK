@@ -93,6 +93,8 @@ if __name__ == '__main__':
                 #Read the rest of the packet
                 input.extend(full_read(master_fd, length))
 
+                print 'RECEIVED A MESSAGE', input
+
                 #Emulate motors in new thread and send results back
                 if id == const.ID_BROADCAST:
                     for motor in motor_dict.values():

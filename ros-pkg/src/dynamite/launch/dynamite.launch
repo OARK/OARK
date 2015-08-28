@@ -8,6 +8,7 @@
 <launch>
 
     <!-- Launch the controller manager. Params in controllers.yaml -->
+    <rosparam command="load" file="$(find dynamite)/launch/controllers.yaml" />
     <node
         name="dynamixel_manager"
         pkg="dynamixel_controllers"
@@ -23,17 +24,15 @@
                     baud_rate: 115200
                     min_motor_id: 1
                     max_motor_id: 7
-                    update_rate: 4 
+                    update_rate: 4
         </rosparam>
     </node>
-	<rosparam command="load" file="$(find dynamite)/launch/controllers.yaml" />
 
-<!--
-	<node
-		name="em2_node"
-		pkg="dynamite"
-		type="em2.py"
-		required="true"
-		output="screen"/>-->
+    <node
+        name="em2_node"
+        pkg="dynamite"
+        type="em2.py"
+        output="screen"
+	respawn="true"/> 
 </launch>
 

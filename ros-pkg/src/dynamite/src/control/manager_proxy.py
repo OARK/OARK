@@ -138,8 +138,9 @@ class ManagerProxy:
     def command(self, controller_name, value):
         #Create and cache publisher
         if controller_name not in self._cmds:
-            self._cmds[controller_name] = rospy.Publisher(controller_name + '/command', 
+            self._cmds[controller_name] = rospy.Publisher(controller_name + '/command',
                                                           std_msgs.msg.Float64, 
+                                                          latch=True,
                                                           queue_size=10)
 
         self._cmds[controller_name].publish(std_msgs.msg.Float64(value))

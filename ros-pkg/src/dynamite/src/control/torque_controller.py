@@ -14,13 +14,13 @@
 
 
 
+import rospy
 import controller
 import threading
-import manager_proxy
 
 
 class TorqueController(controller.Controller):
-    def __init__(self, proxy, controller_name, port_ns):
+    def __init__(self, proxy, controller_name, port_ns, wait=True):
         #Initialise fields of parent class
         #Creates object fields: self.proxy, self.controller_name, and
         # self.port_ns
@@ -28,10 +28,10 @@ class TorqueController(controller.Controller):
 
         #Create controller
         proxy.start_torque_cont(controller_name, port_ns)
-        self.hardware_init = True
+        if wait:
+            rospy.wait_for_service('/%s/set_speed'%(controller_name,))
 
-    def __del__(self):
-        self.proxy.stop_torque_cont(self.controller_name, self.port_ns)
+        self.hardware_init = True
 
     def _torque_to_cmd(self, torque):
         """Translates a torque value to a controller command. The format
@@ -54,7 +54,6 @@ class TorqueController(controller.Controller):
 
 
 #Used only for testing
-import rospy
 import time
 
 #Cute little test harness.
