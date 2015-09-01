@@ -4,6 +4,7 @@ import locale
 import sys
 from dialog import Dialog
 
+import wifi_config_file
 import wifi_list
 
 # Set the locale
@@ -22,29 +23,48 @@ DEFAULT_CHANNEL=0
 DEFAULT_TEXTBOX_HEIGHT=10
 DEFAULT_TEXTBOX_WIDTH=30
 
+HW_MODE_G_CUTOFF_CHANNEL=14
+
+COUNTRIES = {'AU': 'Australia',
+             'CN': 'China',
+             'US': 'United States'}
+
 def main_menu(dialog):
     "Display the main menu."
 
     do_not_exit = True
+
+    wifi_config = wifi_config_file.WifiConfig()
 
     while(do_not_exit):
         code, tag = dialog.menu("What do you want to edit?:",
                                 choices=[("SSID", "Change SSID"),
                                          ("Password", "Change Password"),
                                          ("Country Code", "Change country code"),
-                                         ("Channel", "Change channel")])
+                                         ("Channel", "Change channel"),
+                                         ("Save", "Save Config")])
         if code == dialog.DIALOG_OK:
         # tag is menu selected.
             if tag == "SSID":
-                change_ssid(dialog, DEFAULT_SSID)
+                wifi_config.set_ssid(change_ssid(dialog, wifi_config.get_ssid()))
             elif tag == "Password":
-                change_password(dialog, DEFAULT_PASSWORD)
+                wifi_config.set_wpa_passphrase(change_password(dialog, wifi_config.get_wpa_passphrase()))
             elif tag == "Country Code":
-                change_country_code(dialog, DEFAULT_COUNTRY_CODE)
+                wifi_config.set_country_code(change_country_code(dialog, wifi_config.get_country_code()))
             elif tag == "Channel":
-                change_channel(dialog, DEFAULT_CHANNEL)
+                wifi_config.set_channel(change_channel(dialog, wifi_config.get_channel()))
+            elif tag == "Save":
+                set_hw_mode(wifi_config.get_channel(), wifi_config)
+                wifi_config.save()
+                dialog.msgbox('Config file saved')
         else:
             do_not_exit = False
+
+def set_hw_mode(channel, wifi_config):
+    if channel <= HW_MODE_G_CUTOFF_CHANNEL:
+        wifi_config.set_hwmode('a')
+    else:
+        wifi_config.set_hwmode('g')
 
 def change_ssid(dialog, current_ssid):
     result = current_ssid
@@ -70,15 +90,27 @@ def change_password(dialog, current_password):
 
 def change_country_code(dialog, current_country_code):
     result = current_country_code
+    country_choices = list_country_codes(current_country_code)
 
     code, country_code = dialog.radiolist("Country Code",
-                                          choices=[("AU", "Australia", "on"),
-                                                   ("CN", "China", "off"),
-                                                   ("US", "United States", "off")])
+                                          choices=country_choices)
     if code == dialog.DIALOG_OK:
         result = country_code
 
     return result
+
+def list_country_codes(current_country_code):
+    country_list = []
+
+    for country in COUNTRIES:
+        selected = 'off'
+
+        if country == current_country_code:
+            selected = 'on'
+
+        country_list.append(tuple([country, COUNTRIES[country], selected]))
+
+    return country_list
 
 def list_channels(current_channel):
     channels = wifi_list.get_channel_list('wlan0')
