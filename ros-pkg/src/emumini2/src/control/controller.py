@@ -8,7 +8,7 @@ but should be accessed through a DXLManager object.
 import rospy
 import threading
 
-from std_msgs.msgs
+import std_msgs
 
 
 __author__    = 'Tim Peskett'
@@ -42,7 +42,7 @@ class Controller(object):
 
     def _cmd(self, val):
         """Publish a command to the dynamixel"""
-        self._publisher(std_msgs.msg.Float64(val))
+        self._publisher.publish(std_msgs.msg.Float64(val))
 
 
     #TODO: Add time 
@@ -93,11 +93,11 @@ class PosController(Controller):
         if rospy.has_param(cont_ns):
             raise ValueError('A controller by that name is already started')
 
+        rospy.set_param(cont_ns + '/joint_name', params['joint_name'])
         rospy.set_param(cont_ns + '/motor/id', motor_id)
-        rospy.set_param(cont_ns + '/motor/joint_name', params.joint_name)
-        rospy.set_param(cont_ns + '/motor/init', params.init)
-        rospy.set_param(cont_ns + '/motor/min', params.min)
-        rospy.set_param(cont_ns + '/motor/max', params.max)
+        rospy.set_param(cont_ns + '/motor/init', params['init'])
+        rospy.set_param(cont_ns + '/motor/min', params['min'])
+        rospy.set_param(cont_ns + '/motor/max', params['max'])
 
         self._start(port_ns, 'dynamixel_controllers', 'joint_position_controller', 'JointPositionController', name, [])
 
@@ -106,8 +106,13 @@ class PosController(Controller):
 
         super(PosController, self).__init__(motor_id, name)
 
-    def __del__(self):
+
+    def _destroy(self):
+        """Destroys the controller. This method should not be called directly
+        on the class. The manager will call this method before it is destroyed.
+        """
         self._stop(self.name)
+
 
     def _pos_to_cmd(self, pos):
         """Converts a value for a position into a value for the AX12. This
@@ -147,11 +152,11 @@ class TorqueController(Controller):
         if rospy.has_param(cont_ns):
             raise ValueError('A controller by that name is already started')
 
+        rospy.set_param(cont_ns + '/joint_name', params['joint_name'])
         rospy.set_param(cont_ns + '/motor/id', motor_id)
-        rospy.set_param(cont_ns + '/motor/joint_name', params.joint_name)
-        rospy.set_param(cont_ns + '/motor/init', params.init)
-        rospy.set_param(cont_ns + '/motor/min', params.min)
-        rospy.set_param(cont_ns + '/motor/max', params.max)
+        rospy.set_param(cont_ns + '/motor/init', params['init'])
+        rospy.set_param(cont_ns + '/motor/min', params['min'])
+        rospy.set_param(cont_ns + '/motor/max', params['max'])
 
         self._start(port_ns, 'dynamixel_controllers', 'joint_torque_controller', 'JointTorqueController', name, [])
 
@@ -161,10 +166,14 @@ class TorqueController(Controller):
         super(TorqueController, self).__init__(motor_id, name)
 
 
-    def __del__(self):
+    def _destroy(self):
+        """Destroys the controller. This method should not be called directly
+        on the class. The manager will call this method before it is destroyed.
+        """
         self._stop(self.name)
 
-    def torque_to_cmd(self, torque):
+
+    def _torque_to_cmd(self, torque):
         """Converts a value for a torque into a value for the AX12. This
         allows simple conversion of units to be implemented later.
         """
@@ -187,3 +196,4 @@ class TorqueController(Controller):
         """Flush the commands in the command queue. See Controller._flush_cmd
         """
         self._flush_cmd(choose)
+
