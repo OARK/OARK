@@ -54,11 +54,11 @@ class DXLManager(object):
 
         #Prepare service calls
         self._start_srv   = rospy.ServiceProxy(start_srv_name,
-                                                StartController)
+                                               StartController)
         self._stop_srv    = rospy.ServiceProxy(stop_srv_name,
-                                                StopController)
+                                               StopController)
         self._restart_srv = rospy.ServiceProxy(restart_srv_name,
-                                                RestartController)
+                                               RestartController)
  
         #Register for motor state list
         self._motor_state_mutex = threading.Lock()
@@ -71,15 +71,22 @@ class DXLManager(object):
 
 
     def __getitem__(self, cont_name):
+        """An accessor to allow easy access to this class's core functionality."""
         return self.cont_list[cont_name]
 
 
     def _motor_state_callback(self, msl):
+        """A callback that for the dynamixel driver software to supply the motor
+        state list to. Should not be called from other code.
+        """
         with self._motor_state_mutex:
             self.motor_state_list = msl
 
 
     def get_motor_state(self, motor_id, default=None):
+        """Get the state of a motor. There need not be a motor controller
+        instantiated to view these motor states.
+        """
         with self._motor_state_mutex:
             for motor in self.motor_state_list:
                 if motor_id == motor.id:
@@ -87,7 +94,23 @@ class DXLManager(object):
             return default
 
 
-    def create_controller(self, motor_id, name, cont_type, params):
+    def create_controller(self, motor_id, name, cont_type, **kwargs):
+        """Create a controller for a motor. This will instantiate an
+        object inside of the manager that can be used later on to send commands
+        to the motor.
+        Params: motor_id - ID of the motor that the controller is to control.
+                name - A name that you wish the controller to have. It will be
+                identified by this name. Should be a string: e.g 'wheel_fr'.
+                cont_type - The type of controller that you wish to create. See
+                the constants at the top of this class.
+                **kwargs - Extra keyword arguments, these can change depending
+                on the type of controller you wish to create. For the most part,
+                the following will suffice:
+                    min - The minimum position/torque for the motor.
+                    max - The maximum position/torque for the motor.
+                    init - Where the value is measured from for the motor.
+                    joint_name - An arbitrary name for the joint_name.
+        """
         if name in self.cont_list:
             raise ValueError('A controller by that name already exists')
 
@@ -99,12 +122,15 @@ class DXLManager(object):
             raise ValueError('Invalid type suppled. Must be pos or torque controller')
 
         self.cont_list[name] = ContType(motor_id, name, 
-                                        self.port_ns, params,
+                                        self.port_ns, kwargs,
                                         self._start_srv, self._stop_srv,
                                         self._restart_srv)
 
 
     def destroy_controller(self, name):
+        """Destroys a controller. The controller should not be referenced
+        after this is called. It will return an error if you try to.
+        """
         if name not in self.cont_list:
             raise ValueError('No controller by that name exists')
 
@@ -119,11 +145,12 @@ if __name__ == '__main__':
     try:
         rospy.init_node('test_node')
         dxl_man = DXLManager('dxl_manager', 'pi_out_port')
-        dxl_man.create_controller(1, 'wheel_one', DXLManager.TORQUE_CONTROLLER, { 'joint_name': 'wheel_joint', 'min': 0, 'max': 4093, 'init': 0 })
+        dxl_man.create_controller(1, 'wheel_one', DXLManager.TORQUE_CONTROLLER, joint_name='wheel_joint', min=0, max=4093, init=0)
         dxl_man['wheel_one'].set_torque(1)
         time.sleep(2)
         dxl_man['wheel_one'].set_torque(0)
-        rospy.spin()
+        while not rospy.is_shutdown():
+            print str(dxl_man['wheel_one'].get_joint_state())
+            time.sleep(1)
     except Exception, e:
         print 'Error: ', str(e)
-	pass

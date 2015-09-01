@@ -9,6 +9,7 @@ import rospy
 import threading
 
 import std_msgs
+from dynamixel_msgs.msg import JointState
 
 
 __author__    = 'Tim Peskett'
@@ -35,10 +36,19 @@ class Controller(object):
         self._cmd_queue = []
 
         #Create the publisher that we can send commands on
-        self._publisher = rospy.Publisher('%s/command'%(self.name,),
+        self._publisher = rospy.Publisher('/%s/command'%(self.name,),
                                           std_msgs.msg.Float64,
                                           latch=True,
                                           queue_size=10)
+
+        #A mutex to control access to the joint state
+        self._js_mutex = threading.Lock()
+        self.joint_state = None
+        rospy.Subscriber('/%s/state'%(self.name,),
+                         JointState,
+                         self._joint_state_callback)
+
+
 
     def _cmd(self, val):
         """Publish a command to the dynamixel"""
@@ -67,6 +77,16 @@ class Controller(object):
                 self._cmd(cmd)
 
             del self._cmd_queue[:]
+
+
+    def _joint_state_callback(self, js):
+        with self._js_mutex:
+            self.joint_state = js
+
+
+    def get_joint_state(self):
+        with self._js_mutex:
+            return self.joint_state
 
 
     def set_pos(self, pos):
