@@ -10,6 +10,7 @@ import rospy
 import sys
 import argparse
 import threading
+from math import radians
 
 from manager import DXLManager
 from emumini2.msg import Command
@@ -25,6 +26,8 @@ RIGHT_GO = 4
 ARM_GO = 6
 WRIST_GO = 9
 HAND_GO = 10
+
+NODE_NAME = 'em2_control_node'
 
 
 class EM2Node(object):
@@ -55,7 +58,7 @@ class EM2Node(object):
 
         #Create a mutex to allow multithreaded subscriber
         self._cmd_mutex = threading.Lock()
-        rospy.Subscriber('command', Command, self.msg_rcvd)
+        rospy.Subscriber('/' + NODE_NAME + '/command', Command, self.msg_rcvd)
 
 
     def msg_rcvd(self, msg):
@@ -77,30 +80,30 @@ class EM2Node(object):
                 lower = 200
                 upper = 850
 
-                result = rescale(msg.value, 0, 127, 
+                result = self._rescale(msg.value, 0, 127, 
                                  0, (upper - lower) / 1023.0 * radians(300))
 
-                self.dxl_mgr['base'].set_position_buffered(result)
+                self.dxl_mgr['elbow'].set_pos_buffered(result)
 
             elif msg.type == WRIST_GO:
                 #Value is between 0 and 127. Wrist goes from 173 - 820 (AX12 Units)
                 lower = 173
                 upper = 820
 
-                result = rescale(msg.value, 0, 127, 
+                result = self._rescale(msg.value, 0, 127, 
                                  0, (upper - lower) / 1023.0 * radians(300))
 
-                self.dxl_mgr['wrist'].set_position_buffered(result)
+                self.dxl_mgr['wrist'].set_pos_buffered(result)
 
             elif msg.type == HAND_GO:
                 #Value is between 0 and 127. Hand goes from 150-870 (AX12 Units)
                 lower = 150 
                 upper = 870 
 
-                result = rescale(msg.value, 0, 127, 
+                result = self._rescale(msg.value, 0, 127, 
                                  0, (upper - lower) / 1023.0 * radians(300))
 
-                self.dxl_mgr['hand'].set_position_buffered(result)
+                self.dxl_mgr['hand'].set_pos_buffered(result)
             else:
                 rospy.logwarn('Malformed message')
                 rospy.logwarn('Message: ' + str(msg))
@@ -117,6 +120,26 @@ class EM2Node(object):
             rate.sleep()
 
 
+    def _rescale(self, point, min1, max1, min2, max2):
+        """Takes a point in the interval (min1, max1) and converts it
+         to a point in the interval (min2, max2).
+         
+         After the function:
+         (point - min1) / (point - max1) == (return_value - min2) / (return_value - max2)
+         """
+
+        #Validate
+        if min1 > max1 - 1: min1 = max1 - 1
+        if min2 > max2: min2 = max2
+        if point < min1: point = min1
+        if point > max1: point = max1
+
+        #Normalise point
+        norm = float(point - min1) / float(max1 - min1)
+        
+        return min2 + norm * float(max2 - min2)
+
+
 
 if __name__ == '__main__':
     #Parser command line
@@ -128,7 +151,7 @@ if __name__ == '__main__':
     args = parser.parse_args(rospy.myargv(argv=sys.argv)[1:])
 
     try:
-        rospy.init_node('em2_node')
+        rospy.init_node(NODE_NAME)
         em2_node = EM2Node(args.manager_namespace, args.port_namespace)
         em2_node.run()
     except rospy.ROSInterruptException, rie:

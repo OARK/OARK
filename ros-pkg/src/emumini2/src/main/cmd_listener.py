@@ -8,6 +8,8 @@ import rospy
 import socket
 import threading
 
+import msg
+
 
 class CmdListener:
     def __init__(self, interface, port=1717):
@@ -37,7 +39,6 @@ class CmdListener:
 
             #Allow connections
             self._sock_fd.listen(1)
-
         except socket.timeout, t:
             raise ConnectionException("Could not connect socket")
         except Exception, e:
@@ -54,6 +55,7 @@ class CmdListener:
     def shutdown(self):
         #Terminate socket and then the thread
         self.stopped = True
+        self._recv_sock.shutdown(socket.SHUT_RDWR)
         self._sock_fd.close()
         self._listener_thread.join()
 
@@ -61,33 +63,37 @@ class CmdListener:
     def _listen(self):
         while not self.stopped:
             #Wait for connection
-            recv_sock, remote_addr = self.sock_fd.accept()
+            rospy.loginfo('Waiting for connection...')
+            self._recv_sock, remote_addr = self._sock_fd.accept()
             with self._listener_mutex:
                 for callback in self._conn_listeners:
                     callback(remote_addr)
 
-            rospy.loginfo('Accepted connection from ' + remote_addr)
+            rospy.loginfo('Accepted connection from ' + str(remote_addr))
             
             #Start main message receiving/processing loop
             connected = True
             while connected:
-                first_byte = self.recv_sock.recv(1)
+                first_byte = self._recv_sock.recv(1)
+                print 'Got Message'
 
                 #Test whether client has disconnected
                 if not first_byte:
-                    connect = False
+                    print 'DC message'
+                    connected = False
                     #inform observers
                     with self._listener_mutex:
                         for callback in self._dc_listeners:
                             callback()
                 else:
+                    print 'parsing message'
                     #Process message
                     msg_len = ord(first_byte)
 
                     #Receive until we have an entire message
-                    msg_body = self.recv_sock.recv(msg_len)
+                    msg_body = self._recv_sock.recv(msg_len)
                     while len(msg_body) < msg_len:
-                        msg_body = msg_body + recv_sock.recv(msg_len - len(msg_body))
+                        msg_body = msg_body + self._recv_sock.recv(msg_len - len(msg_body))
 
                     msg_parsed = msg.Msg(msg_body)
                     #Inform observers
@@ -96,22 +102,22 @@ class CmdListener:
                             callback(msg_parsed)
 
 
-        def add_connect_listener(self, callback):
-            if callback not in self._conn_listeners:
-                with self._listener_mutex:
-                    self._conn_listeners.append(callback)
+    def add_connect_listener(self, callback):
+        if callback not in self._conn_listeners:
+            with self._listener_mutex:
+                self._conn_listeners.append(callback)
 
 
-        def add_data_listener(self, callback):
-            if callback not in self._data_listeners:
-                with self._listener_mutex:
-                    self._data_listeners.append(callback)
+    def add_data_listener(self, callback):
+        if callback not in self._data_listeners:
+            with self._listener_mutex:
+                self._data_listeners.append(callback)
 
 
-        def add_dc_listener(self, callback):
-            if callback not in self._dc_listeners:
-                with self._listener_mutex:
-                    self._dc_listeners.append(callback)
+    def add_dc_listener(self, callback):
+        if callback not in self._dc_listeners:
+            with self._listener_mutex:
+                self._dc_listeners.append(callback)
 
 
 

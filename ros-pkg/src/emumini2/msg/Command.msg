@@ -1,2 +1,2 @@
 uint8 type
-uint8 value
+int8 value
