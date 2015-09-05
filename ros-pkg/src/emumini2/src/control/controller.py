@@ -110,8 +110,8 @@ class PosController(Controller):
         self._restart = restart
 
         cont_ns = '/' + name
-        if rospy.has_param(cont_ns):
-            raise ValueError('A controller by that name is already started')
+        #if rospy.has_param(cont_ns):
+            #raise ValueError('A controller by that name is already started')
 
         rospy.set_param(cont_ns + '/joint_name', params['joint_name'])
         rospy.set_param(cont_ns + '/motor/id', motor_id)
@@ -153,7 +153,7 @@ class PosController(Controller):
         self._queue_cmd(pos)
 
 
-    def flush_pos(self, choose=lambda q: q):
+    def flush(self, choose=lambda q: q):
         """Flush the commands in the command queue. See Controller._flush_cmd
         """
         self._flush_cmd(choose)
@@ -169,8 +169,8 @@ class TorqueController(Controller):
         self._restart = restart
 
         cont_ns = '/' + name
-        if rospy.has_param(cont_ns):
-            raise ValueError('A controller by that name is already started')
+        #if rospy.has_param(cont_ns):
+            #raise ValueError('A controller by that name is already started')
 
         rospy.set_param(cont_ns + '/joint_name', params['joint_name'])
         rospy.set_param(cont_ns + '/motor/id', motor_id)
@@ -212,7 +212,7 @@ class TorqueController(Controller):
         self._queue_cmd(torque)
 
 
-    def flush_torque(self, choose=lambda q: q):
+    def flush(self, choose=lambda q: q):
         """Flush the commands in the command queue. See Controller._flush_cmd
         """
         self._flush_cmd(choose)

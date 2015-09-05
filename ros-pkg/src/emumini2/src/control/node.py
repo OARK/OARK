@@ -33,23 +33,25 @@ class EM2Node(object):
     """
 
     def __init__(self, man_ns, port_ns):
-        self.dxl_mgr = DXLManager(manager_ns, port_ns)
-        
-        self.create_controller(1, 'fl', DXLManager.TORQUE_CONTROLLER,
-                               min=0, max=4093, init=0, joint_name='wheel_fl')
-        self.create_controller(2, 'fr', DXLManager.TORQUE_CONTROLLER,
-                               min=0, max=4093, init=0, joint_name='wheel_fr')
-        self.create_controller(3, 'br', DXLManager.TORQUE_CONTROLLER,
-                               min=0, max=4093, init=0, joint_name='wheel_br')
-        self.create_controller(4, 'bl', DXLManager.TORQUE_CONTROLLER,
-                               min=0, max=4093, init=0, joint_name='wheel_bl')
+        rospy.loginfo('Creating controllers...')
+        d = DXLManager(man_ns, port_ns)
+        d.create_controller(1, 'fl', DXLManager.TORQUE_CONTROLLER,
+                            min=0, max=4093, init=0, joint_name='wheel_fl')
+        d.create_controller(2, 'fr', DXLManager.TORQUE_CONTROLLER,
+                            min=0, max=4093, init=0, joint_name='wheel_fr')
+        d.create_controller(3, 'br', DXLManager.TORQUE_CONTROLLER,
+                            min=0, max=4093, init=0, joint_name='wheel_br')
+        d.create_controller(4, 'bl', DXLManager.TORQUE_CONTROLLER,
+                            min=0, max=4093, init=0, joint_name='wheel_bl')
 
-        self.create_controller(5, 'elbow', DXLManager.POS_CONTROLLER,
-                               min=200, max=850, init=200, joint_name='arm_elbow')
-        self.create_controller(6, 'wrist', DXLManager.POS_CONTROLLER,
-                               min=173, max=810, init=173, joint_name='arm_wrist')
-        self.create_controller(7, 'hand', DXLManager.POS_CONTROLLER,
-                               min=150, max=870, init=150, joint_name='arm_hand')
+        d.create_controller(5, 'elbow', DXLManager.POS_CONTROLLER,
+                            min=200, max=850, init=200, joint_name='arm_elbow')
+        d.create_controller(6, 'wrist', DXLManager.POS_CONTROLLER,
+                            min=173, max=810, init=173, joint_name='arm_wrist')
+        d.create_controller(7, 'hand', DXLManager.POS_CONTROLLER,
+                            min=150, max=870, init=150, joint_name='arm_hand')
+        self.dxl_mgr = d
+        rospy.loginfo('Controllers created!')
 
         #Create a mutex to allow multithreaded subscriber
         self._cmd_mutex = threading.Lock()
@@ -109,8 +111,8 @@ class EM2Node(object):
         choose_func = lambda q: ([q[-1]] if q else [])
         rate = rospy.Rate(20)
         while not rospy.is_shutdown():
-            for name, cont in controllers.items():
-                cont.flush_cmd(choose=choose_func)
+            for name, cont in self.dxl_mgr:
+                cont.flush(choose=choose_func)
 
             rate.sleep()
 
@@ -120,14 +122,14 @@ if __name__ == '__main__':
     #Parser command line
     parser = argparse.ArgumentParser(description='Start the emumini2 control node')
     parser.add_argument('manager_namespace',
-                        help='The namespace provided to the dynamixel driver software') 
+                        help='The manager namespace provided to the dynamixel driver software') 
     parser.add_argument('port_namespace',
                         help='The port name provided to the dynamixel driver software')
+    args = parser.parse_args(rospy.myargv(argv=sys.argv)[1:])
 
-    args = parser.parse_args(args=rospy.myargv(argv=sys.argv))
     try:
         rospy.init_node('em2_node')
         em2_node = EM2Node(args.manager_namespace, args.port_namespace)
         em2_node.run()
     except rospy.ROSInterruptException, rie:
-        rospy.logerror('Fatal error occurred. Exiting...')
+        rospy.logerr('Fatal error occurred. Exiting...')
