@@ -75,6 +75,12 @@ class DXLManager(object):
         return self.cont_list[cont_name]
 
 
+    def __iter__(self):
+        """A special python method that allows iterating over this object. Actually just
+        iterates over the (name, controller) tuples in the object."""
+        return self.cont_list.iteritems()
+
+
     def _motor_state_callback(self, msl):
         """A callback that for the dynamixel driver software to supply the motor
         state list to. Should not be called from other code.
