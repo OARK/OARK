@@ -1,8 +1,0 @@
----
-# Set up the Pi to be a wireless access point.
-- hosts: pi_emu
-  sudo: yes
-  tasks:
-    - name: Make sure we have in the correct packages.
-      apt: name=hostapd state=present
-

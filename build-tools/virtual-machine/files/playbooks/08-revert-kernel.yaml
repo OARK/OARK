@@ -1,0 +1,8 @@
+---
+# Revert the kernel back to one that works with Adafruit.
+- hosts: pi_emu
+  sudo: yes
+  tasks:
+    - name: Revert kernel
+      # Isn't this the default kernel anyway?
+      apt: name=raspberrypi-bootloader state=present

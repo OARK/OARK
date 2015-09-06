@@ -1,0 +1,20 @@
+---
+# Set up the Pi to be a wireless access point.
+- hosts: pi_emu
+  sudo: yes
+  tasks:
+    - name: Make sure we have in the correct packages.
+      apt: name=iw,wireless-tools,hostapd,isc-dhcp-server state=present
+    - name: Comment out unneeded lines in DHCP conf.
+      shell: sed /etc/dhcp/dhcpd.conf -i -e "s/^option/#option/"
+    - name: DHCP is to be authoritative
+      shell: sed /etc/dhcp/dhcpd.conf -i -e "s/^#authoritative/authoritative/"
+    - name: Ensure IP addresses handed out.
+      lineinfile:
+        dest=/etc/dhcp/dhcpd.conf
+        line="subnet 192.168.12.0 netmask 255.255.255.0 { range 192.168.12.10 192.168.12.20; }"
+        state=present
+    - name: Copy across the network interfaces file.
+      copy: src=../interfaces dest=/etc/network/interfaces
+    - name: HostAPD
+      shell: sed /etc/init.d/hostapd -i -e "s/DAEMON_CONF=\"\"/DAEMON_CONF=\"/etc/hostapd/hostapd.conf\""

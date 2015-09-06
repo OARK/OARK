@@ -6,7 +6,7 @@ Development is part of the "Software Engineering Project" unit at Curtin Univers
 
 SEP Group 17
 
-Members: Mike Aldred, Delan Azabani, Tim Peskett
+Members: Mike Aldred, Tim Peskett
 
 Client: Raymond Sheh
 

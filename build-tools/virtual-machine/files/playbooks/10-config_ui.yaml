@@ -1,0 +1,7 @@
+---
+# What we need for the configure UI.
+- hosts: pi_emu
+  sudo: yes
+  tasks:
+    - name: Install the Python Dialog package
+      apt: name=python-dialog,python-configobj state=present
