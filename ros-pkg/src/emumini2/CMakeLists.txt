@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   message_generation
+  std_srvs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -51,11 +52,10 @@ find_package(catkin REQUIRED COMPONENTS
  )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+ add_service_files(
+   FILES
+   StartStream.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -102,7 +102,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES emumini2
-  CATKIN_DEPENDS message_runtime dynamixel_controllers rospy std_msgs
+  CATKIN_DEPENDS message_runtime dynamixel_controllers rospy std_msgs std_srvs
 #  DEPENDS system_lib
 )
 

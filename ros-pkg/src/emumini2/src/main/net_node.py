@@ -8,6 +8,8 @@ import rospy
 
 from cmd_listener import CmdListener
 from emumini2.msg import Command
+from emumini2.srv import StartStream
+from std_srvs.srv import Empty
 
 
 __author__    = 'Tim Peskett'
@@ -22,8 +24,14 @@ class NetNode(object):
                                             latch=True,
                                             queue_size=10)
 
+
     def on_connect(self, addr):
         rospy.loginfo('Connected to ' + str(addr))
+        start_stream = rospy.ServiceProxy('/em2_vid_node/start_stream',
+                                          StartStream)
+
+        #The first member of the addr tuple is the IP address
+        start_stream(str(addr[0]))
 
 
     def on_data(self, msg):
@@ -36,11 +44,18 @@ class NetNode(object):
 
     def on_dc(self):
         rospy.loginfo('Disconnected')
+        stop_stream = rospy.ServiceProxy('/em2_vid_node/stop_stream',
+                                         Empty)
+
+        stop_stream()
 
 
 
 if __name__ == '__main__':
     rospy.init_node('em2_net_node')
+
+    #Wait for camera node to initialise
+    rospy.wait_for_service('/em2_vid_node/start_stream')
 
     #Create a listener on all interfaces
     listener = CmdListener('')

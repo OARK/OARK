@@ -1,0 +1,31 @@
+- element:
+      - name: "{{ source }}"
+- element:
+      - name: capsfilter
+        properties:
+            caps: 'video/x-raw, width=640, height=480, framerate=25/1, color-rate=90000'
+- element:
+      - name: omxh264enc
+        properties:
+            control-rate: variable
+            target-bitrate: 1200000
+      - name: x264enc
+        properties:
+            sliced-threads: True
+            tune: 0x4
+- element:
+      - name: capsfilter
+        properties:
+            caps: 'video/x-h264'
+- element:
+      - name: h264parse
+- element:
+      - name: rtph264pay
+        properties:
+            pt: 96
+            config-interval: 4
+- element:
+      - name: udpsink
+        properties:
+            host: "{{ address }}"
+            port: "{{ port }}"

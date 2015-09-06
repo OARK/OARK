@@ -42,7 +42,7 @@ class VideoSensor:
         self.setup_rtppayload()
         self.setup_video_src_caps_filter()
         self.setup_video_enc_caps_filter()
-        self.setup_udp_target('192.168.9.33', 5000)
+        self.setup_udp_target('192.168.12.11', 5000)
         self.setup_pipeline()
         self.link_video()
 
@@ -107,5 +107,5 @@ class VideoSensor:
         self.mainloop.run()
 
 if __name__ == "__main__":
-    app = VideoSensor("videotestsrc", "192.168.9.33")
+    app = VideoSensor("v4l2src", "192.168.12.11")
     app.run()
