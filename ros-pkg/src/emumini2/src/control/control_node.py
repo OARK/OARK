@@ -63,17 +63,17 @@ class EM2Node(object):
 
     def msg_rcvd(self, msg):
         with self._cmd_mutex:
-            scale_func = lambda val: val * 0.5
+            scale_func = lambda val: val * 1
             if msg.type == LEFT_GO:
                 speed = scale_func(msg.value)
-                self.dxl_mgr['fl'].set_torque_buffered(speed)
-                self.dxl_mgr['bl'].set_torque_buffered(speed)
+                self.dxl_mgr['fl'].queue(speed)
+                self.dxl_mgr['bl'].queue(speed)
 
             elif msg.type == RIGHT_GO:
                 #Value has to be negated because servos oriented differently
                 speed = -scale_func(msg.value)
-                self.dxl_mgr['fr'].set_torque_buffered(speed)
-                self.dxl_mgr['br'].set_torque_buffered(speed)
+                self.dxl_mgr['fr'].queue(speed)
+                self.dxl_mgr['br'].queue(speed)
 
             elif msg.type == ARM_GO:
                 #Value is between 0 and 127. Arm goes from 200-850 (AX12 Units)
@@ -83,7 +83,7 @@ class EM2Node(object):
                 result = self._rescale(msg.value, 0, 127, 
                                  0, (upper - lower) / 1023.0 * radians(300))
 
-                self.dxl_mgr['elbow'].set_pos_buffered(result)
+                self.dxl_mgr['elbow'].queue(result)
 
             elif msg.type == WRIST_GO:
                 #Value is between 0 and 127. Wrist goes from 173 - 820 (AX12 Units)
@@ -93,7 +93,7 @@ class EM2Node(object):
                 result = self._rescale(msg.value, 0, 127, 
                                  0, (upper - lower) / 1023.0 * radians(300))
 
-                self.dxl_mgr['wrist'].set_pos_buffered(result)
+                self.dxl_mgr['wrist'].queue(result)
 
             elif msg.type == HAND_GO:
                 #Value is between 0 and 127. Hand goes from 150-870 (AX12 Units)
@@ -103,7 +103,7 @@ class EM2Node(object):
                 result = self._rescale(msg.value, 0, 127, 
                                  0, (upper - lower) / 1023.0 * radians(300))
 
-                self.dxl_mgr['hand'].set_pos_buffered(result)
+                self.dxl_mgr['hand'].queue(result)
             else:
                 rospy.logwarn('Malformed message')
                 rospy.logwarn('Message: ' + str(msg))

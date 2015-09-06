@@ -11,6 +11,8 @@ import threading
 import std_msgs
 from dynamixel_msgs.msg import JointState
 
+from dynamixel_controllers.srv import SetSpeed
+
 
 __author__    = 'Tim Peskett'
 __copyright__ = 'Copyright 2016, OARK'
@@ -35,12 +37,6 @@ class Controller(object):
         self._cmd_mutex = threading.Lock()
         self._cmd_queue = []
 
-        #Create the publisher that we can send commands on
-        self._publisher = rospy.Publisher('/%s/command'%(self.name,),
-                                          std_msgs.msg.Float64,
-                                          latch=True,
-                                          queue_size=10)
-
         #A mutex to control access to the joint state
         self._js_mutex = threading.Lock()
         self.joint_state = None
@@ -49,20 +45,26 @@ class Controller(object):
                          self._joint_state_callback)
 
 
-
-    def _cmd(self, val):
+    def _cmd(self, cmd):
         """Publish a command to the dynamixel"""
-        self._publisher.publish(std_msgs.msg.Float64(val))
+        raise NotImplementedError('This method is implemented in subclasses')
+
+
+    def _convert_to_cmd(self, val):
+        """Takes a controller-specific value and converts it the appropriate command
+        value to be sent to the dynamixel
+        """
+        raise NotImplementedError('This method is implemented in subclasses')
 
 
     #TODO: Add time 
-    def _queue_cmd(self, cmd):
+    def queue(self, val):
         """Queue up a command for publishing to the dynamixel"""
         with self._cmd_mutex:
-            self._cmd_queue.append(cmd)
+            self._cmd_queue.append(self._convert_to_cmd(val))
 
 
-    def _flush_cmd(self, choose=lambda q: q):
+    def flush(self, choose=lambda q: q):
         """Flush the command queue. The function to choose which 
         commands are flushed is 'choose'. choose should return a list
         that is a (improper) sublist of q. If you wish all commands to be
@@ -74,6 +76,8 @@ class Controller(object):
         with self._cmd_mutex:
             to_flush = choose(self._cmd_queue)
             for cmd in to_flush:
+                #commands were already converted to the correct format when
+                #they were add to the queue so we do not have to do that here
                 self._cmd(cmd)
 
             del self._cmd_queue[:]
@@ -121,8 +125,12 @@ class PosController(Controller):
 
         self._start(port_ns, 'dynamixel_controllers', 'joint_position_controller', 'JointPositionController', name, [])
 
-        #Ensure that controller has started up
-        rospy.wait_for_service(cont_ns + '/set_speed')
+        #Create the publisher that we can send commands on
+        self._publisher = rospy.Publisher('/%s/command'%(name,),
+                                          std_msgs.msg.Float64,
+                                          latch=True,
+                                          queue_size=10)
+
 
         super(PosController, self).__init__(motor_id, name)
 
@@ -134,29 +142,25 @@ class PosController(Controller):
         self._stop(self.name)
 
 
-    def _pos_to_cmd(self, pos):
-        """Converts a value for a position into a value for the AX12. This
-        allows simple conversion of units to be implemented later.
+    def _cmd(self, cmd):
+        """Publish a command to the dynamixel"""
+        self._publisher.publish(std_msgs.msg.Float64(cmd))
+
+
+    def _convert_to_cmd(self, val):
+        """Takes a controller-specific value and converts it the appropriate command
+        value to be sent to the dynamixel. In this case, converts position value into
+        an AX12 position value. This method allows simple conversion of units to be
+        implemented later.
         """
-        return pos
+        return val
 
 
     def set_pos(self, pos):
         """Set the position of a motor. The value that corresponds to a
         given position will depend on _pos_to_cmd.
         """
-        self._cmd(self._pos_to_cmd(pos))
-
-
-    def set_pos_buffered(self, pos):
-        """Queue a command to set the position of the motor."""
-        self._queue_cmd(pos)
-
-
-    def flush(self, choose=lambda q: q):
-        """Flush the commands in the command queue. See Controller._flush_cmd
-        """
-        self._flush_cmd(choose)
+        self._cmd(self._convert_to_cmd(pos))
 
 
 
@@ -182,6 +186,7 @@ class TorqueController(Controller):
 
         #Ensure that controller has started up
         rospy.wait_for_service(cont_ns + '/set_speed')
+        self._speed_srv = rospy.ServiceProxy(cont_ns + '/set_speed', SetSpeed)
 
         super(TorqueController, self).__init__(motor_id, name)
 
@@ -193,27 +198,21 @@ class TorqueController(Controller):
         self._stop(self.name)
 
 
-    def _torque_to_cmd(self, torque):
-        """Converts a value for a torque into a value for the AX12. This
-        allows simple conversion of units to be implemented later.
+
+    def _cmd(self, cmd):
+        """Publish a command to the dynamixel"""
+        self._speed_srv(cmd)
+
+
+    def _convert_to_cmd(self, val):
+        """Takes a controller-specific value and converts it the appropriate command
+        value to be sent to the dynamixel. In this case, converts torque to command.
         """
-        return torque
+        return val
 
 
     def set_torque(self, torque):
         """Set the torque of a motor. The value that corresponds to a
         given torque will depend on _torque_to_cmd.
         """
-        self._cmd(self._torque_to_cmd(torque))
-
-
-    def set_torque_buffered(self, torque):
-        """Queue a command to set the torque of the motor."""
-        self._queue_cmd(torque)
-
-
-    def flush(self, choose=lambda q: q):
-        """Flush the commands in the command queue. See Controller._flush_cmd
-        """
-        self._flush_cmd(choose)
-
+        self._cmd(self._convert_to_cmd(torque))
