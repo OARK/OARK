@@ -1,10 +1,13 @@
 # Build Tools
 
-As the name says, tools for building the project. There are three different ways that the system can be built, using Vagrant, locally on a Linux machine, or remotely onto an actual Raspberry Pi.
+As the name says, tools for building the project. There are two different ways that the system can be built, both rely on having a real Pi available on a known IP address. One method is to use Vagrant which will download and script a virtual machine to build the software on the Pi, the other is if you run the build scripts locally on a Linux machine.
+
+# Requirements
+The scripting expects an untouched Raspbian install. You can download the Raspbian image from the Raspbian site, and copy the image to a SD card, please check the Raspbian site for details.
 
 # Vagrant
 
-The easiest and most automatic way is to install [Vagrant](https://www.vagrantup.com/) (and either VirtualBox or VMWare), `cd` into the `virtual-machine` directory, and run `vagrant up`. Check the README.md in the `virtual-machine` directory for details.
+The easiest and most automatic way is to install [Vagrant](https://www.vagrantup.com/) (and either VirtualBox or VMWare), then update two configuration files with the IP address of the Pi to use and `cd` into the `virtual-machine` directory, and run `vagrant up`. Check the README.md in the `virtual-machine` directory for details.
 
 # Remote install
 
@@ -15,7 +18,7 @@ The easiest and most automatic way is to install [Vagrant](https://www.vagrantup
 
 `ip-address` must be changed to the IP address of the Raspberry Pi.
 
-Ansible relies SSH and also relies on a pre-generated SSH key to be installed on the Pi so there's no need to enter a password. If you've generated a SSH key already (check ~/.ssh/id_rsa.pub) then you're fine to go onto the next step, otherwise you can generate one with the command:
+Ansible relies on SSH and also on a pre-generated SSH key to be installed on the Pi so there's no need to enter a password. If you've generated a SSH key already (check ~/.ssh/id_rsa.pub) then you're fine to go onto the next step, otherwise you can generate one with the command:
 
     ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 
@@ -27,6 +30,11 @@ Once you've generated the SSH key, then you will have to install it onto the Pi.
     ansible-playbook -i <ansible-hosts_file> 01-init.yaml -k
 
 If will prompt for the SSH password for the Pi, which is `raspberry`, and then install the SSH key so password prompts are no longer needed. Then, building the system is just a case of executing each of the playbooks in the numbered sequence indicated by their filename.
+
+### SSH complains about key mismatch
+You may have to remove the ~/.ssh/known_hosts file if you are using the same IP address that had been used with a different Pi.
+
+## Installing OARK
 
 # Note
 This directory used to contain scripts for building a QEMU compatible kernel and installing Arch Linux onto an image file for generating the OARK without need of a real Pi. However, as of 2015-08-17, this has proven to be a bit difficult, with errors occurring in the emulated system, in particular package downloads.
