@@ -62,9 +62,9 @@ def main_menu(dialog):
 
 def set_hw_mode(channel, wifi_config):
     if channel <= HW_MODE_G_CUTOFF_CHANNEL:
-        wifi_config.set_hwmode('a')
-    else:
         wifi_config.set_hwmode('g')
+    else:
+        wifi_config.set_hwmode('a')
 
 def change_ssid(dialog, current_ssid):
     result = current_ssid
