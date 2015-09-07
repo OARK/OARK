@@ -20,8 +20,6 @@
         dest=/etc/inittab
         line="T0:23:respawn:/sbin/getty -L ttyAMA0 115200 vt100"
         state=absent
-    - name: Copy config tool.
-      synchronize: src=../../../../config-tool dest=/opt/oark/ recursive=yes delete=yes
     - name: Copy utils.
       synchronize: src=../../../../utils dest=/opt/oark/ recursive=yes delete=yes
     - name: Copy startup file.
