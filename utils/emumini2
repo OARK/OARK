@@ -22,7 +22,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Launch the Emu Mini 2 ROS Nodes"
 NAME=emumini2
 DAEMON=/opt/oark/ros-pkg/ros-launch.sh
-DAEMON_ARGS=/opt/oark/ros-pkg/src/dynamite/launch/dynamite.launch
+DAEMON_ARGS=/opt/oark/ros-pkg/src/emumini2/launch/emumini2.launch
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
