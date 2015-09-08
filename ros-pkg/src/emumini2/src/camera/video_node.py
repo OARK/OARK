@@ -203,6 +203,7 @@ class StreamNode(object):
                               will usually be v4l2src.
             port            - The port to stream the data on.
         """
+        rospy.loginfo("Init StreamNode video.")
         self._video_src = video_src
         self._port = port
 
@@ -285,7 +286,7 @@ if __name__ == '__main__':
                         help='The port to stream video on')
     parser.add_argument('--address',
                         help='The initial address to stream video to')
-    args = parser.parse_args()
+    args = parser.parse_args(rospy.myargv(argv=sys.argv)[1:])
 
     node_name = 'em2_vid_node'
     rospy.init_node(node_name)

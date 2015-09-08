@@ -1,0 +1,53 @@
+<!-- 
+     It is assumed that this code would run on a raspberry pi.
+     As such, the serial port used is /dev/ttyAMA0. Care should
+     be taken to properly configure this port before this launch
+     file is actually loaded.
+-->
+
+<launch>
+
+    <!-- Launch the controller manager. Params in controllers.yaml -->
+    <node
+        name="dynamixel_manager"
+        pkg="dynamixel_controllers"
+        type="controller_manager.py"
+        required="true"
+        output="screen">
+
+        <rosparam>
+            namespace: dxl_manager
+            serial_ports:
+                pi_out_port:
+                    port_name: "/dev/ttyAMA0"
+                    baud_rate: 115200
+                    min_motor_id: 1
+                    max_motor_id: 7
+                    update_rate: 4
+        </rosparam>
+    </node>
+
+    <node
+        name="em2_control_node"
+        pkg="emumini2"
+        type="control_node.py"
+        args="dxl_manager pi_out_port"
+        required="true"
+        output="screen"/>
+
+    <node
+        name="em2_vid_node"
+        pkg="emumini2"
+        type="video_node.py"
+        args="$(find emumini2)/src/camera/pipeline.yaml v4l2src 5000"
+        required="true"
+        output="screen"/>
+
+    <node
+        name="em2_net_node"
+        pkg="emumini2"
+        type="net_node.py"
+        required="true"
+        output="screen"/>
+</launch>
+

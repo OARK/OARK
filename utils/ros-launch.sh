@@ -12,10 +12,11 @@ PATH=/usr/local/bin:/usr/bin:/usr/bin:/bin
 ROS_PATH=/opt/ros/indigo/setup.bash
 PROJ_PATH=/opt/oark/ros-pkg/devel/setup.bash
 
+#Flip video
+v4l2-ctl --set-ctrl=horizontal_flip=1
+v4l2-ctl --set-ctrl=vertical_flip=1
 
 . $ROS_PATH
 . $PROJ_PATH
-export PYTHONPATH=/opt/ros/indigo/lib/dynamixel_controllers:$PYTHONPATH
 
 roslaunch $@
-#roscore
