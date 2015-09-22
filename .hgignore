@@ -24,14 +24,16 @@ build-tools/toochain
 # Android Project
 .gradle
 local.properties
-.idea/workspace.xml
-.idea/libraries
+.idea
 .DS_Store
 build
+*.iml
+gradlew
+gradlew.bat
 
 # Ignore any Rasbian images
 *raspbian*.img
 *raspbian*.zip
 
-#Commit
-
+# Don't care about .gitignore
+.gitignore
