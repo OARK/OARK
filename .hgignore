@@ -7,6 +7,9 @@ syntax: glob
 #Vim swap file
 *.swp
 
+# Emacs swap files
+.\#*
+
 #Build directories
 ros-pkg/devel
 ros-pkg/build
