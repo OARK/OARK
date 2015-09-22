@@ -19,6 +19,9 @@ import android.widget.TableRow;
 
 import java.util.ArrayList;
 
+import org.luminousmonkey.dynamiclayout.ui.ControllerTable;
+import org.yaml.snakeyaml.Yaml;
+
 public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -27,27 +30,14 @@ public class MainActivity extends Activity {
         int numberOfSliders = 3;
         int numberOfSticks = 2;
 
-        ArrayList<TableRow> tableRows = new ArrayList<TableRow>();
+        ControllerTable tbl = new ControllerTable(this);
 
-        TableLayout tbl = new TableLayout(this);
-        tbl.setOrientation(TableLayout.HORIZONTAL);
+        tbl.addSlider();
+        tbl.addSlider();
 
-        for(int x = 0; x < numberOfSliders; x++) {
-            TableRow currentRow = new TableRow(this);
-            SeekBar currentSeekBar = new SeekBar(this);
-            currentSeekBar.setMinimumWidth(150);
-
-            currentRow.addView(currentSeekBar);
-            tableRows.add(currentRow);
-
-            TableRow.LayoutParams params = new TableRow.LayoutParams(
-                    TableRow.LayoutParams.MATCH_PARENT,
-                    TableRow.LayoutParams.MATCH_PARENT);
-            params.span = numberOfSticks + 1;
-
-            currentRow.setLayoutParams(params);
-            tbl.addView(currentRow);
-        }
+        tbl.addAnalogStick();
+        tbl.addAnalogStick();
+        tbl.addAnalogStick();
 
         this.setContentView(tbl);
     }
