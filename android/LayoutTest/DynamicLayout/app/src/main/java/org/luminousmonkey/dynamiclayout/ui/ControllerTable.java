@@ -62,15 +62,14 @@ public class ControllerTable extends TableLayout {
         return newSeekBar;
     }
 
-    public TextView addAnalogStick() {
+    public AnalogStick addAnalogStick() {
 
         if (!this.sticksAdded) {
             this.addView(analogSticksRow);
             this.sticksAdded = true;
         }
 
-        TextView newStick = new TextView(this.getContext());
-        newStick.setText("Test");
+        AnalogStick newStick = new AnalogStick(this.getContext());
 
         TableRow.LayoutParams stickLayout = new TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
