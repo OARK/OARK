@@ -3,8 +3,8 @@ package org.luminousmonkey.dynamiclayout.ui;
 import java.util.ArrayList;
 
 import android.content.Context;
-import android.view.ViewGroup;
 import android.widget.SeekBar;
+import android.widget.Space;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
@@ -79,5 +79,20 @@ public class ControllerTable extends TableLayout {
         newStick.setLayoutParams(stickLayout);
 
         return newStick;
+    }
+
+    public void addSpacerRow() {
+        TableRow.LayoutParams params = new TableRow.LayoutParams(
+            TableRow.LayoutParams.MATCH_PARENT,
+            200, 1f);
+
+        Space spacer = new Space(this.getContext());
+        TableRow spacerRow = new TableRow(this.getContext());
+
+        spacerRow.setLayoutParams(params);
+        spacer.setLayoutParams(params);
+        spacerRow.addView(spacer);
+
+        this.addView(spacerRow);
     }
 }
