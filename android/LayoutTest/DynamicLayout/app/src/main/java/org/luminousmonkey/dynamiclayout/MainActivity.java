@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import org.luminousmonkey.dynamiclayout.config.Config;
+import org.luminousmonkey.dynamiclayout.config.Motor;
 import org.luminousmonkey.dynamiclayout.ui.ControllerTable;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 public class MainActivity extends Activity {
     @Override
@@ -18,15 +20,23 @@ public class MainActivity extends Activity {
 
         try {
             Config testConfig = new Config(this);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
 
         ControllerTable tbl = new ControllerTable(this);
 
-        tbl.addSlider();
-        tbl.addSlider();
-        tbl.addSlider();
+        // Iterate through the list, anything that's absolute, slider.
+        Iterator it = testConfig.getMotors().iterator();
+
+        while (it.hasNext()) {
+            Motor currentMotor = (Motor) it.next();
+
+            if (currentMotor.usesAbsolutePosition()) {
+                tbl.addSlider(currentMotor.getDisplayText(),
+                              currentMotor.getMinPosition(),
+                              currentMotor.getMaxPosition(),
+                              currentMotor.getInitPosition());
+            }
+        }
 
         tbl.addSpacerRow();
 
@@ -34,5 +44,9 @@ public class MainActivity extends Activity {
         tbl.addAnalogStick();
 
         this.setContentView(tbl);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

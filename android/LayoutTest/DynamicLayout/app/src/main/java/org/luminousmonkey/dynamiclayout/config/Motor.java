@@ -1,22 +1,80 @@
 package org.luminousmonkey.dynamiclayout.config;
 
-public abstract class Motor {
+public class Motor {
+    private String name;
+    private String displayText;
+    private int id;
+    private int initPosition;
+    private int minPosition, maxPosition;
+    private boolean mUsesAbsolutePosition;
 
-    public abstract String getName();
-    public abstract String getDisplayText();
+    public Motor() {
+        mUsesAbsolutePosition = false;
+    }
 
-    public abstract void setName(String name);
-    public abstract void setDisplayText(String displayText);
+    public void setUsesAbsolutePosition(boolean useAbsolutePosition) {
+        mUsesAbsolutePosition = useAbsolutePosition;
+    }
 
-    public abstract int getId();
-    public abstract int getInitPosition();
-    public abstract int getMaxPosition();
-    public abstract int getMinPosition();
+    public void setDisplayText(String displayName) {
+        this.displayText = displayName;
+    }
 
-    public abstract void setId(int id);
-    public abstract void setInitPosition(int initPosition);
-    public abstract void setMaxPosition(int maxPosition);
-    public abstract void setMinPosition(int minPosition);
+    public String getDisplayText() {
+        return this.displayText;
+    }
 
-    public abstract boolean usesAbsolutePosition();
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return this.id;
+    }
+
+    public void setInitPosition(int initPosition) {
+        this.initPosition = initPosition;
+    }
+
+    public int getInitPosition() {
+        return this.initPosition;
+    }
+
+    public void setMinPosition(int minPosition) {
+        this.minPosition = minPosition;
+    }
+
+    public int getMinPosition() {
+        return this.minPosition;
+    }
+
+    public void setMaxPosition(int maxPosition) {
+        this.maxPosition = maxPosition;
+    }
+
+    public int getMaxPosition() {
+        return this.maxPosition;
+    }
+
+    public boolean usesAbsolutePosition() {
+        return mUsesAbsolutePosition;
+    }
+
+    @Override
+    public String toString() {
+        return "Name: " + this.getName() + ", " +
+            "ID: " + this.getId() + ", " +
+            "InitPos: " + this.getInitPosition() + ", " +
+            "MinPos: " + this.getMinPosition() + ", " +
+            "MaxPos: " + this.getMaxPosition() + "," +
+            "Absolute Pos: " + this.usesAbsolutePosition() + ".";
+    }
 }

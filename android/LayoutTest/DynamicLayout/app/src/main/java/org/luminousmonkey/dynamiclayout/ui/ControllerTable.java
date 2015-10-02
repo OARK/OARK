@@ -30,12 +30,12 @@ public class ControllerTable extends TableLayout {
         analogSticksRow = new TableRow(this.getContext());
     }
 
-    public SeekBar addSlider() {
+    public SeekBar addSlider(String name, int min, int max, int init) {
         TableRow newRow = new TableRow(this.getContext());
         SeekBar newSeekBar = new SeekBar(this.getContext());
         TextView newText = new TextView(this.getContext());
 
-        newText.setText("Test");
+        newText.setText(name);
         newRow.addView(newText);
         newRow.addView(newSeekBar);
 
@@ -55,7 +55,10 @@ public class ControllerTable extends TableLayout {
         barLayout.span = 2;
 
         newSeekBar.setLayoutParams(barLayout);
-        newSeekBar.setMax(100);
+
+        // Make sure to always add min to any value from the seekbar.
+        newSeekBar.setMax(min + max);
+        newSeekBar.setProgress(min + init);
 
         this.addView(newRow);
 

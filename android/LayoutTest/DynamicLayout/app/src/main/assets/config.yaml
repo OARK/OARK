@@ -12,6 +12,7 @@ wheel_fl:
     init: 0
     min: 0
     max: 4093
+    invert: false
 
 wheel_fr:
   display_name: Front Right Wheel
@@ -27,6 +28,7 @@ wheel_fr:
     init: 0
     min: 0
     max: 4093
+    invert: true
 
 wheel_br:
   display_name: Back Right Wheel
@@ -42,6 +44,7 @@ wheel_br:
     init: 0
     min: 0
     max: 4093
+    invert: true
 
 wheel_bl:
   display_name: Back Left Wheel
@@ -57,6 +60,7 @@ wheel_bl:
     init: 0
     min: 0
     max: 4093
+    invert: false
 
 arm_base:
   display_name: Arm
