@@ -15,35 +15,48 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        int numberOfSliders = 3;
-        int numberOfSticks = 2;
-
         try {
             Config testConfig = new Config(this);
 
+            ControllerTable tbl = new ControllerTable(this);
 
-        ControllerTable tbl = new ControllerTable(this);
+            // Iterate through the list, anything that's absolute, slider.
+            Iterator it = testConfig.getMotors().iterator();
 
-        // Iterate through the list, anything that's absolute, slider.
-        Iterator it = testConfig.getMotors().iterator();
+            // The following is horrible code, but it's a quick test.
+            int stickCounter = 0;
 
-        while (it.hasNext()) {
-            Motor currentMotor = (Motor) it.next();
+            while (it.hasNext()) {
+                Motor currentMotor = (Motor) it.next();
 
-            if (currentMotor.usesAbsolutePosition()) {
-                tbl.addSlider(currentMotor.getDisplayText(),
-                              currentMotor.getMinPosition(),
-                              currentMotor.getMaxPosition(),
-                              currentMotor.getInitPosition());
+                stickCounter++;
             }
-        }
 
-        tbl.addSpacerRow();
+            it = testConfig.getMotors().iterator();
+            while (it.hasNext()) {
+                Motor currentMotor = (Motor) it.next();
 
-        tbl.addAnalogStick();
-        tbl.addAnalogStick();
+                if (currentMotor.usesAbsolutePosition()) {
+                    tbl.addSlider(currentMotor.getDisplayText(),
+                                  currentMotor.getMinPosition(),
+                                  currentMotor.getMaxPosition(),
+                                  currentMotor.getInitPosition(),
+                                  stickCounter);
+                }
+            }
 
-        this.setContentView(tbl);
+            tbl.addSpacerRow();
+
+            it = testConfig.getMotors().iterator();
+            while (it.hasNext()) {
+                Motor currentMotor = (Motor) it.next();
+
+                if (!currentMotor.usesAbsolutePosition()) {
+                    tbl.addAnalogStick();
+                }
+            }
+
+            this.setContentView(tbl);
 
         } catch (IOException e) {
             e.printStackTrace();

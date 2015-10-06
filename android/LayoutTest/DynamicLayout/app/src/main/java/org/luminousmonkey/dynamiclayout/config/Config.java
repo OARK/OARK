@@ -88,6 +88,8 @@ public class Config {
         if (motorMap.get(CONFIG_MOTOR) instanceof Map) {
             Map motorDetails = (Map) motorMap.get(CONFIG_MOTOR);
             newMotor.setId((int) motorDetails.get(CONFIG_ID));
+
+            // This should really read the current position of the motor.
             newMotor.setInitPosition((int) motorDetails.get(CONFIG_INIT));
             newMotor.setMinPosition((int) motorDetails.get(CONFIG_MIN));
             newMotor.setMaxPosition((int) motorDetails.get(CONFIG_MAX));

@@ -106,3 +106,18 @@ arm_hand:
     init: 150
     min: 150
     max: 870
+
+test_hand:
+  display_name: Test
+  type: WHEEL
+  controller:
+    package: dynamixel_controllers
+    module: joint_position_controller
+    type: JointPositionController
+  joint_name: hand2
+  joint_speed: 1.0
+  motor:
+    id: 7
+    init: 150
+    min: 150
+    max: 870

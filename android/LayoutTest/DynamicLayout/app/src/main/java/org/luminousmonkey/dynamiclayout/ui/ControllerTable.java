@@ -30,7 +30,7 @@ public class ControllerTable extends TableLayout {
         analogSticksRow = new TableRow(this.getContext());
     }
 
-    public SeekBar addSlider(String name, int min, int max, int init) {
+    public SeekBar addSlider(String name, int min, int max, int init, int span) {
         TableRow newRow = new TableRow(this.getContext());
         SeekBar newSeekBar = new SeekBar(this.getContext());
         TextView newText = new TextView(this.getContext());
@@ -52,7 +52,7 @@ public class ControllerTable extends TableLayout {
             TableRow.LayoutParams.MATCH_PARENT,
             TableRow.LayoutParams.WRAP_CONTENT, 1f);
 
-        barLayout.span = 2;
+        barLayout.span = span;
 
         newSeekBar.setLayoutParams(barLayout);
 

@@ -21,7 +21,7 @@ public class AnalogStick extends View {
 
     private boolean isTouching = false;
     private float touchX, touchY;
-    private float circleRad = 200.0f;
+    private float circleRad = 150f;
     private Paint circlePainter;
 
     private boolean effects = true;
