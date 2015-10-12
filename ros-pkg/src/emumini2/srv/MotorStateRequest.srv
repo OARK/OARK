@@ -1,0 +1,3 @@
+int8 motor_id
+---
+dynamixel_msgs/JointState js

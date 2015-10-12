@@ -49,12 +49,15 @@ find_package(catkin REQUIRED COMPONENTS
  add_message_files(
    FILES
    Command.msg
+   Input.msg
  )
 
 ## Generate services in the 'srv' folder
  add_service_files(
    FILES
    StartStream.srv
+   InputRequest.srv
+   MotorStateRequest.srv
  )
 
 ## Generate actions in the 'action' folder

@@ -14,7 +14,9 @@ import yaml
 import math
 
 from manager import DXLManager
+
 from emumini2.msg import Command
+from emumini2.srv import InputRequest, InputRequestResponse
 
 __author__    = 'Tim Peskett'
 __copyright__ = 'Copyright 2016, OARK'
@@ -147,7 +149,7 @@ class EM2Node(object):
     control the emu mini 2 based on these messages.
     """
 
-    def __init__(self, man_ns, port_ns, config_filename):
+    def __init__(self, node_ns, man_ns, port_ns, config_filename):
         #Read the controller configuration from a file
         config_file = open(config_filename, 'r')
         self.config = yaml.load(config_file.read())
@@ -158,6 +160,14 @@ class EM2Node(object):
         cont_dict = self.config['controllers']
         self.dxl_mgr = DXLManager(man_ns, port_ns)
         self._create_controllers(cont_dict)
+
+        #Create a mutex to allow multithreaded subscriber
+        self._cmd_mutex = threading.Lock()
+        rospy.Subscriber('/%s/command'%(node_ns,), Command, self.cmd_rcvd)
+
+        #Create services to allow caller to retrieve data
+        rospy.Service('/%s/get_inputs'%(node_ns,),, self.get_inputs)
+        rospy.Service('/%s/get_motor_state'%(node_ns,), , self.get_motor_state)
 
         #Initialise the evaluation function symbol table
         #Updated before each evaluation
@@ -180,7 +190,7 @@ class EM2Node(object):
         try:
             for name, data in cont_dict.iteritems():
                 #Validate data
-                if data['type'] == 'torque':
+                if data['type'].lower() == 'torque':
                     cont_type = DXLManager.TORQUE_CONTROLLER
                 elif data['type'].lower() == 'position':
                     cont_type = DXLManager.POS_CONTROLLER
@@ -199,9 +209,22 @@ class EM2Node(object):
         rospy.loginfo('Controllers created!')
 
 
+    def cmd_rcvd(self, cmd):
+        pass
+
+    
+    def get_inputs(self, req):
+        pass
+
+
+    def get_motor_state(self, req): 
+        pass
+
+    
 
 class ConfigException(Exception):
     pass
+
 
 if __name__ == '__main__':
     #Parser command line
@@ -216,7 +239,8 @@ if __name__ == '__main__':
 
     try:
         rospy.init_node(NODE_NAME)
-        em2_node = EM2Node(args.manager_namespace,
+        em2_node = EM2Node(NODE_NAME,
+                           args.manager_namespace,
                            args.port_namespace,
                            args.controller_file)
         em2_node.run()

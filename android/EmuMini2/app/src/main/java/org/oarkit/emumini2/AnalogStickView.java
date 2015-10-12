@@ -12,6 +12,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.MotionEvent;
 
@@ -111,6 +112,7 @@ public class AnalogStickView extends View {
         int width = getWidth();
         int height = getHeight();
 
+        Log.e("EMUMINI2AST", "onDraw is called");
         /* This needs to be here for when drawing occurs before action */
         if(!isTouching) {
             touchX = width / 2;
@@ -151,6 +153,7 @@ public class AnalogStickView extends View {
         int width = getWidth();
         int height = getHeight();
 
+        Log.e("EMUMINI2AST", me.toString());
         /* Get only required axes */
         if(axes != Y) {
             touchX = me.getX();

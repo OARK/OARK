@@ -1,2 +1,1 @@
-uint8 type
-int8 value
+float32[] values
