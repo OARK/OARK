@@ -1,0 +1,44 @@
+#To use rosjava_messages to generate message using the msg files
+#for use under android
+
+git clone https://github.com/rosjava/rosjava_bootstrap
+cd rosjava_bootstrap
+git fetch origin indigo:indigo
+git checkout indigo
+mkdir output_dir
+export ROS_MAVEN_DEPLOYMENT_REPOSITORY=`pwd`/output_dir
+./gradlew
+
+#Messages generated in message_generation/emumini2
+export ROS_PACKAGE_PATH='/path/to/your/ros/package'
+./gradlew run 
+
+
+#To use the generated interfaces:
+#	See the code in org.ros.node.NodeConfiguration
+#	Look at how a TopicMessageFactory is generated.
+#
+#       Relevant link: http://answers.ros.org/question/41336/creating-composite-rosjava-messages-without-a-node/
+#
+#	The relevant code looks to be (from https://github.com/rosjava/rosjava_core/blob/indigo/rosjava/src/main/java/org/ros/node/NodeConfiguration.java):
+#
+#       import org.ros.message.MessageDefinitionProvider;
+#       import org.ros.internal.message.DefaultMessageFactory;
+#       import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
+#	MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
+#       dmf = new DefaultMessageFactory(messageDefinitionProvider);
+#	Msg m = dmf.newFromType(Msg._TYPE);
+#
+#	To serialise:
+#	import org.ros.internal.message.DefaultMessageSerializationFactory;
+#	dmsf = new DefaultMessageSerializationFactory(messageDefinitionProvider);
+#	BigEndianHeapChannelBuffer chanbuf = new ...(1000);
+#	dsmf.newMessageSerializer(msg._TYPE).serialize(m, chanbuf);
+#
+#
+#	To deserialise:
+#	dmsf.newMessageDeserializer(Msg._TYPE).deserialize(m.serialize())
+
+#Jar dependency files need to compile:
+#
+#export CLASSPATH=/home/tdp/Documents/repo/rosjava_bootstrap/message_generation/build/install/message_generation/lib/guava-12.0.jar:/home/tdp/Documents/repo/rosjava_bootstrap/message_generation/build/install/message_generation/lib/netty-3.5.2.Final.jar:/home/tdp/Documents/repo/rosjava_bootstrap/out_dir/org/ros/rosjava_bootstrap/message_generation/0.2.1/message_generation-0.2.1.jar:.

@@ -1,0 +1,176 @@
+#A tentative YAML configuration file for the six wheeled wonder.
+
+#The inputs. These correspond to widgets that will appear on the
+#android controller. The exact number and type of each widget 
+#attribute is still to be decided. The current attributes are:
+#
+#   type:
+#       This determines the actual widget that will appear
+#       on the android device. Currently only analog and 
+#       slider are supported.
+#   position:
+#       This determines the position of the widget on
+#       the android screen.
+#   title (optional):
+#       Text to display alongside the widget on
+#       the android device. If this field is not
+#       present, then no text is displayed.
+#   axes (analog, optional):
+#       The axes that on which the analog stick should allow
+#       movement. Valid options are X, Y, XY or YX. There is
+#       no difference between XY and YX as a value for this
+#       option. An unused axis will always have the value of
+#       0 when referenced in a controller value.
+#
+#All inputs must provide values between -1 and 1. This entire range
+#need not be used as the values that an input provides depend on the
+#input itself.
+#Scaling and translation of this input may need to occur and should
+#be specified in the input if deemed necessary.
+
+inputs:
+  - name: left_analog
+    type: analog
+    axes: Y
+
+  - name: right_analog
+    type: analog
+    axes: Y
+
+  - name: elbow_slider
+    type: slider
+
+  - name: wrist_slider
+    type: slider
+
+  - name: hand_slider
+    title: Hand
+    type: slider
+
+
+#Specifies the controllers created in the software.
+#A controller contains the following fields.
+#
+#   id - The dynamixel ID of the motor that the controller
+#        corresponds to.
+#   type - Specifies whether the controller is a torque controller
+#          or a position controller.
+#   min  - The minimum value that the controller may take. This
+#          field should be converted to some standard coordinate
+#          value at some point.
+#   max  - The maximum value that the controller may take. Should
+#          be converted to a standard coordinate at some point.
+#   value - The value that the controller is to take. *Must be a 
+#           string*.
+#           This should be a valid python expression that takes
+#           any number of inputs and combines them using valid
+#           python operations. The result should be a float that
+#           will be sent to the AX12 motor.
+#           Functions from the python math module may be used,
+#           and they need not be namespaced (i.e use sin rather
+#           than math.sin).
+#           For example:
+#               value: 'sin(input1) + 3 * input2'
+#           will pass sin(input1)+3*input2 to the controller.
+#           Values outside of [-1,1] will be truncated into that
+#           range.
+
+
+controllers:
+    #Wheels
+    fl:
+        id: 9
+        type: torque
+        min: 0
+        max: 4093
+        value: ''
+    ml:
+        id: 2
+        type: torque
+        min: 0
+        max: 4093
+        value: ''
+    bl: 
+        id: 5
+        type: torque
+        min: 0
+        max: 4093
+        value: ''
+    fr:
+        id: 10
+        type: torque
+        min: 0
+        max: 4093
+        value: ''
+    mr:
+        id: 3
+        type: torque
+        min: 0
+        max: 4093
+        value: ''
+    br:
+        id: 4
+        type: torque
+        min: 0
+        max: 4093
+        value: ''
+
+    #Axels
+    f_axel:
+        id: 8
+        type: position
+        min: 0
+        max: 0
+        value: ''
+    b_axel:
+        id: 6
+        type: position
+        min: 0
+        max: 0
+        value: ''
+
+    #Suspension
+    f_susp:
+        id: 7
+        type: position
+        min: 0
+        max: 0
+        value: ''
+
+    #Arm
+    base_tilt_1:
+        id: 13
+        type: position
+        min: 0
+        max: 0
+        value: ''
+    base_tilt_2:
+        id: 14
+        type: position
+        min: 0
+        max: 0
+        value: ''
+    elbow:
+        id: 15
+        type: position
+        min: 0
+        max: 0
+        value: ''
+    wrist_tilt:
+        id: 17
+        type: position
+        min: 0
+        max: 0
+        value: ''
+    wrist_yaw:
+        id: 12
+        type: position
+        min: 0
+        max: 0
+        value: ''
+    wrist_roll:
+        id: 18
+        type: position
+        min: 0
+        max: 0
+        value: ''

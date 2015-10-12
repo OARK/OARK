@@ -1,0 +1,118 @@
+#A sample YAML file for what specifying the Emu Mini 2 config
+#would look like.
+
+
+#The inputs. These correspond to widgets that will appear on the
+#android controller. The exact number and type of each widget 
+#attribute is still to be decided. The current attributes are:
+#
+#   type - This determines the actual widget that will appear
+#          on the android device. Currently only analog and 
+#          slider are supported.
+#   position - This determines the position of the widget on
+#              the android screen.
+#   title (optional) - Text to display alongside the widget on
+#                      the android device. If this field is not
+#                      present, then no text is displayed.
+#
+#All inputs must provide values between -1 and 1. This entire range
+#need not be used as the values that an input provides depend on the
+#input itself.
+#Scaling and translation of this input may need to occur and should
+#be specified in the input if deemed necessary.
+
+inputs:
+    left_analog:
+        type: analog
+        position: bottom, left
+    right_analog:
+        type: analog
+        position: bottom, right
+    elbow_slider:
+        type: slider
+        position: top
+    wrist_slider:
+        type: slider
+        position: top
+    hand_slider:
+        title: Hand
+        type: slider
+        position: top
+
+
+#Specifies the controllers created in the software.
+#A controller contains the following fields.
+#
+#   id - The dynamixel ID of the motor that the controller
+#        corresponds to.
+#   type - Specifies whether the controller is a torque controller
+#          or a position controller.
+#   min  - The minimum value that the controller may take. This
+#          field should be converted to some standard coordinate
+#          value at some point.
+#   max  - The maximum value that the controller may take. Should
+#          be converted to a standard coordinate at some point.
+#   joint_name - A name required for the joint rather than the 
+#                controller. This field will most likely not
+#                be required at some point.
+#   value - The value that the controller is to take. *Must be a 
+#           string*.
+#           This should be specified as a linear combination of 
+#           inputs. Each input that contributes to the value should 
+#           be listed, and can be scaled by a real number. Different 
+#           inputs should be comma separated. For example:
+#
+#               value: '1 * input1, -1 * input2, 3 * input3'
+#
+#           will pass input1-input2+3*input3 to the controller.
+
+controllers:
+    fl:
+        id: 1
+        type: torque
+        min: 0
+        max: 4093
+        joint_name: joint_fl
+        value: '1 * left_analog'
+    fr:
+        id: 2
+        type: torque
+        min: 0
+        max: 4093
+        joint_name: joint_fr
+        value: '-1 * right_analog'
+    br:
+        id: 3
+        type: torque
+        min: 0
+        max: 4093
+        joint_name: joint_br
+        value: '-1 * right_analog'
+    fr:
+        id: 4
+        type: torque
+        min: 0
+        max: 4093
+        joint_name: joint_fr
+        value: '1 * left_analog'
+    elbow:
+        id: 5
+        type: position
+        min: 200
+        max: 850
+        joint_name: joint_elbow
+        value: '1 * elbow_slider'
+    wrist:
+        id: 6
+        type: position
+        min: 173
+        max: 810
+        joint_name: joint_wrist
+        value: '1 * wrist_slider'
+    hand:
+        id: 7
+        type: position
+        min: 150
+        max: 870
+        joint_name: joint_hand
+        value: '1 * hand_slider'

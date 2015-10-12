@@ -67,18 +67,18 @@ class DXLManager(object):
                              MotorStateList,
                              self._motor_state_callback)
 
-        self.cont_list = dict()
+        self.cont_dict = dict()
 
 
     def __getitem__(self, cont_name):
         """An accessor to allow easy access to this class's core functionality."""
-        return self.cont_list[cont_name]
+        return self.cont_dict[cont_name]
 
 
     def __iter__(self):
         """A special python method that allows iterating over this object. Actually just
         iterates over the (name, controller) tuples in the object."""
-        return self.cont_list.iteritems()
+        return self.cont_dict.iteritems()
 
 
     def _motor_state_callback(self, msl):
@@ -117,8 +117,10 @@ class DXLManager(object):
                     init - Where the value is measured from for the motor.
                     joint_name - An arbitrary name for the joint_name.
         """
-        if name in self.cont_list:
+        if name in self.cont_dict:
             raise ValueError('A controller by that name already exists')
+        if motor_id in map(lambda c: c.motor_id, self.cont_dict.iteritems()):
+            raise ValueError('A controller has already been assigned to that ID')
 
         if cont_type == DXLManager.TORQUE_CONTROLLER:
             ContType = TorqueController
@@ -127,7 +129,7 @@ class DXLManager(object):
         else:
             raise ValueError('Invalid type suppled. Must be pos or torque controller')
 
-        self.cont_list[name] = ContType(motor_id, name, 
+        self.cont_dict[name] = ContType(motor_id, name, 
                                         self.port_ns, kwargs,
                                         self._start_srv, self._stop_srv,
                                         self._restart_srv)
@@ -137,11 +139,11 @@ class DXLManager(object):
         """Destroys a controller. The controller should not be referenced
         after this is called. It will return an error if you try to.
         """
-        if name not in self.cont_list:
+        if name not in self.cont_dict:
             raise ValueError('No controller by that name exists')
 
-        self.cont_list[name]._destroy()
-        del self.cont_list[name]
+        self.cont_dict[name]._destroy()
+        del self.cont_dict[name]
 
 
 import time

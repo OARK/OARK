@@ -114,8 +114,6 @@ class PosController(Controller):
         self._restart = restart
 
         cont_ns = '/' + name
-        #if rospy.has_param(cont_ns):
-            #raise ValueError('A controller by that name is already started')
 
         rospy.set_param(cont_ns + '/joint_name', params['joint_name'])
         rospy.set_param(cont_ns + '/motor/id', motor_id)
@@ -173,8 +171,6 @@ class TorqueController(Controller):
         self._restart = restart
 
         cont_ns = '/' + name
-        #if rospy.has_param(cont_ns):
-            #raise ValueError('A controller by that name is already started')
 
         rospy.set_param(cont_ns + '/joint_name', params['joint_name'])
         rospy.set_param(cont_ns + '/motor/id', motor_id)

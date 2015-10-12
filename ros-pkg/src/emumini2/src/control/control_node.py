@@ -10,7 +10,8 @@ import rospy
 import sys
 import argparse
 import threading
-from math import radians
+import yaml
+import math
 
 from manager import DXLManager
 from emumini2.msg import Command
@@ -81,7 +82,7 @@ class EM2Node(object):
                 upper = 850
 
                 result = self._rescale(msg.value, 0, 127, 
-                                 0, (upper - lower) / 1023.0 * radians(300))
+                                 0, (upper - lower) / 1023.0 * math.radians(300))
 
                 self.dxl_mgr['elbow'].queue(result)
 
@@ -91,7 +92,7 @@ class EM2Node(object):
                 upper = 820
 
                 result = self._rescale(msg.value, 0, 127, 
-                                 0, (upper - lower) / 1023.0 * radians(300))
+                                 0, (upper - lower) / 1023.0 * math.radians(300))
 
                 self.dxl_mgr['wrist'].queue(result)
 
@@ -101,7 +102,7 @@ class EM2Node(object):
                 upper = 870 
 
                 result = self._rescale(msg.value, 0, 127, 
-                                 0, (upper - lower) / 1023.0 * radians(300))
+                                 0, (upper - lower) / 1023.0 * math.radians(300))
 
                 self.dxl_mgr['hand'].queue(result)
             else:
@@ -141,6 +142,67 @@ class EM2Node(object):
 
 
 
+class EM2Node(object):
+    """A node to receive messages from other nodes and
+    control the emu mini 2 based on these messages.
+    """
+
+    def __init__(self, man_ns, port_ns, config_filename):
+        #Read the controller configuration from a file
+        config_file = open(config_filename, 'r')
+        self.config = yaml.load(config_file.read())
+        config_file.close()
+
+        self._input_list = self.config['inputs']
+
+        cont_dict = self.config['controllers']
+        self.dxl_mgr = DXLManager(man_ns, port_ns)
+        self._create_controllers(cont_dict)
+
+        #Initialise the evaluation function symbol table
+        #Updated before each evaluation
+        self._sym_table = dict(math.__dict__)
+
+        #Compile the evaluation function for each controller
+        eval_func = dict()
+        try:
+            for name, data in cont_dict.iteritems():
+                eval_func[name] = compile(data['value'], '<string>', 'eval')
+        except KeyError, ke:
+            raise ConfigException('\'value\' field not present on controller %s'%(name,))
+        except (SyntaxError, TypeError) as e:
+            raise ConfigException('\'value\' field not valid python expression on controller %s'%(name,))
+
+
+
+    def _create_controllers(cont_dict):
+        rospy.loginfo('Creating controllers...')
+        try:
+            for name, data in cont_dict.iteritems():
+                #Validate data
+                if data['type'] == 'torque':
+                    cont_type = DXLManager.TORQUE_CONTROLLER
+                elif data['type'].lower() == 'position':
+                    cont_type = DXLManager.POS_CONTROLLER
+                else:
+                    raise ConfigException('Invalid type (%s) for controller %s'%(data['type'], name,))
+
+                #Create controller
+                self.dxl_mgr.create_controller(data['id'],
+                                               name,
+                                               cont_type,
+                                               min=data['min'], max=data['max'],
+                                               init=data['min'],
+                                               joint_name=data['joint_name'])
+        except KeyError, ke:
+            raise ConfigException('Field not found', ke)
+        rospy.loginfo('Controllers created!')
+
+
+
+class ConfigException(Exception):
+    pass
+
 if __name__ == '__main__':
     #Parser command line
     parser = argparse.ArgumentParser(description='Start the emumini2 control node')
@@ -148,11 +210,18 @@ if __name__ == '__main__':
                         help='The manager namespace provided to the dynamixel driver software') 
     parser.add_argument('port_namespace',
                         help='The port name provided to the dynamixel driver software')
+    parser.add_argument('controller_file',
+                        help='A file containing configuration data for the controllers and controls')
     args = parser.parse_args(rospy.myargv(argv=sys.argv)[1:])
 
     try:
         rospy.init_node(NODE_NAME)
-        em2_node = EM2Node(args.manager_namespace, args.port_namespace)
+        em2_node = EM2Node(args.manager_namespace,
+                           args.port_namespace,
+                           args.controller_file)
         em2_node.run()
+    except ConfigException, ce:
+        rospy.logerr('Error with configuration file occured:')
+        rospy.logerr(str(ce))
     except rospy.ROSInterruptException, rie:
-        rospy.logerr('Fatal error occurred. Exiting...')
+        rospy.loginfo('Node exiting...')
