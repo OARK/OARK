@@ -20,15 +20,9 @@ public class Config {
     private final String CONFIG_FILENAME = "config.yaml";
 
     // YAML config field names.
+    private final String CONFIG_INPUTS = "inputs";
     private final String CONFIG_DISPLAY_TEXT = "display_name";
-    private final String CONFIG_MOTOR = "motor";
-    private final String CONFIG_ID = "id";
-    private final String CONFIG_INIT = "init";
-    private final String CONFIG_MIN = "min";
-    private final String CONFIG_MAX = "max";
-    private final String CONFIG_NAME = "joint_name";
-    private final String CONFIG_INVERT = "invert";
-    private final String CONFIG_USES_ABS = "ABSOLUTE";
+    private final String CONFIG_NAME = "name";
 
     private Map configMap;
 
@@ -46,21 +40,10 @@ public class Config {
 
         Log.i("ConfigTest", configMap.toString());
 
-        Iterator it = configMap.entrySet().iterator();
+        Map configInputs = (Map) configMap.get(CONFIG_NAME);
 
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            Log.i("ConfigTest", "Key: " + pair.getKey());
+        Log.i("ConfigTest", "ConfigInputs: " + configInputs.toString());
 
-            // The value of the entries we're iterating, should be
-            // another map with the values per motor.
-            if (pair.getValue() instanceof Map) {
-                Motor currentMotor = getMotorConfig((Map) pair.getValue());
-                Log.i("ConfigTest", "Motor: " + currentMotor);
-
-                motors.add(currentMotor);
-            }
-        }
     }
 
     /*
@@ -78,22 +61,22 @@ public class Config {
      */
     private Motor getMotorConfig(Map motorMap) {
         Motor newMotor = new Motor();
-
-        newMotor.setUsesAbsolutePosition(
-            ((String) motorMap.get("type")).equals(CONFIG_USES_ABS));
-
-        newMotor.setDisplayText((String) motorMap.get(CONFIG_DISPLAY_TEXT));
-        newMotor.setName((String) motorMap.get(CONFIG_NAME));
-
-        if (motorMap.get(CONFIG_MOTOR) instanceof Map) {
-            Map motorDetails = (Map) motorMap.get(CONFIG_MOTOR);
-            newMotor.setId((int) motorDetails.get(CONFIG_ID));
-
-            // This should really read the current position of the motor.
-            newMotor.setInitPosition((int) motorDetails.get(CONFIG_INIT));
-            newMotor.setMinPosition((int) motorDetails.get(CONFIG_MIN));
-            newMotor.setMaxPosition((int) motorDetails.get(CONFIG_MAX));
-        }
+//
+//        newMotor.setUsesAbsolutePosition(
+//            ((String) motorMap.get("type")).equals(CONFIG_USES_ABS));
+//
+//        newMotor.setDisplayText((String) motorMap.get(CONFIG_DISPLAY_TEXT));
+//        newMotor.setName((String) motorMap.get(CONFIG_NAME));
+//
+//        if (motorMap.get(CONFIG_MOTOR) instanceof Map) {
+//            Map motorDetails = (Map) motorMap.get(CONFIG_MOTOR);
+//            newMotor.setId((int) motorDetails.get(CONFIG_ID));
+//
+//            // This should really read the current position of the motor.
+//            newMotor.setInitPosition((int) motorDetails.get(CONFIG_INIT));
+//            newMotor.setMinPosition((int) motorDetails.get(CONFIG_MIN));
+//            newMotor.setMaxPosition((int) motorDetails.get(CONFIG_MAX));
+//        }
 
         return newMotor;
     }
