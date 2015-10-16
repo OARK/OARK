@@ -10,7 +10,7 @@ index 1dba368..82fa543 100644
  	select MIGHT_HAVE_PCI
  	help
  	  Include support for the ARM(R) Versatile Platform Baseboard
-@@ -12,0 +11,0 @@ config ARCH_VERSATILE_PB
+@@ -12,7 +11,6 @@ config ARCH_VERSATILE_PB
 
  config MACH_VERSATILE_AB
  	bool "Support Versatile Application Baseboard for ARM926EJ-S"
@@ -22,7 +22,7 @@ diff --git a/arch/arm/mm/Kconfig b/arch/arm/mm/Kconfig
 index 4118436..08861e5 100644
 --- a/arch/arm/mm/Kconfig
 +++ b/arch/arm/mm/Kconfig
-@@ -71,0 +71,0 @@ config CPU_ARM9TDMI
+@@ -71,7 +71,7 @@ config CPU_ARM9TDMI
 
  # ARM920T
  config CPU_ARM920T
@@ -31,7 +31,7 @@ index 4118436..08861e5 100644
  	select CPU_32v4T
  	select CPU_ABRT_EV4T
  	select CPU_CACHE_V4WT
-@@ -89,0 +89,0 @@ config CPU_ARM920T
+@@ -89,7 +89,7 @@ config CPU_ARM920T
 
  # ARM922T
  config CPU_ARM922T
@@ -40,7 +40,7 @@ index 4118436..08861e5 100644
  	select CPU_32v4T
  	select CPU_ABRT_EV4T
  	select CPU_CACHE_V4WT
-@@ -127,0 +127,0 @@ config CPU_ARM925T
+@@ -127,7 +127,7 @@ config CPU_ARM925T
 
  # ARM926T
  config CPU_ARM926T
