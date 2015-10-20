@@ -77,7 +77,15 @@ class CmdListener:
             #Start main message receiving/processing loop
             connected = True
             while connected:
+                #Reliably read in message header
                 msg_hdr = self._msg_sock.recv(self.MSG_HEADER_LEN)
+                while len(msg_hdr) < self.MSG_HEADER_LEN and msg_hdr is not None:
+                    new_bytes = self._msg_sock.recv(self.MSG_HEADER_LEN - len(msg_hdr))
+                    if new_bytes is None:
+                        msg_hdr = None
+                    else:
+                        msg_hdr = msg_hdr + new_bytes
+
 
                 #Test whether client has disconnected
                 if not msg_hdr:
@@ -87,6 +95,7 @@ class CmdListener:
                         for callback in self._dc_listeners:
                             callback()
                 else:
+                    print 'Msg Header:', [ord(a) for a in msg_hdr]
                     msg_type = ord(msg_hdr[0])
                     print 'Msg Type:', msg_type
 
@@ -94,6 +103,8 @@ class CmdListener:
                     msg_len = 0
                     for i, byte in enumerate(reversed(msg_hdr[1:])):
                         msg_len = msg_len + (ord(byte) << (i * 8))
+
+                    print 'Msg Length:', msg_len
 
 
                     #Receive until we have an entire message
