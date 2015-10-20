@@ -119,7 +119,7 @@ class DXLManager(object):
         """
         if name in self.cont_dict:
             raise ValueError('A controller by that name already exists')
-        if motor_id in map(lambda c: c.motor_id, self.cont_dict.iteritems()):
+        if motor_id in map(lambda c: c.motor_id, self.cont_dict.values()):
             raise ValueError('A controller has already been assigned to that ID')
 
         if cont_type == DXLManager.TORQUE_CONTROLLER:
@@ -160,5 +160,7 @@ if __name__ == '__main__':
         while not rospy.is_shutdown():
             print str(dxl_man['wheel_one'].get_joint_state())
             time.sleep(1)
+    except ConfigException, ce:
+        print str(ce)
     except Exception, e:
         print 'Error: ', str(e)

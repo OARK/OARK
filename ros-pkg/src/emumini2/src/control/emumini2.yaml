@@ -22,22 +22,24 @@
 #be specified in the input if deemed necessary.
 
 inputs:
-    left_analog:
-        type: analog
-        position: bottom, left
-    right_analog:
-        type: analog
-        position: bottom, right
-    elbow_slider:
-        type: slider
-        position: top
-    wrist_slider:
-        type: slider
-        position: top
-    hand_slider:
-        title: Hand
-        type: slider
-        position: top
+  - name: left_analog
+    type: analog
+    axes: Y
+
+  - name: right_analog
+    type: analog
+    axes: Y
+
+  - name: elbow_slider
+    type: slider
+    
+  - name: wrist_slider
+    type: slider
+
+  - name: hand_slider
+    title: Hand
+    type: slider
+
 
 
 #Specifies the controllers created in the software.
@@ -73,28 +75,28 @@ controllers:
         min: 0
         max: 4093
         joint_name: joint_fl
-        value: '1 * left_analog'
+        value: '1 * left_analog_y'
     fr:
         id: 2
         type: torque
         min: 0
         max: 4093
         joint_name: joint_fr
-        value: '-1 * right_analog'
+        value: '-1 * right_analog_y'
     br:
         id: 3
         type: torque
         min: 0
         max: 4093
         joint_name: joint_br
-        value: '-1 * right_analog'
-    fr:
+        value: '-1 * right_analog_y'
+    bl:
         id: 4
         type: torque
         min: 0
         max: 4093
         joint_name: joint_fr
-        value: '1 * left_analog'
+        value: '1 * left_analog_y'
     elbow:
         id: 5
         type: position

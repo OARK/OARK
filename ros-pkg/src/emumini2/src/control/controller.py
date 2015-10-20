@@ -7,6 +7,7 @@ but should be accessed through a DXLManager object.
 
 import rospy
 import threading
+import math
 
 import std_msgs
 from dynamixel_msgs.msg import JointState
@@ -17,6 +18,31 @@ from dynamixel_controllers.srv import SetSpeed
 __author__    = 'Tim Peskett'
 __copyright__ = 'Copyright 2016, OARK'
 __credits__   = ['Tim Peskett', 'Mike Aldred']
+
+
+
+#Utility function to allow easy coordinate rescaling
+def rescale(point, min1, max1, min2, max2):
+    """Takes a point in the interval (min1, max1) and converts it
+     to a point in the interval (min2, max2).
+     
+     After the function:
+     (point - min1) / (point - max1) == (return_value - min2) / (return_value - max2)
+     """
+
+    #Validate
+    if min1 > max1 - 1: min1 = max1 - 1
+    if min2 > max2: min2 = max2
+    if point < min1: point = min1
+    if point > max1: point = max1
+
+    #Normalise point
+    norm = float(point - min1) / float(max1 - min1)
+
+    return min2 + norm * float(max2 - min2)
+
+
+
 
 
 class Controller(object):
@@ -120,6 +146,7 @@ class PosController(Controller):
         rospy.set_param(cont_ns + '/motor/init', params['init'])
         rospy.set_param(cont_ns + '/motor/min', params['min'])
         rospy.set_param(cont_ns + '/motor/max', params['max'])
+        self.params = params
 
         self._start(port_ns, 'dynamixel_controllers', 'joint_position_controller', 'JointPositionController', name, [])
 
@@ -147,11 +174,18 @@ class PosController(Controller):
 
     def _convert_to_cmd(self, val):
         """Takes a controller-specific value and converts it the appropriate command
-        value to be sent to the dynamixel. In this case, converts position value into
-        an AX12 position value. This method allows simple conversion of units to be
-        implemented later.
+        value to be sent to the dynamixel.
+        
+        In this case, converts a value in [-1.0, 1.0] to a value in AX12 coordinates
+        that depend on the min and max values defined.
         """
-        return val
+        motor_range = (self.params['max'] - self.params['min']) / 1023.0 * math.radians(300)
+        rescaled_val = rescale(val, -1.0, 1.0, -(motor_range / 2.0), motor_range / 2.0)
+        print 'Rescaling ', val, ' to ', rescaled_val
+        print 'Motor_range: ', motor_range
+        print 'Params: ', str(self.params)
+        print '\n'
+        return rescaled_val
 
 
     def set_pos(self, pos):
@@ -177,6 +211,7 @@ class TorqueController(Controller):
         rospy.set_param(cont_ns + '/motor/init', params['init'])
         rospy.set_param(cont_ns + '/motor/min', params['min'])
         rospy.set_param(cont_ns + '/motor/max', params['max'])
+        self.params = params
 
         self._start(port_ns, 'dynamixel_controllers', 'joint_torque_controller', 'JointTorqueController', name, [])
 
@@ -203,8 +238,11 @@ class TorqueController(Controller):
     def _convert_to_cmd(self, val):
         """Takes a controller-specific value and converts it the appropriate command
         value to be sent to the dynamixel. In this case, converts torque to command.
+
+        In this case:
+        Takes in a value in [-1.0, 1.0] and converts it to a a value in [-2*pi, 2*pi].
         """
-        return val
+        return rescale(val, -1.0, 1.0, -2*math.pi, 2*math.pi)
 
 
     def set_torque(self, torque):
@@ -212,3 +250,6 @@ class TorqueController(Controller):
         given torque will depend on _torque_to_cmd.
         """
         self._cmd(self._convert_to_cmd(torque))
+
+
+

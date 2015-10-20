@@ -33,7 +33,7 @@ HAND_GO = 10
 NODE_NAME = 'em2_control_node'
 
 
-class EM2Node(object):
+class EM2NodeOld(object):
     """A node to receive messages from other nodes and
     control the emu mini 2 based on these messages.
     """
@@ -144,6 +144,9 @@ class EM2Node(object):
 
 
 
+
+
+
 class EM2Node(object):
     """A node to receive messages from other nodes and
     control the emu mini 2 based on these messages.
@@ -161,23 +164,15 @@ class EM2Node(object):
         self.dxl_mgr = DXLManager(man_ns, port_ns)
         self._create_controllers(cont_dict)
 
-        #Create a mutex to allow multithreaded subscriber
-        self._cmd_mutex = threading.Lock()
-        rospy.Subscriber('/%s/command'%(node_ns,), Command, self.cmd_rcvd)
-
-        #Create services to allow caller to retrieve data
-        rospy.Service('/%s/get_inputs'%(node_ns,),, self.get_inputs)
-        rospy.Service('/%s/get_motor_state'%(node_ns,), , self.get_motor_state)
-
         #Initialise the evaluation function symbol table
         #Updated before each evaluation
         self._sym_table = dict(math.__dict__)
 
         #Compile the evaluation function for each controller
-        eval_func = dict()
+        self.eval_funcs = dict()
         try:
             for name, data in cont_dict.iteritems():
-                eval_func[name] = compile(data['value'], '<string>', 'eval')
+                self.eval_funcs[name] = compile(data['value'], '<string>', 'eval')
         except KeyError, ke:
             raise ConfigException('\'value\' field not present on controller %s'%(name,))
         except (SyntaxError, TypeError) as e:
@@ -185,7 +180,18 @@ class EM2Node(object):
 
 
 
-    def _create_controllers(cont_dict):
+        #Create a mutex to allow multithreaded subscriber
+        self._cmd_mutex = threading.Lock()
+        rospy.Subscriber('/%s/command'%(node_ns,), Command, self.cmd_rcvd)
+
+        #Create services to allow caller to retrieve data
+        #rospy.Service('/%s/get_inputs'%(node_ns,),, self.get_inputs)
+        #rospy.Service('/%s/get_motor_state'%(node_ns,), , self.get_motor_state)
+
+
+
+
+    def _create_controllers(self, cont_dict):
         rospy.loginfo('Creating controllers...')
         try:
             for name, data in cont_dict.iteritems():
@@ -202,28 +208,77 @@ class EM2Node(object):
                                                name,
                                                cont_type,
                                                min=data['min'], max=data['max'],
-                                               init=data['min'],
+                                               init=(data['max'] + data['min'])/2.0,
                                                joint_name=data['joint_name'])
         except KeyError, ke:
             raise ConfigException('Field not found', ke)
         rospy.loginfo('Controllers created!')
 
 
-    def cmd_rcvd(self, cmd):
-        pass
+
+    def run(self):
+        rospy.loginfo('EM2Node running')
+        choose_func = lambda q: ([q[-1]] if q else [])
+        rate = rospy.Rate(20)
+        while not rospy.is_shutdown():
+            for name, cont in self.dxl_mgr:
+                cont.flush(choose=choose_func)
+
+            rate.sleep()
+
+
+    def cmd_rcvd(self, cmd):     
+        with self._cmd_mutex:
+            #Associate each input value with the name of the
+            #input to which it corresponds
+            syms = dict()
+            i = 0
+            for input in self._input_list:
+                if input['type'] == 'analog':
+                    syms[input['name'] + '_x'] = cmd.values[i]
+                    syms[input['name'] + '_y'] = cmd.values[i+1]
+                    i = i + 2
+                else:
+                    syms[input['name']] = cmd.values[i]
+                    i = i + 1
+
+
+            self._sym_table.update(syms)
+
+
+            #Evaluate all functions and supply values to controllers
+            #TODO: Add AttributeError
+            for cont_name, eval_func in self.eval_funcs.iteritems():
+                try:
+                    out_value = float(eval(eval_func, self._sym_table))
+                    self.dxl_mgr[cont_name].queue(out_value)
+                except ValueError, ve:
+                    rospy.logerr('Invalid python expression for controller ' + str(cont_name))
+                except AttributeError, ae:
+                    print self._sym_table
+                    print str(ae)
+                except NameError, ne:
+                    rospy.logerr('Unrecognised name in python expression for controller ' + str(cont_name))
+                    rospy.logerr(str(ne))
+
+
 
     
-    def get_inputs(self, req):
-        pass
+    #def get_inputs(self, req):
+        #pass
 
 
-    def get_motor_state(self, req): 
-        pass
+    #def get_motor_state(self, req): 
+        #pass
+
 
     
 
+#An exception thrown when the configuration file is malformed
 class ConfigException(Exception):
     pass
+
+
 
 
 if __name__ == '__main__':

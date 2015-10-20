@@ -71,6 +71,7 @@ find_package(catkin REQUIRED COMPONENTS
  generate_messages(
    DEPENDENCIES
    std_msgs
+   dynamixel_msgs
  )
 
 ################################################
