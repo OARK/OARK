@@ -10,7 +10,6 @@ git clone https://github.com/rosjava/rosjava_bootstrap
 
 git -C rosjava_bootstrap fetch origin indigo:indigo
 git -C rosjava_bootstrap checkout indigo
-mkdir output_dir
 
 # Deploy to the local Maven repo.
 ROS_MAVEN_DEPLOYMENT_REPOSITORY=$HOME/.m2/repository
