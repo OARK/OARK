@@ -38,5 +38,8 @@ gradlew.bat
 *raspbian*.img
 *raspbian*.zip
 
+# Ignore rosjava_bootstrap
+rosjava_bootstrap
+
 # Don't care about .gitignore
 .gitignore

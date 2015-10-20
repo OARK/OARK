@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.ros.message.
 
 import org.luminousmonkey.dynamiclayout.config.Motor;
 
