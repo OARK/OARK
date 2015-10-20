@@ -181,10 +181,6 @@ class PosController(Controller):
         """
         motor_range = (self.params['max'] - self.params['min']) / 1023.0 * math.radians(300)
         rescaled_val = rescale(val, -1.0, 1.0, -(motor_range / 2.0), motor_range / 2.0)
-        print 'Rescaling ', val, ' to ', rescaled_val
-        print 'Motor_range: ', motor_range
-        print 'Params: ', str(self.params)
-        print '\n'
         return rescaled_val
 
 

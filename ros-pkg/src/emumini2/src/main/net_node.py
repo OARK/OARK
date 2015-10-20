@@ -7,6 +7,7 @@ these messages/events with other running nodes.
 import rospy
 
 from cmd_listener import CmdListener
+
 from emumini2.msg import Command
 from emumini2.srv import StartStream
 from std_srvs.srv import Empty
@@ -15,6 +16,15 @@ from std_srvs.srv import Empty
 __author__    = 'Tim Peskett'
 __copyright__ = 'Copyright 2016, OARK'
 __credits__   = ['Tim Peskett', 'Mike Aldred']
+
+
+#Defines the mapping between message type numbers and the ros message
+#that they instantiate. This is needed so that the message type can be
+#sent over the network.
+MSGS = {
+        1: Command,
+       }
+
 
 
 class NetNode(object):
@@ -34,12 +44,30 @@ class NetNode(object):
         start_stream(str(addr[0]))
 
 
-    def on_data(self, msg):
+
+    def on_data(self, msg_type, msg):
+        """Receives a message from the caller, turns it into the appropriate
+        ROS message and then forwards it to another function to handle the message.
+        The calling of the function may need to be run in another thread at a later
+        point if efficiency issues are encountered.
+        """
+
         rospy.loginfo('Got data')
 
-        #Convert our own message to a ROS message
-        c = Command(type=msg.get_type(), value=msg.get_value())
-        self._command_pub.publish(c)
+        ros_msg = MSGS[msg_type]()
+        ros_msg.deserialize(msg)
+
+        msg_name = MSGS[msg_type].__name__
+
+        try:
+            msg_func = getattr(self, 'on_' + msg_name.lower())
+            msg_func(ros_msg)
+        except AttributeError, ae:
+            rospy.logwarn('No function to handle ROS msg <' + msg_name + '>')
+
+
+    def on_command(self, cmd):
+        self._command_pub.publish(cmd)
 
 
     def on_dc(self):
