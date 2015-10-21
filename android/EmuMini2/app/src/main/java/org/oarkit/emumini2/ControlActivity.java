@@ -19,7 +19,7 @@ import org.oarkit.R;
 public class ControlActivity extends Activity {
     private String targetIP = "192.168.12.1";
 
-    private Talker talker;
+    private Transceiver transceiver;
 
     private final float SPEED_EPSILON = 0.075f;
     private final float POS_EPSILON = 0.05f;
@@ -58,7 +58,7 @@ public class ControlActivity extends Activity {
 
         /* Connect to raspberry pi server */
         try {
-            talker = new Talker(targetIP);
+            transceiver = new Transceiver(targetIP);
         }
         catch(Exception e) {
             /* TODO: Put this code in a listener and pass it to server thread */
@@ -79,7 +79,7 @@ public class ControlActivity extends Activity {
                             fwm.setType(fwm.LEFT_GO);
                             fwm.setVal((byte)(leftAnalog.getAnalogY() * SPEED_MUL));
                             try {
-                                talker.send(fwm);
+                                transceiver.send();
                             }
                             catch(Exception e) {
                                 Log.w("EMUMINI2", "Unable to send message");
@@ -103,7 +103,7 @@ public class ControlActivity extends Activity {
                             fwm.setType(fwm.RIGHT_GO);
                             fwm.setVal((byte)(rightAnalog.getAnalogY() * SPEED_MUL));
                             try {
-                                talker.send(fwm);
+                                transceiver.send();
                             }
                             catch(Exception e) {
                                 Log.w("EMUMINI2", "Unable to send message");
@@ -128,10 +128,10 @@ public class ControlActivity extends Activity {
                             fwm.setType(fwm.ARM_GO);
                             fwm.setVal((byte)(elbowPos * 127));
                             try {
-                                talker.send(fwm);
+                                transceiver.send();
                             }
                             catch(Exception e) {
-                                Log.w("EMUMINI2", "Unable to send message");
+                                Log.w("EMUMINI2", "Exception: " + e.getMessage());
                             }
 
                             Log.e("EMUMINI2", "Elbow: " + elbowPos);
@@ -153,7 +153,7 @@ public class ControlActivity extends Activity {
                             fwm.setType(fwm.WRIST_GO);
                             fwm.setVal((byte)(wristPos * 127));
                             try {
-                                talker.send(fwm);
+                                transceiver.send();
                             }
                             catch(Exception e) {
                                 Log.w("EMUMINI2", "Unable to send message");
@@ -178,7 +178,7 @@ public class ControlActivity extends Activity {
                             fwm.setType(fwm.HAND_GO);
                             fwm.setVal((byte)(handPos * 127));
                             try {
-                                talker.send(fwm);
+                                transceiver.send();
                             }
                             catch(Exception e) {
                                 Log.w("EMUMINI2", "Unable to send message");
@@ -201,7 +201,7 @@ public class ControlActivity extends Activity {
         try {
             videoRenderer.stopRendering();
             // Release our talker socket.
-            talker.close();
+            transceiver.close();
             finish();
         } catch(Exception e) {
             Log.e("EmuMini2", "Could not connect.");
