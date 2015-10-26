@@ -52,12 +52,14 @@ public class Transceiver {
      * communications.
      */
     class TransceiverThread implements Runnable {
-
         private byte[] mMessageBytes = new byte[MAX_MESSAGE_SIZE];
 
         public TransceiverThread() {
         }
 
+        // We throw a RuntimeException here if the connection fails.
+        // TODO: Improve error handling so it will keep retrying and
+        // application won't proceed unless the connection is working.
         public void run() {
             try {
                 mRobotSocket = new Socket(InetAddress.getByName(mAddress),
@@ -69,6 +71,7 @@ public class Transceiver {
 
             } catch (IOException e) {
                 Log.i("TransceiverThread", "IOException: " + e.getMessage());
+                throw new RuntimeException(e);
             }
         }
 
@@ -99,7 +102,7 @@ public class Transceiver {
      *
      */
     public synchronized void send(Message inMessage) throws IOException {
-        ControlMessage testMessage = new ControlMessage(new float[]{0f, 0f, 0f, 0.1f, 0.5f, 0f, 0f});
+        Log.i("Transceiver", "Message: " + inMessage.toString());
         mToRobot.write(inMessage.toByteArray());
         mToRobot.flush();
     }
