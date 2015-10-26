@@ -1,21 +1,21 @@
+/*
+ * OARK Controller Software.
+ *
+ * Copyright (c) 2015 Open Academic Robot Kit.
+ */
+
 package org.oarkit.emumini2;
 
 import android.util.Log;
+
+import org.oarkit.emumini2.messages.ControlMessage;
+import org.oarkit.emumini2.messages.Message;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-
-import org.jboss.netty.buffer.BigEndianHeapChannelBuffer;
-import org.jboss.netty.buffer.LittleEndianHeapChannelBuffer;
-import org.oarkit.emumini2.rosmessages.Command;
-import org.ros.message.MessageDefinitionProvider;
-import org.ros.internal.message.DefaultMessageFactory;
-import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
-
-import org.ros.internal.message.DefaultMessageSerializationFactory;
 
 /*
  * This class is the central point for communication to and from the
@@ -98,37 +98,9 @@ public class Transceiver {
     /*
      *
      */
-    public synchronized void send() throws IOException {
-        MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
-        DefaultMessageFactory dmf = new DefaultMessageFactory(messageDefinitionProvider);
-        Command msg = dmf.newFromType(Command._TYPE);
-
-        float[] testValues = new float[]{0f, 0f, 0f, 0.1f, 0.5f, 0f, 0f};
-        msg.setValues(testValues);
-
-        DefaultMessageSerializationFactory dmsf = new DefaultMessageSerializationFactory(messageDefinitionProvider);
-        LittleEndianHeapChannelBuffer chanbuf = new LittleEndianHeapChannelBuffer(MAX_MESSAGE_SIZE);
-        dmsf.newMessageSerializer(msg._TYPE).serialize(msg, chanbuf);
-
-        Log.i("Transceiver", "Length: " + chanbuf.writerIndex());
-
-        byte[] tempBuffer = new byte[chanbuf.writerIndex()];
-
-        System.arraycopy(chanbuf.array(), 0, tempBuffer, 0, chanbuf.writerIndex());
-
-        String tempString = "";
-        for ( byte b : tempBuffer) {
-            tempString += "-" + String.valueOf(b);
-        }
-
-        Log.i("Transceiver", tempString);
-
-        // Only one type available
-        mToRobot.writeByte(1);
-        mToRobot.writeByte(0);
-        mToRobot.writeByte(chanbuf.writerIndex());
-        mToRobot.write(tempBuffer);
-
+    public synchronized void send(Message inMessage) throws IOException {
+        ControlMessage testMessage = new ControlMessage(new float[]{0f, 0f, 0f, 0.1f, 0.5f, 0f, 0f});
+        mToRobot.write(inMessage.toByteArray());
         mToRobot.flush();
     }
 }
