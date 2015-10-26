@@ -247,19 +247,18 @@ class EM2Node(object):
 
 
             #Evaluate all functions and supply values to controllers
-            #TODO: Add AttributeError
             for cont_name, eval_func in self.eval_funcs.iteritems():
                 try:
                     out_value = float(eval(eval_func, self._sym_table))
                     self.dxl_mgr[cont_name].queue(out_value)
                 except ValueError, ve:
-                    rospy.logerr('Invalid python expression for controller ' + str(cont_name))
+                    rospy.logwarn('Invalid python expression for controller ' + str(cont_name))
                 except AttributeError, ae:
-                    print self._sym_table
-                    print str(ae)
+                    rospy.logwarn('Unrecognised attribute in expression for controller ' + str(cont_name))
+                    rospy.logwarn(str(ae))
                 except NameError, ne:
-                    rospy.logerr('Unrecognised name in python expression for controller ' + str(cont_name))
-                    rospy.logerr(str(ne))
+                    rospy.logwarn('Unrecognised name in python expression for controller ' + str(cont_name))
+                    rospy.logwarn(str(ne))
 
 
 
