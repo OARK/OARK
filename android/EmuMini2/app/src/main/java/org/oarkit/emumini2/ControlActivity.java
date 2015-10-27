@@ -57,6 +57,7 @@ public class ControlActivity extends Activity {
     @Override
     public void onPause() {
         super.onPause();
+        controlPoller.stop();
         videoRenderer.stopRendering();
         finish();
     }

@@ -35,7 +35,13 @@ public class Poller {
 
     private Transceiver mTransceiver;
 
+    private Thread pollerThread;
+
+    private volatile boolean mRunning;
+
     public Poller(Activity inActivity) {
+        mRunning = true;
+
         leftAnalog = (AnalogStickView) inActivity.findViewById(R.id.left_analog_stick);
         rightAnalog = (AnalogStickView) inActivity.findViewById(R.id.right_analog_stick);
         handSeek = (SeekBar) inActivity.findViewById(R.id.handSeek);
@@ -54,8 +60,12 @@ public class Poller {
 
     private void createAndStartThread() {
         PollerThread ti = new PollerThread();
-        Thread pollerThread = new Thread(ti);
+        pollerThread = new Thread(ti);
         pollerThread.start();
+    }
+
+    public void stop() {
+        mRunning = false;
     }
 
     class PollerThread implements Runnable {
@@ -67,7 +77,7 @@ public class Poller {
 
             }
 
-            while (true) {
+            while (mRunning) {
                 // TODO: Poll a layout that is dynamically generated.
                 float[] testingArray = new float[]{
                     (float) leftAnalog.getAnalogX(),
