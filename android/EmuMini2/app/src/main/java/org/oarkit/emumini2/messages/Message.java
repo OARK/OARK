@@ -42,7 +42,8 @@ public abstract class Message {
     public final static int HEADER_SIZE = 3;
 
     // Max allowed message size.
-    public final static int MAX_MESSAGE_SIZE = Short.MAX_VALUE;
+    // It's unsigned at robot end.
+    public final static int MAX_MESSAGE_SIZE = (Short.MAX_VALUE * 2) + 1;
 
     // The type of message being sent.
     private byte mType;
@@ -65,11 +66,11 @@ public abstract class Message {
      */
     public Message(String inRosType) {
         mRosType = inRosType;
-        MessageDefinitionProvider mMdp =
+        MessageDefinitionProvider mdp =
             new MessageDefinitionReflectionProvider();
-        DefaultMessageFactory mDmf = new DefaultMessageFactory(mMdp);
-        mRosMessage = mDmf.newFromType(mRosType);
-        mDmsf = new DefaultMessageSerializationFactory(mMdp);
+        DefaultMessageFactory dmf = new DefaultMessageFactory(mdp);
+        mDmsf = new DefaultMessageSerializationFactory(mdp);
+        mRosMessage = dmf.newFromType(mRosType);
     }
 
     public byte getType() {
@@ -82,7 +83,7 @@ public abstract class Message {
      *
      * @param inType Byte value decided to be that message type.
      */
-    public void setType(byte inType) {
+    protected void setType(byte inType) {
         mType = inType;
     }
 
@@ -96,6 +97,8 @@ public abstract class Message {
      * @return Byte array representing network packet.
      */
     public byte[] toByteArray() {
+        // TODO: Check if this isn't causing the CG issues.
+
         /* There doesn't seem to be a way to find out the bytesize of
          * the data without first putting it into a buffer and
          * counting. The ROS code on the other end expects little
@@ -118,6 +121,35 @@ public abstract class Message {
                          chanBuf.writerIndex());
 
         return message;
+    }
+
+    /**
+     *
+     */
+    public boolean fromByteArray(byte[] inByteArray) throws
+        IllegalArgumentException {
+        boolean result = false;
+        if (inByteArray[0] == getType()) {
+            int length = (inByteArray[1] << 8) | (inByteArray[2]);
+
+            if (length != (inByteArray.length - HEADER_SIZE)) {
+                throw new IllegalStateException("Packet length: " +
+                                                length + " doesn't match " +
+                                                (inByteArray.length -
+                                                 HEADER_SIZE));
+            } else {
+                LittleEndianHeapChannelBuffer chanBuf =
+                    new LittleEndianHeapChannelBuffer(length);
+
+                chanBuf.writeBytes(inByteArray, HEADER_SIZE, length);
+                mRosMessage = (org.ros.internal.message.Message)
+                        mDmsf.newMessageDeserializer(mRosType).deserialize(chanBuf);
+
+                result = true;
+            }
+        }
+
+        return result;
     }
 
     /**

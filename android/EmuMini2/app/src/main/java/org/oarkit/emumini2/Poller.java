@@ -22,8 +22,9 @@ import static java.lang.Thread.sleep;
  * the controls and send the data at fixed time intervals.
  */
 public class Poller {
-    private String targetIP = "192.168.6.22";
+    private String targetIP = "192.168.12.1";
 
+    // Time in ms when updates should be sent to the robot.
     final private static long POLL_TIME = 200;
 
     private AnalogStickView leftAnalog;
