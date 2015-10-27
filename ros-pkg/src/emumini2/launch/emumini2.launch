@@ -31,7 +31,7 @@
         name="em2_control_node"
         pkg="emumini2"
         type="control_node.py"
-        args="dxl_manager pi_out_port $(find emumini2)/src/control/emumini2.yaml"
+        args="dxl_manager pi_out_port $(find emumini2)/emumini2.yaml"
         required="true"
         output="screen"/>
 
