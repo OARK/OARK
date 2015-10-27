@@ -5,6 +5,7 @@ buildscript {
         jcenter()
         mavenCentral()
     }
+
     dependencies {
         classpath 'com.android.tools.build:gradle:1.2.3'
 

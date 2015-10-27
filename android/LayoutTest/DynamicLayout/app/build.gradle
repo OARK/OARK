@@ -1,17 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-
-  packagingOptions {
-    exclude 'META-INF/LICENSE.txt'
-          exclude 'META-INF/NOTICE.txt'
-  }
-
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
+
     defaultConfig {
-        applicationId 'org.intelligentrobots.emumini2'
-        minSdkVersion 18
+        applicationId "org.luminousmonkey.dynamiclayout"
+        minSdkVersion 19
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
@@ -22,16 +17,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    productFlavors {
-    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:22.1.1'
+    compile group: 'org.yaml', name: 'snakeyaml', version: '1.16'
     compile group: 'org.ros.rosjava_bootstrap', name: 'message_generation', version: '0.2.1'
-    // Unit testing
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.hamcrest:hamcrest-library:1.1'
-
 }
