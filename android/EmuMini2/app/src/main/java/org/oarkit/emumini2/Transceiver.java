@@ -89,7 +89,11 @@ public class Transceiver {
             }
 
             int type = mMessageBytes[0];
-            int length = mMessageBytes[1];
+            int length = (mMessageBytes[1] << 8) | mMessageBytes[2];
+
+            if ((mMessageBytes.length - 3) == length) {
+                Log.i("TransceiverThread", "Length is correct");
+            }
 
             return null;
         }
