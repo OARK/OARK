@@ -74,8 +74,8 @@ class CmdListener:
             rospy.loginfo('Accepted connection from ' + str(remote_addr))
             
             #Start main message receiving/processing loop
-            connected = True
-            while connected:
+            self.connected = True
+            while self.connected:
                 #Reliably read in message header
                 msg_hdr = self._msg_sock.recv(net_consts.MSG_HEADER_LEN)
                 while len(msg_hdr) < net_consts.MSG_HEADER_LEN and msg_hdr is not None:
@@ -88,7 +88,7 @@ class CmdListener:
 
                 #Test whether client has disconnected
                 if not msg_hdr:
-                    connected = False
+                    self.connected = False
                     #inform observers
                     with self._listener_mutex:
                         for callback in self._dc_listeners:
@@ -116,20 +116,26 @@ class CmdListener:
 
 
     def send(self, msg_type, data):
+        """data should be a serialised *string*
+        """
         with self._send_mutex:
             if not self.connected:
                 raise NetworkException('Could not send data on socket. Not connected')
 
-            #Calculate length of data in byte form
-            msg_len_rev = []
+            #Calculate length of data in byte form. Done from lowest to highest byte
+            msg_len = []
             for i in range(net_consts.MSG_HEADER_LEN-1):
-                msg_len_rev.append((len(data) >> (i*8)) % 256)
+                msg_len.append((len(data) >> (i*8)) % 256)
+            #Correct order to be network byte order
+            msg_len.reverse()
+
+            print 'message length bytes: ', msg_len
 
             #Create message to send
-            msg = [msg_type] + reversed(msg_len_rev) + data
+            msg = chr(msg_type) + ''.join(map(chr, msg_len)) + data
 
             #Send message
-            success = self._msg_sock.sendall(data)
+            success = self._msg_sock.sendall(msg)
             if success != None:
                 raise NetworkException('Could not send data on socket')
 

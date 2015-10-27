@@ -105,6 +105,7 @@ if __name__ == '__main__':
     try:
         result = packet_func(sys.argv[2:])
         sys.stdout.write(result)
+        sys.stdout.flush()
     except Exception, e:
         print "Error occurred: ", str(e)
     
