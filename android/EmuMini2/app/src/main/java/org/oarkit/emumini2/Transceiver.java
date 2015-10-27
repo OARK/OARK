@@ -22,8 +22,8 @@ import java.net.Socket;
  * the robot.
  */
 public class Transceiver {
-    private final int DEFAULT_PORT = 1717;
-    private final int MAX_MESSAGE_SIZE = 1024;
+    private final static int DEFAULT_PORT = 1717;
+    private final static int MAX_MESSAGE_SIZE = 1024;
 
     private Socket mRobotSocket;
     private DataOutputStream mToRobot;
