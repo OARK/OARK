@@ -13,6 +13,8 @@ import static org.junit.Assert.assertThat;
 
 import org.oarkit.emumini2.messages.rosmessages.Input;
 
+import java.util.List;
+
 public class InputResponseTest {
     private static byte[] testPacket = new byte[]{
         0x03, 0x00, 0x25, 0x01, 0x00, 0x00, 0x00, 0x04,
@@ -29,6 +31,15 @@ public class InputResponseTest {
     public void InputResponseTest_create() {
         InputResponse testResponse = new InputResponse(testPacket);
 
-        testResponse.getValues();
+        List<Input> inputList = testResponse.getValues();
+
+        // Single input only.
+        Input firstInput = inputList.get(0);
+
+        // Title and type in the test data are swapped around.
+        assertThat(firstInput.getName(), is("name"));
+        assertThat(firstInput.getType(), is("title"));
+        assertThat(firstInput.getTitle(), is("type"));
+        assertThat(firstInput.getAxes(), is("axes"));
     }
 }

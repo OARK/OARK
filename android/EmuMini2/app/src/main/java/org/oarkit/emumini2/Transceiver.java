@@ -17,9 +17,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 
-/*
- * This class is the central point for communication to and from the
- * robot.
+/**
+ * This class is the central receiver and transmitter of packets from
+ * the robot.
  */
 public class Transceiver {
     private final int DEFAULT_PORT = 1717;
@@ -32,11 +32,17 @@ public class Transceiver {
     private Thread mTransceiverThread;
 
     private String mAddress;
+    private int mPort;
 
-    private Transceiver() {}
+    private Transceiver() {};
 
     public Transceiver(String address) throws IOException {
+        this(address, DEFAULT_PORT);
+    }
+
+    public Transceiver(String address, int port) throws IOException {
         mAddress = address;
+        mPort = port;
 
         createAndStartThread();
     }
@@ -63,7 +69,7 @@ public class Transceiver {
         public void run() {
             try {
                 mRobotSocket = new Socket(InetAddress.getByName(mAddress),
-                                          DEFAULT_PORT);
+                                          mPort);
                 mToRobot =
                     new DataOutputStream(mRobotSocket.getOutputStream());
                 mFromRobot =
