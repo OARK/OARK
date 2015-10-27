@@ -3,6 +3,7 @@
 """A basic network module to allow connections and pass messages
 to any observers.
 """
+import net_consts
 
 import rospy
 import socket
@@ -12,8 +13,6 @@ import msg
 
 
 class CmdListener:
-    MSG_HEADER_LEN = 3
-
     def __init__(self, interface, port=1717):
         """Creates the network socket and initialises it to 
         the appropriate port. It then binds the socket to 
@@ -78,9 +77,9 @@ class CmdListener:
             connected = True
             while connected:
                 #Reliably read in message header
-                msg_hdr = self._msg_sock.recv(self.MSG_HEADER_LEN)
-                while len(msg_hdr) < self.MSG_HEADER_LEN and msg_hdr is not None:
-                    new_bytes = self._msg_sock.recv(self.MSG_HEADER_LEN - len(msg_hdr))
+                msg_hdr = self._msg_sock.recv(net_consts.MSG_HEADER_LEN)
+                while len(msg_hdr) < net_consts.MSG_HEADER_LEN and msg_hdr is not None:
+                    new_bytes = self._msg_sock.recv(net_consts.MSG_HEADER_LEN - len(msg_hdr))
                     if new_bytes is None:
                         msg_hdr = None
                     else:
@@ -95,17 +94,12 @@ class CmdListener:
                         for callback in self._dc_listeners:
                             callback()
                 else:
-                    print 'Msg Header:', [ord(a) for a in msg_hdr]
                     msg_type = ord(msg_hdr[0])
-                    print 'Msg Type:', msg_type
 
                     #Get message length from header
                     msg_len = 0
                     for i, byte in enumerate(reversed(msg_hdr[1:])):
                         msg_len = msg_len + (ord(byte) << (i * 8))
-
-                    print 'Msg Length:', msg_len
-
 
                     #Receive until we have an entire message
                     msg_body = self._msg_sock.recv(msg_len)
@@ -115,7 +109,9 @@ class CmdListener:
                     #Inform observers
                     with self._listener_mutex:
                         for callback in self._data_listeners:
-                            callback(msg_type, msg_body)
+                            #Perform callback(msg_type, msg_body) on new thread
+                            threading.Thread(target=callback, args=(msg_type, msg_body)).start()
+                            
 
 
 
@@ -126,7 +122,7 @@ class CmdListener:
 
             #Calculate length of data in byte form
             msg_len_rev = []
-            for i in range(self.MSG_HEADER_LEN-1):
+            for i in range(net_consts.MSG_HEADER_LEN-1):
                 msg_len_rev.append((len(data) >> (i*8)) % 256)
 
             #Create message to send
