@@ -59,14 +59,16 @@ inputs:
 #                be required at some point.
 #   value - The value that the controller is to take. *Must be a 
 #           string*.
-#           This should be specified as a linear combination of 
-#           inputs. Each input that contributes to the value should 
-#           be listed, and can be scaled by a real number. Different 
-#           inputs should be comma separated. For example:
+#           This value must be a valid python expression. It should
+#           evaluate to a value between -1.0 and 1.0. Functions from
+#           the python math module can be used, the should not be
+#           prefixed with 'math.'.
+#           For example:
 #
-#               value: '1 * input1, -1 * input2, 3 * input3'
+#               value: '1 * input1 + sin(input2) + 3 * input3'
 #
-#           will pass input1-input2+3*input3 to the controller.
+#           will pass input1+sin(input2)+3*input3 to the controller.
+#           Values outside of [-1.0, 1.0] will be truncated.
 
 controllers:
     fl:
@@ -118,3 +120,7 @@ controllers:
         max: 870
         joint_name: joint_hand
         value: '1 * hand_slider'
+
+
+#Settings
+video: true

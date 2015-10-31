@@ -19,4 +19,4 @@ v4l2-ctl --set-ctrl=vertical_flip=1
 . $ROS_PATH
 . $PROJ_PATH
 
-roslaunch $@
+roslaunch oark oark.launch

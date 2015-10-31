@@ -13,7 +13,7 @@ from cmd_listener import CmdListener
 import net_consts
 
 from oark.msg import Command
-from oark.srv import StartStream
+from oark.srv import Connected
 from oark.srv import GetInputs, GetInputsRequest, GetInputsResponse
 from std_srvs.srv import Empty
 
@@ -60,10 +60,10 @@ class NetNode(object):
                                             latch=True,
                                             queue_size=10)
 
-        self.stop_stream = rospy.ServiceProxy('/oark_vid_node/stop_stream',
-                                              Empty)
-        self.start_stream = rospy.ServiceProxy('/oark_vid_node/start_stream',
-                                               StartStream)
+        self.disconnected_srv = rospy.ServiceProxy('/oark_control_node/disconnected',
+                                                   Empty)
+        self.connected_srv = rospy.ServiceProxy('/oark_control_node/connected',
+                                                Connected)
 
 
     def on_connect(self, addr):
@@ -75,7 +75,7 @@ class NetNode(object):
         rospy.loginfo('Connected to ' + str(addr))
 
         #The first member of the addr tuple is the IP address
-        self.start_stream(str(addr[0]))
+        self.connected_srv(str(addr[0]))
 
 
     def on_data(self, msg_type, msg):
@@ -137,7 +137,7 @@ class NetNode(object):
         """Called when a client disconnects.
         """
         rospy.loginfo('Disconnected')
-        self.stop_stream()
+        self.disconnected_srv()
 
     
     def shutdown(self):
@@ -156,7 +156,6 @@ class NetNode(object):
         return out_buf
 
 
-
 if __name__ == '__main__':
     """The entry point for the network node. Creates a network node object
     on a specified port and then lets that node take over."""
@@ -171,9 +170,8 @@ if __name__ == '__main__':
 
     rospy.init_node(NODE_NAME)
 
-    #Wait for camera node to initialise
-    rospy.wait_for_service('/oark_vid_node/start_stream')
-
+    #Wait for the control node to initialise
+    rospy.wait_for_service('/oark_control_node/connected')
     try:
         #Create network node
         n = NetNode(NODE_NAME, args.port)

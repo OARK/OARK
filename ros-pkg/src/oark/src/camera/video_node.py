@@ -17,7 +17,7 @@ from gi.repository import GObject, Gst
 GObject.threads_init()
 
 from std_srvs.srv import Empty, EmptyResponse
-from oark.srv import StartStream, StartStreamResponse
+from oark.srv import Connected, ConnectedResponse
 
 __author__    = 'Mike Aldred, Tim Peskett'
 __copyright__ = 'Copyright 2016, OARK'
@@ -67,7 +67,7 @@ class VideoStream(object):
             },
         ]
 
-        There are obviously some redunancies and annoyances with this format, but
+        There are obviously some redundancies and annoyances with this format, but
         some of this is necessary to facilitate its writing in YAML.
 
         The elements of the inner dictionaries are tried in order until one of
@@ -216,7 +216,7 @@ class StreamNode(object):
 
         #Create ROS services
         self._stream_mutex = threading.Lock()
-        rospy.Service('/%s/start_stream'%(node_namespace,), StartStream, self.start_stream)
+        rospy.Service('/%s/start_stream'%(node_namespace,), Connected, self.start_stream)
         rospy.Service('/%s/stop_stream'%(node_namespace,), Empty, self.stop_stream)
 
 
@@ -245,7 +245,7 @@ class StreamNode(object):
                 success = False
 
             #Return a C-style error code.
-            return StartStreamResponse(1 if success else 0)
+            return ConnectedResponse(1 if success else 0)
 
 
     def stop_stream(self, req):

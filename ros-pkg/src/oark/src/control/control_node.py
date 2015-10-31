@@ -17,7 +17,9 @@ from manager import DXLManager
 
 from oark.msg import Command
 from oark.srv import GetInputs, GetInputsResponse
+from oark.srv import Connected, ConnectedResponse
 from oark.msg import Input
+from std_srvs.srv import Empty, EmptyResponse
 
 
 __author__    = 'Tim Peskett'
@@ -49,11 +51,13 @@ class OARKNode(object):
         self.config = yaml.load(config_file.read())
         config_file.close()
 
-        self._input_list = self.config['inputs']
-        cont_dict = self.config['controllers']
+        #Save config file in this object
+        self.input_list = self.config['inputs']
+        self.cont_dict = self.config['controllers']
+        self._has_video = self.config.get('video', False)
 
         self.dxl_mgr = DXLManager(man_ns, port_ns)
-        self._create_controllers(cont_dict)
+        self._create_controllers(self.cont_dict)
 
         #Initialise the evaluation function symbol table
         #Updated before each evaluation
@@ -62,7 +66,7 @@ class OARKNode(object):
         #Compile the evaluation function for each controller
         self.eval_funcs = dict()
         try:
-            for name, data in cont_dict.iteritems():
+            for name, data in self.cont_dict.iteritems():
                 self.eval_funcs[name] = compile(data['value'], '<string>', 'eval')
         except KeyError, ke:
             raise ConfigException('\'value\' field not present on controller %s'%(name,))
@@ -73,14 +77,27 @@ class OARKNode(object):
         self._cmd_mutex = threading.Lock()
         rospy.Subscriber('/%s/command'%(node_ns,), Command, self.cmd_rcvd)
 
+        #Wait for video node if available
+        if self._has_video:
+            rospy.wait_for_service('/oark_vid_node/start_stream')
+
         #Create services to allow caller to retrieve data
+        rospy.Service('/%s/connected'%(node_ns,), Connected, self.connected)
+        rospy.Service('/%s/disconnected'%(node_ns,), Empty, self.disconnected)
         rospy.Service('/%s/get_inputs'%(node_ns,), GetInputs, self.get_inputs)
         #rospy.Service('/%s/get_motor_state'%(node_ns,), , self.get_motor_state)
+
+        #Create service proxies with which to call other services
+        self.stop_stream = rospy.ServiceProxy('/oark_vid_node/stop_stream',
+                                              Empty)
+        self.start_stream = rospy.ServiceProxy('/oark_vid_node/start_stream',
+                                               Connected)
 
 
     def _create_controllers(self, cont_dict):
         """A helper function to take the yaml-specified motor configuration data
-        and create the controllers for them.
+        and create the controllers for them. The point of this method is really
+        just to keep the constructor clean.
         """
         rospy.loginfo('Creating controllers...')
         try:
@@ -130,7 +147,7 @@ class OARKNode(object):
             #input to which it corresponds
             syms = dict()
             i = 0
-            for input in self._input_list:
+            for input in self.input_list:
                 if input['type'] == 'analog':
                     syms[input['name'] + '_x'] = cmd.values[i]
                     syms[input['name'] + '_y'] = cmd.values[i+1]
@@ -158,6 +175,26 @@ class OARKNode(object):
                     rospy.logwarn(str(ne))
 
 
+    def connected(self, req):
+        """Called when a client connects to the robot.
+        Req contains the IP address of the connected robot.
+        """
+        rospy.loginfo('Client connected')
+        if self._has_video:
+            return self.start_stream(req)
+        else:
+            #Nothing to do, return success
+            return ConnectedResponse(1)
+
+    
+    def disconnected(self, req):
+        """Called when a client disconnects from the robot.
+        Req is the Empty message.
+        """
+        if self._has_video:
+            return self.stop_stream(req)
+        else:
+            return EmptyResponse()
 
     
     def get_inputs(self, req):
@@ -167,15 +204,13 @@ class OARKNode(object):
         each motor uses these values to set its own value.
         """
         #Create Input objects out of input yaml dictionaries
-        out_inputs = map(lambda i: Input(**i), self._input_list)
+        out_inputs = map(lambda i: Input(**i), self.input_list)
         return GetInputsResponse(inputs=out_inputs)
 
 
     #def get_motor_state(self, req): 
         #pass
 
-
-    
 
 #An exception thrown when the configuration file is malformed
 class ConfigException(Exception):

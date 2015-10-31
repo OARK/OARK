@@ -1,28 +1,28 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides:          emumini2
+# Provides:          oark
 # Required-Start:    $remote_fs $syslog $network $all
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Launches the ROS nodes required to control the Emu Mini 2
+# Short-Description: Launches the ROS nodes required to control the specified robot
 ### END INIT INFO
 
 # Author: Tim Peskett <tdpeskett@gmail.com>
 # Adapted from raspbian skeleton example
 # To install:
-# > chmod +x emumini2
-# > cp emumini2 /etc/init.d/
-# > update-rc.d emumini2 defaults
+# > chmod +x oark
+# > cp oark /etc/init.d/
+# > update-rc.d oark defaults
 # (sudo is probably required for this)
 #
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="Launch the Emu Mini 2 ROS Nodes"
-NAME=emumini2
+DESC="Launch the oark ROS Nodes"
+NAME=oark
 DAEMON=/opt/oark/ros-pkg/ros-launch.sh
-DAEMON_ARGS=/opt/oark/ros-pkg/src/emumini2/launch/emumini2.launch
+DAEMON_ARGS=
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
