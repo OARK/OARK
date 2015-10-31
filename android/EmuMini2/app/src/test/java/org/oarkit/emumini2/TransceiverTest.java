@@ -83,6 +83,80 @@ public class TransceiverTest {
     }
 
     /**
+     * Test that if we receive half a message, then the other half,
+     * plus a half of another message that we get a single message.
+     * And when receive the remaining half, that message gets
+     * received.
+     */
+    @Test
+    public void TransceiverTest_halfAndHalfWithHalf() throws Exception {
+        byte[] testMessageOne = new byte[]{1, 0, 5, 1, 2, 3, 4, 5};
+        final int firstHalfMessageOne = testMessageOne.length / 2;
+
+        mToTransceiver.write(testMessageOne, 0, firstHalfMessageOne);
+        Thread.sleep(PAUSE_TIME);
+
+        byte[] testMessageTwo = new byte[]{1, 0, 5, 6, 7, 8, 9, 10};
+        final int firstHalfMessageTwo = testMessageTwo.length / 2;
+
+        byte[] combinedMessage = new byte[testMessageOne.length -
+                                          firstHalfMessageOne +
+                                          firstHalfMessageTwo];
+
+        System.arraycopy(testMessageOne, firstHalfMessageOne, combinedMessage,
+                         0, testMessageOne.length - firstHalfMessageOne);
+        System.arraycopy(testMessageTwo, 0, combinedMessage,
+                         testMessageOne.length - firstHalfMessageTwo,
+                         firstHalfMessageTwo);
+
+        mToTransceiver.write(combinedMessage);
+        Thread.sleep(PAUSE_TIME);
+
+        assertThat(mCallbackCount, is(1));
+
+        mToTransceiver.write(testMessageTwo, firstHalfMessageTwo,
+                             testMessageTwo.length - firstHalfMessageTwo);
+
+        Thread.sleep(PAUSE_TIME);
+
+        assertThat(mCallbackCount, is(2));
+    }
+
+    /**
+     * Receiving two complete messages at once.
+     *
+     * This should just result in one message being parsed, with the
+     * other remaining in the buffer until data is received again.
+     *
+     * This behaviour needs to change in the future.
+     */
+    @Test
+    public void TransceiverTest_twoComplete() throws Exception {
+        byte[] testMessageOne = new byte[]{1, 0, 5, 5, 4, 3, 2, 1};
+        byte[] testMessageTwo = new byte[]{1, 0, 5, 6, 7, 8, 9, 10};
+
+        byte[] combinedMessage = new byte[testMessageOne.length +
+                                          testMessageTwo.length];
+
+        System.arraycopy(testMessageOne, 0, combinedMessage, 0,
+                         testMessageOne.length);
+
+        System.arraycopy(testMessageTwo, 0, combinedMessage,
+                         testMessageOne.length, testMessageTwo.length);
+
+        mToTransceiver.write(combinedMessage);
+
+        Thread.sleep(PAUSE_TIME);
+
+        assertThat(mCallbackCount, is(1));
+
+        // Check the message.
+        assertThat(mCurrentInMessage[0], is(testMessageOne[0]));
+        assertThat(mCurrentInMessage[1], is(testMessageOne[1]));
+        assertThat(mCurrentInMessage[2], is(testMessageOne[2]));
+    }
+
+    /**
      * Set up a local socket and get the Transceiver to connect to it.
      */
     @Before
