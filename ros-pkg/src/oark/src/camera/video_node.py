@@ -138,7 +138,6 @@ class VideoStream(object):
             """
             m = re.search(VideoStream.variable_re, string)
             if m is not None:
-                print 'Made substitution of ', m.group(1), ' with ', sym_table[m.group(1)]
                 string = sym_table[m.group(1)]
             return string
 
@@ -149,10 +148,8 @@ class VideoStream(object):
                 if isinstance(element['name'], basestring):
                     element['name'] = substitute_var(element['name'], replacements)
                 gst_element = Gst.ElementFactory.make(element['name'], None)
-                print 'Creating element ', element['name']
 
                 if gst_element is not None:
-                    print 'Successful'
                     #Loop through properties on the successful element
                     if 'properties' in element:
                         for prop_name, prop in element['properties'].iteritems():

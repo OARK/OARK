@@ -130,7 +130,7 @@ class NetNode(object):
         #Call the control node
         result = self.get_inputs_srv(inputrequest)
         #Send the result of the call over the network
-        self.listener.send_str(net_consts.MSG_TYPES[GetInputsRequest], self._msg_to_string(result))
+        self.listener.send_str(net_consts.MSG_TYPES[GetInputsResponse], self._msg_to_string(result))
 
 
     def on_dc(self):

@@ -35,14 +35,23 @@ class OARKNode(object):
     """
 
     def __init__(self, node_ns, man_ns, port_ns, config_filename):
+        """Create the OARKNode object. The object will receive messages
+        from the networking node and control the motors based on these
+        messages.
+        Params:
+            node_ns - The name of this node.
+            man_ns  - The namespace of the dynamixel manager (specified in the roslaunch file)
+            port_ns - The namespace of the dynamixel port (specified in the roslaunch file)
+            config_filename - The filename of the config file
+        """
         #Read the controller configuration from a file
         config_file = open(config_filename, 'r')
         self.config = yaml.load(config_file.read())
         config_file.close()
 
         self._input_list = self.config['inputs']
-
         cont_dict = self.config['controllers']
+
         self.dxl_mgr = DXLManager(man_ns, port_ns)
         self._create_controllers(cont_dict)
 
@@ -60,8 +69,6 @@ class OARKNode(object):
         except (SyntaxError, TypeError) as e:
             raise ConfigException('\'value\' field not valid python expression on controller %s'%(name,))
 
-
-
         #Create a mutex to allow multithreaded subscriber
         self._cmd_mutex = threading.Lock()
         rospy.Subscriber('/%s/command'%(node_ns,), Command, self.cmd_rcvd)
@@ -71,9 +78,10 @@ class OARKNode(object):
         #rospy.Service('/%s/get_motor_state'%(node_ns,), , self.get_motor_state)
 
 
-
-
     def _create_controllers(self, cont_dict):
+        """A helper function to take the yaml-specified motor configuration data
+        and create the controllers for them.
+        """
         rospy.loginfo('Creating controllers...')
         try:
             for name, data in cont_dict.iteritems():
@@ -99,6 +107,9 @@ class OARKNode(object):
 
 
     def run(self):
+        """The main loop for the node. This method will flush the commands to
+        the motors a few times a second until the node is shutdown.
+        """
         rospy.loginfo('Control node running')
         choose_func = lambda q: ([q[-1]] if q else [])
         rate = rospy.Rate(UPDATE_RATE)
@@ -110,6 +121,10 @@ class OARKNode(object):
 
 
     def cmd_rcvd(self, cmd):     
+        """Called by ROS whenever a command is received from the network
+        node. cmd is a Command message object. The Command is parsed and
+        the motors are moved appropriately.
+        """
         with self._cmd_mutex:
             #Associate each input value with the name of the
             #input to which it corresponds
@@ -146,6 +161,11 @@ class OARKNode(object):
 
     
     def get_inputs(self, req):
+        """Called by ROS when the networking node receives a request
+        for the inputs. The inputs usually map to widgets on the
+        android device. Each input is a float value between -1.0 and 1.0, and
+        each motor uses these values to set its own value.
+        """
         #Create Input objects out of input yaml dictionaries
         out_inputs = map(lambda i: Input(**i), self._input_list)
         return GetInputsResponse(inputs=out_inputs)
@@ -165,6 +185,9 @@ class ConfigException(Exception):
 
 
 if __name__ == '__main__':
+    """The entry point for the application. Parses command line arguments and
+    then starts an OARKNode
+    """
     #Parser command line
     parser = argparse.ArgumentParser(description='Start the oark control node')
     parser.add_argument('manager_namespace',
