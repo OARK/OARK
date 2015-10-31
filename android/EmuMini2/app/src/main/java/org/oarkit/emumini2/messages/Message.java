@@ -130,7 +130,8 @@ public abstract class Message {
         IllegalArgumentException {
         boolean result = false;
         if (inByteArray[0] == getType()) {
-            int length = (inByteArray[1] << 8) | (inByteArray[2]);
+            int length = (((inByteArray[1] << 8) & 0xFF00) |
+                          (inByteArray[2] & 0xFF));
 
             if (length != (inByteArray.length - HEADER_SIZE)) {
                 throw new IllegalStateException("Packet length: " +

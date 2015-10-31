@@ -18,7 +18,7 @@ import org.oarkit.emumini2.messages.rosmessages.InputRequestRequest;
  */
 public class InputRequestMessage extends Message {
     // Internal OARK type for header.
-    private final static byte OARK_TYPE = 2;
+    public final static byte OARK_TYPE = 2;
 
     /**
      * Create the input request message.

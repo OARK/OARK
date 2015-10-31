@@ -16,7 +16,7 @@ import org.oarkit.emumini2.messages.rosmessages.InputRequestResponse;
  */
 public class InputResponse extends Message {
     // Internal OARK type for header.
-    private final static byte OARK_TYPE = 3;
+    public final static byte OARK_TYPE = 3;
 
     /**
      * Takes in a response that's a result of an input query.
@@ -35,5 +35,23 @@ public class InputResponse extends Message {
         InputRequestResponse message =
             (InputRequestResponse) this.getRosMessage();
         return message.getInputs();
+    }
+
+    @Override
+    public String toString() {
+        String result = "";
+
+        result += super.toString() + "\n";
+
+        for (Input inp : getValues()) {
+            result += (inp.getName().isEmpty() ? "" : "Name: " +
+                       inp.getName()) +
+                (inp.getType().isEmpty() ? "" : ", Type: " + inp.getType()) +
+                (inp.getTitle().isEmpty() ? "" : ", Title: " + inp.getTitle()) +
+                (inp.getAxes().isEmpty() ? "" : ", Axes: " + inp.getAxes()) +
+                "\n";
+        }
+
+        return result;
     }
 }

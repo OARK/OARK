@@ -22,8 +22,6 @@ import static java.lang.Thread.sleep;
  * the controls and send the data at fixed time intervals.
  */
 public class Poller {
-    private String targetIP = "192.168.12.1";
-
     // Time in ms when updates should be sent to the robot.
     final private static long POLL_TIME = 200;
 
@@ -39,7 +37,7 @@ public class Poller {
 
     private volatile boolean mRunning;
 
-    public Poller(Activity inActivity) {
+    public Poller(Activity inActivity, Transceiver inTransceiver ) {
         mRunning = true;
 
         leftAnalog = (AnalogStickView) inActivity.findViewById(R.id.left_analog_stick);
@@ -48,13 +46,7 @@ public class Poller {
         wristSeek = (SeekBar) inActivity.findViewById(R.id.wristSeek);
         elbowSeek = (SeekBar) inActivity.findViewById(R.id.elbowSeek);
 
-        // Try to connect to the robot.
-        try {
-            mTransceiver = new Transceiver(targetIP);
-        } catch (IOException e) {
-            Log.e("Poller", "Count not connect: " + e.getMessage());
-        }
-
+        mTransceiver = inTransceiver;
         createAndStartThread();
     }
 

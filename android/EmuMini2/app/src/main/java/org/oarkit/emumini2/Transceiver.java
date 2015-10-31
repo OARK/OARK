@@ -44,6 +44,8 @@ public class Transceiver {
     // the moment.
     private INetworkCallback mCallback;
 
+    private byte[] mMessageBuffer = new byte[Message.MAX_MESSAGE_SIZE];
+
     private Transceiver() {};
 
     /**
@@ -98,7 +100,6 @@ public class Transceiver {
      * Message into the correct class for processing.
      */
     class TransceiverThread implements Runnable {
-        byte[] mMessageBuffer = new byte[Message.MAX_MESSAGE_SIZE];
         /**
          * Will try to open the socket with the port and address set
          * in the parent class.
@@ -139,53 +140,99 @@ public class Transceiver {
                 throw new IllegalStateException("No callback set");
             }
 
-            mRunning = true;
+            mRunning = false;
 
             while (mRunning) {
-                try {
-                    mBytesRead += mFromRobot.read(mMessageBuffer, mBytesRead,
-                                                  Message.MAX_MESSAGE_SIZE -
-                                                  mBytesRead);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                readFromNetwork();
+                int messageLength = getMessageLength();
+                byte[] tempBuffer = new byte[messageLength];
 
-                // If we haven't got a full message, then keep waiting
-                // until we do. Always keep the header of a message at
-                // the start of the Message Buffer.
-                int messageLength = (mMessageBuffer[1] << 8 | mMessageBuffer[2] +
-                                     Message.HEADER_SIZE);
-
-                // Test that header is within range of header types here?
-                // How to do cleanly?
-
-                if (messageLength <= mBytesRead) {
-                    // We've got the message (and maybe more) just
-                    // copy the message bytes, leaving the rest as the
-                    // next message.
-                    byte[] tempBuffer = new byte[messageLength];
-
-                    System.arraycopy(mMessageBuffer, 0, tempBuffer, 0, messageLength);
-
-                    final int remainingBytesLength = mMessageBuffer.length -
-                        messageLength;
-
-                    // Shuffled any remaining bytes down to the start
-                    // of the array.
-                    byte[] tmp = new byte[remainingBytesLength];
-
-                    System.arraycopy(mMessageBuffer, messageLength, tmp, 0,
-                                     remainingBytesLength);
-
-                    System.arraycopy(tmp, 0, mMessageBuffer, 0,
-                                     remainingBytesLength);
-
-                    mBytesRead = remainingBytesLength;
-
+                if (parseMessage(tempBuffer, messageLength)) {
                     mCallback.handleMessage(tempBuffer);
                 }
             }
         }
+    }
+
+    // Dirty hack for refactoring purposes.
+    // Remove this!!!!!!!
+    public DataInputStream getInputStream() {
+        return mFromRobot;
+    }
+
+    public void readFromNetwork() {
+        try {
+            mBytesRead += mFromRobot.read(mMessageBuffer, mBytesRead,
+                                          Message.MAX_MESSAGE_SIZE -
+                                          mBytesRead);
+
+            Log.i("Transceiver", "Total bytes Read so far: " + mBytesRead);
+
+            if (mBytesRead > 0) {
+                String testString = "";
+                for (int i = 0; i < mBytesRead; i++) {
+                    testString += String.valueOf(mMessageBuffer[i]) + " ";
+                }
+
+                Log.i("Transceiver", "Buffer: " + testString);
+            }
+        } catch (IOException e) {
+            Log.e("Transceiver", "Exception: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int getMessageLength() {
+        int result = (((mMessageBuffer[1] << 8) & 0xFF00) |
+                      (mMessageBuffer[2] & 0xFF));
+
+        return result + Message.HEADER_SIZE;
+    }
+
+    /**
+     * We've received something from the robot. Parse the message.
+     *
+     * Refactoring hack so can start cleaning up.
+     */
+    public boolean parseMessage(byte[] inTempBuffer, int inMessageLength) {
+        // If we haven't got a full message, then keep waiting
+        // until we do. Always keep the header of a message at
+        // the start of the Message Buffer.
+
+        // Test that header is within range of header types here?
+        // How to do cleanly?
+
+        boolean result = false;
+
+        Log.i("Transceiver", "parseMessage");
+        Log.i("Transceiver", "inMessageLength: " + inMessageLength + " " +
+              "mBytesRead: " + mBytesRead);
+        if (inMessageLength <= mBytesRead) {
+            Log.i("Transceiver", "Message shorter, equal bytes read.");
+            result = true;
+
+            // We've got the message (and maybe more) just
+            // copy the message bytes, leaving the rest as the
+            // next message.
+            System.arraycopy(mMessageBuffer, 0, inTempBuffer, 0, inMessageLength);
+
+            final int remainingBytesLength = mMessageBuffer.length -
+                inMessageLength;
+
+            // Shuffled any remaining bytes down to the start
+            // of the array.
+            byte[] tmp = new byte[remainingBytesLength];
+
+            System.arraycopy(mMessageBuffer, inMessageLength, tmp, 0,
+                             remainingBytesLength);
+
+            System.arraycopy(tmp, 0, mMessageBuffer, 0,
+                             remainingBytesLength);
+
+            mBytesRead = remainingBytesLength;
+        }
+
+        return result;
     }
 
     /*

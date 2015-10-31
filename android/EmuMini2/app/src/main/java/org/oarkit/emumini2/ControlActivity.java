@@ -14,12 +14,21 @@ import android.view.WindowManager;
 import android.widget.SeekBar;
 
 import org.oarkit.R;
+import org.oarkit.emumini2.messages.InputResponse;
+import org.oarkit.emumini2.networking.INetworkCallback;
+import org.oarkit.emumini2.networking.InputsConfigTask;
+
+import java.io.IOException;
 
 public class ControlActivity extends Activity {
     final private int DEFAULT_VIDEO_PORT = 5000;
+    private final String targetIP = "192.168.12.1";
 
     private SurfaceView videoSurfaceView;
     private VideoRenderer videoRenderer;
+
+    // Handles network communication.
+    private Transceiver mTransceiver;
 
     // Polls the controls at a fixed interval and sends data to robot.
     private Poller controlPoller;
@@ -47,16 +56,44 @@ public class ControlActivity extends Activity {
 
         /* Connect to raspberry pi server */
         try {
-            controlPoller = new Poller(this);
+
+            mTransceiver = new Transceiver(targetIP);
+            mTransceiver.addCallback(new ReceiveTransceiverMessage());
+
+            InputsConfigTask configTask = new InputsConfigTask();
+            configTask.execute(mTransceiver);
+
+            // Do InputRequest to robot and handling here.
+            controlPoller = new Poller(this, mTransceiver);
         }
         catch(Exception e) {
+            Log.e("ControlActivity", "Caught exception: " + e.getMessage());
+            Log.e("controlActivity", "Exiting application.");
             finish();
+        }
+    }
+
+    class ReceiveTransceiverMessage implements INetworkCallback {
+        public void handleMessage(byte[] inMessage) {
+            switch (inMessage[0]) {
+            case InputResponse.OARK_TYPE:
+                //     handleInputResponse(inMessage);
+                Log.e("ControlActivity", "InputResponse not implemented.");
+            default:
+                Log.i("ControlActivity", "Unhandled message type: " +
+                      inMessage[0]);
+            }
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        try {
+            mTransceiver.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         controlPoller.stop();
         videoRenderer.stopRendering();
         finish();

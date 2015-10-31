@@ -19,7 +19,7 @@ import org.oarkit.emumini2.messages.rosmessages.Command;
  */
 public class ControlMessage extends Message {
     // Internal OARK type for header.
-    private final static byte OARK_TYPE = 1;
+    public final static byte OARK_TYPE = 1;
     private final static int FLOAT_SIZE = 4;
 
     /**
