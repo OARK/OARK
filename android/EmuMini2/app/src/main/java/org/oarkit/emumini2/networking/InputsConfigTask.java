@@ -37,7 +37,7 @@ public class InputsConfigTask extends AsyncTask<Transceiver, String, InputRespon
             inTransceiver[0].start();
             inTransceiver[0].send(requestInputs);
 
-            boolean responseReceived = false;
+            boolean responseReceived;
             byte[] tempBuffer;
 
             do {
@@ -45,8 +45,8 @@ public class InputsConfigTask extends AsyncTask<Transceiver, String, InputRespon
 
                 int messageLength = inTransceiver[0].getMessageLength();
                 tempBuffer = new byte[messageLength];
-                inputResponse = new InputResponse(tempBuffer);
                 responseReceived = inTransceiver[0].parseMessage(tempBuffer,messageLength);
+                inputResponse = new InputResponse(tempBuffer);
             } while (!responseReceived);
 
             Log.i("InputsConfigTask", "Message in buffer. Type: " +
