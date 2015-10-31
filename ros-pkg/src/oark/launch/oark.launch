@@ -1,0 +1,66 @@
+<!-- 
+     It is assumed that this code would run on a raspberry pi.
+     As such, the serial port used is /dev/ttyAMA0. Care should
+     be taken to properly configure this port before this launch
+     file is actually loaded.  
+-->
+<launch>
+
+    <!-- Launch the dynamixel motor controller manager.  -->
+    <!-- The max motor id will need to be changed here when the number
+         of motors in use changes. 
+    -->
+    <node
+        name="dynamixel_manager"
+        pkg="dynamixel_controllers"
+        type="controller_manager.py"
+        required="true"
+        output="screen">
+
+        <rosparam>
+            namespace: dxl_manager
+            serial_ports:
+                pi_out_port:
+                    port_name: "/dev/ttyAMA0"
+                    baud_rate: 115200
+                    min_motor_id: 1
+                    max_motor_id: 7
+                    update_rate: 4
+        </rosparam>
+    </node>
+
+    <!-- Launch the oark control node. This node will communicate with the
+         controller manager software to move the motors. It also reads the 
+         robot config file to initialise all of the motor controllers.
+         This node depends on the controller manager node 
+    -->
+    <node
+        name="oark_control_node"
+        pkg="oark"
+        type="control_node.py"
+        args="dxl_manager pi_out_port $(find oark)/emumini2.yaml"
+        required="true"
+        output="screen"/>
+
+    <!-- Launch the video node. Sends a video stream over UDP to an IP
+         address when requested (via service calls) 
+    -->
+    <node
+        name="oark_video_node"
+        pkg="oark"
+        type="video_node.py"
+        args="$(find oark)/src/camera/pipeline.yaml v4l2src 5000"
+        required="true"
+        output="screen"/>
+
+    <!-- Launch the networking node. Listens to the network on specified
+         port (default 1717) and handles network messages. 
+    -->
+    <node
+        name="oark_net_node"
+        pkg="oark"
+        type="net_node.py"
+	args="1717"
+        required="true"
+        output="screen"/>
+</launch>

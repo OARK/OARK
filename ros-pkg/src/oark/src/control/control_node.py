@@ -3,7 +3,7 @@
 # made to specify the motors. For now, the values are hardcoded.
 
 """A module to act as a ROS node and create relevant services/topics
-that other ROS nodes can use to interact with the emumini2 motors.
+that other ROS nodes can use to interact with the motors.
 """
 
 import rospy
@@ -15,29 +15,23 @@ import math
 
 from manager import DXLManager
 
-from emumini2.msg import Command
-from emumini2.srv import InputRequest, InputRequestResponse
-from emumini2.msg import Input
+from oark.msg import Command
+from oark.srv import GetInputs, GetInputsResponse
+from oark.msg import Input
 
 
 __author__    = 'Tim Peskett'
-__copyright__ = 'Copyright 2016, OARK'
+__copyright__ = 'Copyright 2015, OARK'
 __credits__   = ['Tim Peskett', 'Mike Aldred']
 
-
-#Temporary. These constants should definitely be moved elsewhere
-LEFT_GO = 3
-RIGHT_GO = 4
-ARM_GO = 6
-WRIST_GO = 9
-HAND_GO = 10
-
-NODE_NAME = 'em2_control_node'
+NODE_NAME = 'oark_control_node'
+#Update motor states 20 times a second
+UPDATE_RATE = 20
 
 
-class EM2Node(object):
+class OARKNode(object):
     """A node to receive messages from other nodes and
-    control the emu mini 2 based on these messages.
+    control the motors based on these messages.
     """
 
     def __init__(self, node_ns, man_ns, port_ns, config_filename):
@@ -73,7 +67,7 @@ class EM2Node(object):
         rospy.Subscriber('/%s/command'%(node_ns,), Command, self.cmd_rcvd)
 
         #Create services to allow caller to retrieve data
-        rospy.Service('/%s/get_inputs'%(node_ns,), InputRequest, self.get_inputs)
+        rospy.Service('/%s/get_inputs'%(node_ns,), GetInputs, self.get_inputs)
         #rospy.Service('/%s/get_motor_state'%(node_ns,), , self.get_motor_state)
 
 
@@ -105,9 +99,9 @@ class EM2Node(object):
 
 
     def run(self):
-        rospy.loginfo('EM2Node running')
+        rospy.loginfo('Control node running')
         choose_func = lambda q: ([q[-1]] if q else [])
-        rate = rospy.Rate(20)
+        rate = rospy.Rate(UPDATE_RATE)
         while not rospy.is_shutdown():
             for name, cont in self.dxl_mgr:
                 cont.flush(choose=choose_func)
@@ -154,7 +148,7 @@ class EM2Node(object):
     def get_inputs(self, req):
         #Create Input objects out of input yaml dictionaries
         out_inputs = map(lambda i: Input(**i), self._input_list)
-        return InputRequestResponse(inputs=out_inputs)
+        return GetInputsResponse(inputs=out_inputs)
 
 
     #def get_motor_state(self, req): 
@@ -172,7 +166,7 @@ class ConfigException(Exception):
 
 if __name__ == '__main__':
     #Parser command line
-    parser = argparse.ArgumentParser(description='Start the emumini2 control node')
+    parser = argparse.ArgumentParser(description='Start the oark control node')
     parser.add_argument('manager_namespace',
                         help='The manager namespace provided to the dynamixel driver software') 
     parser.add_argument('port_namespace',
@@ -183,11 +177,11 @@ if __name__ == '__main__':
 
     try:
         rospy.init_node(NODE_NAME)
-        em2_node = EM2Node(NODE_NAME,
-                           args.manager_namespace,
-                           args.port_namespace,
-                           args.controller_file)
-        em2_node.run()
+        node = OARKNode(NODE_NAME,
+                        args.manager_namespace,
+                        args.port_namespace,
+                        args.controller_file)
+        node.run()
     except ConfigException, ce:
         rospy.logerr('Error with configuration file occured:')
         rospy.logerr(str(ce))

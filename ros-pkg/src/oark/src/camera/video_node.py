@@ -17,12 +17,13 @@ from gi.repository import GObject, Gst
 GObject.threads_init()
 
 from std_srvs.srv import Empty, EmptyResponse
-from emumini2.srv import StartStream, StartStreamResponse
+from oark.srv import StartStream, StartStreamResponse
 
 __author__    = 'Mike Aldred, Tim Peskett'
 __copyright__ = 'Copyright 2016, OARK'
 __credits__   = ['Tim Peskett', 'Mike Aldred']
 
+NODE_NAME = 'oark_vid_node'
 
 
 class VideoStream(object):
@@ -272,8 +273,6 @@ if __name__ == '__main__':
     """The entry point. Parse arguments. Setup ROS service.
     """
 
-    #Initialise gstreamer
-
     parser = argparse.ArgumentParser(description='Start video streaming ROS node')
     parser.add_argument('element_file',
                         help='A file from which to load the gstreamer elements')
@@ -288,10 +287,9 @@ if __name__ == '__main__':
                         help='The initial address to stream video to')
     args = parser.parse_args(rospy.myargv(argv=sys.argv)[1:])
 
-    node_name = 'em2_vid_node'
-    rospy.init_node(node_name)
+    rospy.init_node(NODE_NAME)
     try:
-        sn = StreamNode(node_name, args.element_file, args.video_src, args.port)
+        sn = StreamNode(NODE_NAME, args.element_file, args.video_src, args.port)
         if args.address is not None:
             sn.start_stream(address)
         rospy.spin()

@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(emumini2)
+project(oark)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   dynamixel_controllers
+  message_generation
   rospy
   std_msgs
-  message_generation
   std_srvs
 )
 
@@ -56,8 +56,8 @@ find_package(catkin REQUIRED COMPONENTS
  add_service_files(
    FILES
    StartStream.srv
-   InputRequest.srv
-   MotorStateRequest.srv
+   GetInputs.srv
+   GetMotorStates.srv
  )
 
 ## Generate actions in the 'action' folder
@@ -105,8 +105,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES emumini2
-  CATKIN_DEPENDS message_runtime dynamixel_controllers rospy std_msgs std_srvs
+#  LIBRARIES oark
+  CATKIN_DEPENDS dynamixel_controllers message_runtime rospy std_msgs std_srvs
 #  DEPENDS system_lib
 )
 
@@ -122,24 +122,24 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(emumini2
-#   src/${PROJECT_NAME}/emumini2.cpp
+# add_library(oark
+#   src/${PROJECT_NAME}/oark.cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(emumini2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(oark ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(emumini2_node src/emumini2_node.cpp)
+# add_executable(oark_node src/oark_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(emumini2_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(oark_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(emumini2_node
+# target_link_libraries(oark_node
 #   ${catkin_LIBRARIES}
 # )
 
@@ -158,7 +158,7 @@ include_directories(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS emumini2 emumini2_node
+# install(TARGETS oark oark_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -183,7 +183,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_emumini2.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_oark.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
