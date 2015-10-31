@@ -1,4 +1,3 @@
-
 /*
  * OARK Controller Software.
  *
@@ -17,7 +16,7 @@ import android.view.View;
 
 import java.util.ArrayList;
 
-public class AnalogStick extends View {
+public class AnalogStick extends View implements IRobotControl {
     private final int X = 0;
     private final int Y = 1;
     private final int BOTH = 2;
@@ -167,5 +166,9 @@ public class AnalogStick extends View {
         double effectiveHeight = getHeight() - 2 * circleRad;
 
         return -(touchY / (getHeight() / 2.0) - 1.0) * (getHeight() / effectiveHeight);
+    }
+
+    public float[] getValues() {
+        return new float[]{(float)getAnalogX(), (float)getAnalogY()};
     }
 }

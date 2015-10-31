@@ -12,6 +12,8 @@ import android.util.Log;
 import org.oarkit.emumini2.Transceiver;
 import org.oarkit.emumini2.messages.InputRequestMessage;
 import org.oarkit.emumini2.messages.InputResponse;
+import org.oarkit.emumini2.messages.rosmessages.Input;
+import org.oarkit.emumini2.ui.ControllerTable;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -21,6 +23,15 @@ import java.net.ConnectException;
  * controls that should be made available to the user.
  */
 public class InputsConfigTask extends AsyncTask<Transceiver, String, InputResponse> {
+    private IInputRequestCallback callback;
+
+    /**
+     * Set the callback to be called when we have the response from the robot.
+     */
+    public void setCallback(IInputRequestCallback inCallback) {
+        callback = inCallback;
+    }
+
     /**
      * Setup a socket, send a request to the robot for available
      * inputs.
@@ -68,5 +79,6 @@ public class InputsConfigTask extends AsyncTask<Transceiver, String, InputRespon
 
     @Override
     protected void onPostExecute(InputResponse inResponse) {
+        callback.updateInputControllers(inResponse.getValues());
     }
 }

@@ -9,7 +9,6 @@ package org.oarkit.emumini2.ui;
 import java.util.ArrayList;
 
 import android.content.Context;
-import android.widget.SeekBar;
 import android.widget.Space;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -36,14 +35,15 @@ public class ControllerTable extends TableLayout {
         analogSticksRow = new TableRow(this.getContext());
     }
 
-    public SeekBar addSlider(String name, int min, int max, int init, int span) {
+    public ControllerSeekBar addSlider(String name, int min, int max, int init, int span) {
         TableRow newRow = new TableRow(this.getContext());
-        SeekBar newSeekBar = new SeekBar(this.getContext());
+        ControllerSeekBar newControllerSeekBar =
+            new ControllerSeekBar(this.getContext(), span);
         TextView newText = new TextView(this.getContext());
 
         newText.setText(name);
         newRow.addView(newText);
-        newRow.addView(newSeekBar);
+        newRow.addView(newControllerSeekBar);
 
         tableRows.add(newRow);
 
@@ -54,21 +54,13 @@ public class ControllerTable extends TableLayout {
         params.setMargins(0, 0, 0, 0);
         newRow.setLayoutParams(params);
 
-        TableRow.LayoutParams barLayout = new TableRow.LayoutParams(
-            TableRow.LayoutParams.MATCH_PARENT,
-            TableRow.LayoutParams.WRAP_CONTENT, 1f);
-
-        barLayout.span = span;
-
-        newSeekBar.setLayoutParams(barLayout);
-
         // Make sure to always add min to any value from the seekbar.
-        newSeekBar.setMax(min + max);
-        newSeekBar.setProgress(min + init);
+        newControllerSeekBar.setMax(min + max);
+        newControllerSeekBar.setProgress(min + init);
 
         this.addView(newRow);
 
-        return newSeekBar;
+        return newControllerSeekBar;
     }
 
     public AnalogStick addAnalogStick() {
