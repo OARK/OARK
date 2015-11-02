@@ -1,2 +1,2 @@
 [pi_emu]
-134.7.47.214 ansible_connection=ssh ansible_ssh_user=pi
+localhost:10022 ansible_connection=ssh ansible_ssh_user=pi

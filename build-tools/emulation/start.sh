@@ -43,7 +43,9 @@ buildKernel() {
 buildKernel
 
 qemu-system-arm -machine versatilepb \
-                -cpu arm1176 -m 256 -no-reboot -serial stdio \
+                -cpu arm1176 -m 256 -no-reboot \
+                -daemonize \
+                -vnc :5 \
                 -kernel $(getScriptDirectory)/../kernel/build/qemu/qemu-kernel \
                 -append "root=/dev/sda2 panic=1 rw" \
                 -hda $1 \
