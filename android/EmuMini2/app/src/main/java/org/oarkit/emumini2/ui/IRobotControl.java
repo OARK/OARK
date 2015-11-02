@@ -17,5 +17,5 @@ package org.oarkit.emumini2.ui;
  * used to control the robot, they must have this interface.
  */
 public interface IRobotControl {
-    public float[] getValues();
+    float[] getValues();
 }

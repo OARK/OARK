@@ -35,15 +35,13 @@ public class ControllerTable extends TableLayout {
         analogSticksRow = new TableRow(this.getContext());
     }
 
-    public ControllerSeekBar addSlider(String name, int min, int max, int init, int span) {
+    public void addSlider(ControllerSeekBar inControllerSeekBar) {
         TableRow newRow = new TableRow(this.getContext());
-        ControllerSeekBar newControllerSeekBar =
-            new ControllerSeekBar(this.getContext(), span);
         TextView newText = new TextView(this.getContext());
 
-        newText.setText(name);
+        newText.setText(inControllerSeekBar.getTitle());
         newRow.addView(newText);
-        newRow.addView(newControllerSeekBar);
+        newRow.addView(inControllerSeekBar);
 
         tableRows.add(newRow);
 
@@ -54,32 +52,22 @@ public class ControllerTable extends TableLayout {
         params.setMargins(0, 0, 0, 0);
         newRow.setLayoutParams(params);
 
-        // Make sure to always add min to any value from the seekbar.
-        newControllerSeekBar.setMax(min + max);
-        newControllerSeekBar.setProgress(min + init);
-
         this.addView(newRow);
-
-        return newControllerSeekBar;
     }
 
-    public AnalogStick addAnalogStick() {
+    public void addStick(AnalogStick inStick) {
 
         if (!this.sticksAdded) {
             this.addView(analogSticksRow);
             this.sticksAdded = true;
         }
 
-        AnalogStick newStick = new AnalogStick(this.getContext());
-
         TableRow.LayoutParams stickLayout = new TableRow.LayoutParams(
                 TableRow.LayoutParams.MATCH_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT, 1f);
 
-        analogSticksRow.addView(newStick);
-        newStick.setLayoutParams(stickLayout);
-
-        return newStick;
+        analogSticksRow.addView(inStick);
+        inStick.setLayoutParams(stickLayout);
     }
 
     public void addSpacerRow() {

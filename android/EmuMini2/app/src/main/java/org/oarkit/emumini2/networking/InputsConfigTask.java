@@ -56,8 +56,8 @@ public class InputsConfigTask extends AsyncTask<Transceiver, String, InputRespon
 
                 int messageLength = inTransceiver[0].getMessageLength();
                 tempBuffer = new byte[messageLength];
-                inputResponse = new InputResponse(tempBuffer);
                 responseReceived = inTransceiver[0].parseMessage(tempBuffer,messageLength);
+                inputResponse = new InputResponse(tempBuffer);
             } while (!responseReceived);
 
             Log.i("InputsConfigTask", "Message in buffer. Type: " +
@@ -79,6 +79,10 @@ public class InputsConfigTask extends AsyncTask<Transceiver, String, InputRespon
 
     @Override
     protected void onPostExecute(InputResponse inResponse) {
-        callback.updateInputControllers(inResponse.getValues());
+        if (callback != null) {
+            callback.updateInputControllers(inResponse.getValues());
+        } else {
+           Log.e("InputsConfigTask", "No callback set");
+        }
     }
 }
