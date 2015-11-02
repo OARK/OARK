@@ -75,7 +75,7 @@ public class ControllerMapping {
             inTable.addSlider(slider);
         }
 
-        if (sliders.size() > 0) {
+        if (sliders.size() > 0 & (sticks.size() > 1)) {
             inTable.addSpacerRow();
         }
 
