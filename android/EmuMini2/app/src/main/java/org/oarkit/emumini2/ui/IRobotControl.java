@@ -15,6 +15,9 @@ package org.oarkit.emumini2.ui;
  *
  * In order to make data queries consistent for classes that may be
  * used to control the robot, they must have this interface.
+ *
+ * @todo Come up with a way to allow more than one type to be returned
+ *       but still have the interface general enough.
  */
 public interface IRobotControl {
     float[] getValues();
