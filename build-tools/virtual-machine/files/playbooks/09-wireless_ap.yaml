@@ -17,4 +17,6 @@
     - name: Copy across the network interfaces file.
       copy: src=../interfaces dest=/etc/network/interfaces
     - name: HostAPD
-      shell: sed /etc/init.d/hostapd -i -e "s/DAEMON_CONF=\"\"/DAEMON_CONF=\"/etc/hostapd/hostapd.conf\""
+      shell: sed /etc/init.d/hostapd -i -e "s/DAEMON_CONF=\"\"/DAEMON_CONF=\"\/etc\/hostapd\/hostapd.conf\"/"
+    - name: HostAPD config.
+      copy: src=../hostapd.conf dest=/etc/hostapd/hostapd.conf

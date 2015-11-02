@@ -11,213 +11,119 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.WindowManager;
-import android.widget.SeekBar;
-import android.widget.Toast;
+import android.widget.FrameLayout;
 
-import org.oarkit.R;
+import org.oarkit.emumini2.messages.InputResponse;
+import org.oarkit.emumini2.messages.rosmessages.Input;
+import org.oarkit.emumini2.networking.IInputRequestCallback;
+import org.oarkit.emumini2.networking.INetworkCallback;
+import org.oarkit.emumini2.networking.InputsConfigTask;
+import org.oarkit.emumini2.ui.ControllerMapping;
+import org.oarkit.emumini2.ui.ControllerTable;
+import org.oarkit.emumini2.ui.IRobotControl;
 
-public class ControlActivity extends Activity {
-    private String targetIP = "192.168.12.1";
+import java.io.IOException;
+import java.util.List;
 
-    private Talker talker;
+public class ControlActivity extends Activity implements IInputRequestCallback {
+    final private int DEFAULT_VIDEO_PORT = 5000;
+    private final String targetIP = "192.168.6.22";
 
-    private final float SPEED_EPSILON = 0.075f;
-    private final float POS_EPSILON = 0.05f;
-    private final float SPEED_MUL = 6f;
-
-    private double curHand = 0;
-    private double curWrist = 0;
-    private double curElbow = 0;
-
-    private double curLeft = 0;
-    private double curRight = 0;
-
-    private SurfaceView videoSurfaceView;
     private VideoRenderer videoRenderer;
+    private FrameLayout mainFrame;
+
+    // Handles network communication.
+    private Transceiver mTransceiver;
+
+    // Polls the controls at a fixed interval and sends data to robot.
+    private Poller controlPoller;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_control);
+        // setContentView(R.layout.activity_control);
 
         /* Stop screen dimming */
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        /* Initialise video */
-        videoSurfaceView = (SurfaceView) findViewById(R.id.robotCameraView);
-        videoRenderer = new VideoRenderer(videoSurfaceView, 5000);
+        mainFrame = new FrameLayout(this);
+        SurfaceView videoSurfaceView = new SurfaceView(this);
+
+        videoRenderer = new VideoRenderer(videoSurfaceView, DEFAULT_VIDEO_PORT);
         videoSurfaceView.getHolder().addCallback(videoRenderer);
 
-        /* Initialise controls */
-        final AnalogStickView leftAnalog = (AnalogStickView) findViewById(R.id.left_analog_stick);
-        final AnalogStickView rightAnalog = (AnalogStickView) findViewById(R.id.right_analog_stick);
-        final SeekBar handSeek = (SeekBar) findViewById(R.id.handSeek);
-        final SeekBar wristSeek = (SeekBar) findViewById(R.id.wristSeek);
-        final SeekBar elbowSeek = (SeekBar) findViewById(R.id.elbowSeek);
+        mainFrame.addView(videoSurfaceView);
 
         /* Connect to raspberry pi server */
         try {
-            talker = new Talker(targetIP);
+
+            mTransceiver = new Transceiver(targetIP);
+            mTransceiver.addCallback(new ReceiveTransceiverMessage());
+
+            InputsConfigTask configTask = new InputsConfigTask();
+            configTask.setCallback(this);
+            configTask.execute(mTransceiver);
         }
         catch(Exception e) {
-            /* TODO: Put this code in a listener and pass it to server thread */
-            Log.e("EMUMINI2", "Could not connect: " + e.getMessage());
-            Toast.makeText(getApplicationContext(),
-                           "Could not connect to " + targetIP,
-                           Toast.LENGTH_SHORT).show();
+            Log.e("ControlActivity", "Caught exception: " + e.getMessage());
+            Log.e("controlActivity", "Exiting application.");
             finish();
         }
+    }
 
-        /* Listen to changes on the left analog stick */
-        leftAnalog.addAnalogStickListener(
-                new AnalogStickView.AnalogStickListener() {
-                    public void onAnalogStickChange(float x, float y) {
-                        FourWWMsg fwm = new FourWWMsg();
+    /**
+     * Called when when the robot information for the available inputs
+     * has been received.
+     */
+    public void updateInputControllers(List<Input> inList) {
+        // Keep a copy of the list so we know the order values are to
+        // be sent to the robot.
+        Log.i("ControlActivity", "Received inputs");
 
-                        if (Math.abs(leftAnalog.getAnalogY() - curLeft) > SPEED_EPSILON) {
-                            fwm.setType(fwm.LEFT_GO);
-                            fwm.setVal((byte)(leftAnalog.getAnalogY() * SPEED_MUL));
-                            try {
-                                talker.send(fwm);
-                            }
-                            catch(Exception e) {
-                                Log.w("EMUMINI2", "Unable to send message");
-                            }
+        ControllerTable tbl = new ControllerTable(this);
+        List<IRobotControl> controls =
+                ControllerMapping.mapAndCreateControllers(this, tbl, inList);
+        mainFrame.addView(tbl);
 
-                            curLeft = leftAnalog.getAnalogY();
+        this.setContentView(mainFrame);
 
-                        }
-                        Log.e("EMUMINI2", "Left -- X: " + x + " Y: " + y);
-                    }
-                }
-        );
+        for (Input inp : inList) {
+            Log.i("ControlActivity", "Name: " + inp.getName() + "Type: " + inp.getType());
+        }
 
-        /* Listen to changes on the right analog stick */
-        rightAnalog.addAnalogStickListener(
-                new AnalogStickView.AnalogStickListener() {
-                    public void onAnalogStickChange(float x, float y) {
-                        FourWWMsg fwm = new FourWWMsg();
+        // Start polling the controls now.
+        controlPoller = new Poller(mTransceiver, controls);
+    }
 
-                        if (Math.abs(rightAnalog.getAnalogY() - curRight) > SPEED_EPSILON) {
-                            fwm.setType(fwm.RIGHT_GO);
-                            fwm.setVal((byte)(rightAnalog.getAnalogY() * SPEED_MUL));
-                            try {
-                                talker.send(fwm);
-                            }
-                            catch(Exception e) {
-                                Log.w("EMUMINI2", "Unable to send message");
-                            }
-
-                            curRight = rightAnalog.getAnalogY();
-                        }
-
-                        Log.e("EMUMINI2", "Right -- X: " + x + " Y: " + y);
-                    }
-                }
-        );
-
-        /* Listen to changes on the elbow seekbar */
-        elbowSeek.setOnSeekBarChangeListener(
-                new SeekBar.OnSeekBarChangeListener() {
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        FourWWMsg fwm = new FourWWMsg();
-                        final float elbowPos = (float)progress / elbowSeek.getMax();
-
-                        if (Math.abs(elbowPos - curElbow) > POS_EPSILON){
-                            fwm.setType(fwm.ARM_GO);
-                            fwm.setVal((byte)(elbowPos * 127));
-                            try {
-                                talker.send(fwm);
-                            }
-                            catch(Exception e) {
-                                Log.w("EMUMINI2", "Unable to send message");
-                            }
-
-                            Log.e("EMUMINI2", "Elbow: " + elbowPos);
-                            curElbow = elbowPos;
-                        }
-                    }
-                    public void onStartTrackingTouch(SeekBar seekBar) {}
-                    public void onStopTrackingTouch(SeekBar seekBar) {}
-                }
-        );
-        /* Listen to changes on the wrist seekbar */
-        wristSeek.setOnSeekBarChangeListener(
-                new SeekBar.OnSeekBarChangeListener() {
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        FourWWMsg fwm = new FourWWMsg();
-                        final float wristPos = (float)progress / wristSeek.getMax();
-
-                        if (Math.abs(wristPos - curWrist) > POS_EPSILON){
-                            fwm.setType(fwm.WRIST_GO);
-                            fwm.setVal((byte)(wristPos * 127));
-                            try {
-                                talker.send(fwm);
-                            }
-                            catch(Exception e) {
-                                Log.w("EMUMINI2", "Unable to send message");
-                            }
-
-                            Log.e("EMUMINI2", "Wrist: " + wristPos);
-                            curWrist = wristPos;
-                        }
-                    }
-                    public void onStartTrackingTouch(SeekBar seekBar) {}
-                    public void onStopTrackingTouch(SeekBar seekBar) {}
-                }
-        );
-        /* Listen to changes on the hand seekbar */
-        handSeek.setOnSeekBarChangeListener(
-                new SeekBar.OnSeekBarChangeListener() {
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        FourWWMsg fwm = new FourWWMsg();
-                        final float handPos = (float)progress / handSeek.getMax();
-
-                        if (Math.abs(handPos - curHand) > POS_EPSILON){
-                            fwm.setType(fwm.HAND_GO);
-                            fwm.setVal((byte)(handPos * 127));
-                            try {
-                                talker.send(fwm);
-                            }
-                            catch(Exception e) {
-                                Log.w("EMUMINI2", "Unable to send message");
-                            }
-
-                            Log.e("EMUMINI2", "Hand: " + handPos);
-                            curElbow = handPos;
-                        }
-                    }
-                    public void onStartTrackingTouch(SeekBar seekBar) {}
-                    public void onStopTrackingTouch(SeekBar seekBar) {}
-                }
-        );
+    class ReceiveTransceiverMessage implements INetworkCallback {
+        public void handleMessage(byte[] inMessage) {
+            switch (inMessage[0]) {
+            case InputResponse.OARK_TYPE:
+                //     handleInputResponse(inMessage);
+                Log.e("ControlActivity", "InputResponse not implemented.");
+            default:
+                Log.i("ControlActivity", "Unhandled message type: " +
+                      inMessage[0]);
+            }
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
         try {
-            videoRenderer.stopRendering();
-            // Release our talker socket.
-            talker.close();
-            finish();
-        } catch(Exception e) {
-            Log.e("EmuMini2", "Could not connect.");
+            mTransceiver.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+        controlPoller.stop();
+        videoRenderer.stopRendering();
+        finish();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
-        try {
-            // Initialise the talker thread again.
-            /*talker = new Talker(targetIP);*/
-        } catch(Exception e) {
-            Log.e("EmuMini2", "Could not connect.");
-            finish();
-        }
     }
 }
