@@ -56,7 +56,7 @@ public abstract class Message {
     private String mRosType;
 
     // ROS Message type MUST be passed in.
-    private Message() {};
+    private Message() {}
 
     /**
      * Construct the message that suits the given inRosType.

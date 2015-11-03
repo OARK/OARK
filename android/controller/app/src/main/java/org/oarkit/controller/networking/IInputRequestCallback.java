@@ -11,5 +11,5 @@ import org.oarkit.controller.messages.rosmessages.Input;
 import java.util.List;
 
 public interface IInputRequestCallback {
-    public void updateInputControllers(List<Input> inInputs);
+    void updateInputControllers(List<Input> inInputs);
 }

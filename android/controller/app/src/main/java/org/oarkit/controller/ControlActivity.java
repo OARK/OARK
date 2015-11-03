@@ -26,8 +26,8 @@ import java.io.IOException;
 import java.util.List;
 
 public class ControlActivity extends Activity implements IInputRequestCallback {
-    final private int DEFAULT_VIDEO_PORT = 5000;
-    private final String targetIP = "192.168.12.1";
+    private final static int DEFAULT_VIDEO_PORT = 5000;
+    private final static String targetIP = "192.168.12.1";
 
     private VideoRenderer videoRenderer;
     private FrameLayout mainFrame;

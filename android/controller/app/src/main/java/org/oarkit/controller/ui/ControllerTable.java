@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 public class ControllerTable extends TableLayout {
 
-    private ArrayList<TableRow> tableRows = new ArrayList<TableRow>();
+    private ArrayList<TableRow> tableRows = new ArrayList<>();
     private TableRow analogSticksRow;
     private boolean sticksAdded = false;
 
@@ -58,7 +58,7 @@ public class ControllerTable extends TableLayout {
         this.addView(newRow);
     }
 
-    public void addStick(AnalogStick inStick) {
+    public void addStick(ControllerStick inStick) {
 
         if (!this.sticksAdded) {
             this.addView(analogSticksRow);

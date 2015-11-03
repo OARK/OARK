@@ -1,5 +1,5 @@
 <resources>
-    <declare-styleable name="AnalogStick">
+    <declare-styleable name="ControllerStick">
         <attr name="backColor" format="color" />
         <attr name="transparent" format="boolean" />
 

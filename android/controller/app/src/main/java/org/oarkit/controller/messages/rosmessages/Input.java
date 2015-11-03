@@ -11,8 +11,8 @@ package org.oarkit.controller.messages.rosmessages;
  * robot that represents available inputs.
  */
 public interface Input extends org.ros.internal.message.Message {
-    static final java.lang.String _TYPE = "org/oarkit/controller/messages/rosmessages/Input";
-    static final java.lang.String _DEFINITION = "string name\nstring type\nstring title\nstring axes\n";
+    java.lang.String _TYPE = "org/oarkit/controller/messages/rosmessages/Input";
+    java.lang.String _DEFINITION = "string name\nstring type\nstring title\nstring axes\n";
     java.lang.String getName();
     void setName(java.lang.String value);
     java.lang.String getType();

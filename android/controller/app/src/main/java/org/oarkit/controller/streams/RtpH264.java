@@ -80,7 +80,7 @@ public class RtpH264 {
 
     private String TAG = "RtpH264:";
 
-    static public enum ProcessResult {
+    public enum ProcessResult {
         BUFFER_PROCESSED_OK,
         OUTPUT_BUFFER_NOT_FILLED
     }

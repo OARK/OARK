@@ -39,7 +39,7 @@ public class VideoRenderer implements SurfaceHolder.Callback {
     // Thread that actually does everything.
     private Thread mStreamRenderer;
 
-    private VideoRenderer() {};
+    private VideoRenderer() {}
 
     /**
      * After the video renderer is created here, it must be added as a

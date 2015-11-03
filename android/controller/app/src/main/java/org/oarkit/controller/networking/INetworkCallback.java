@@ -14,5 +14,5 @@ package org.oarkit.controller.networking;
  * type.
  */
 public interface INetworkCallback {
-    public void handleMessage(byte[] inMessage);
+    void handleMessage(byte[] inMessage);
 }

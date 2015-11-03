@@ -17,7 +17,7 @@ import android.view.View;
 
 import java.util.ArrayList;
 
-public class AnalogStick extends View implements IRobotControl {
+public class ControllerStick extends View implements IRobotControl {
     public final static int X = 0;
     public final static int Y = 1;
     public final static int BOTH = 2;
@@ -28,7 +28,10 @@ public class AnalogStick extends View implements IRobotControl {
     private boolean isTouching = false;
     private float touchX, touchY;
     private float circleRad = 150f;
+
     private Paint circlePainter;
+    private Paint mTextPainter;
+    private Rect mTextBounds;
 
     private boolean effects = true;
     private int axes = BOTH;
@@ -37,32 +40,39 @@ public class AnalogStick extends View implements IRobotControl {
     private String mTitle;
 
     private ArrayList<AnalogStickListener> listeners =
-        new ArrayList<AnalogStickListener>();
+            new ArrayList<>();
 
     /*
       Implement this interface if you wish to receive notifications on
       the analog stick moving.
      */
-    public static interface AnalogStickListener {
-        public void onAnalogStickChange(float x, float y);
+    public interface AnalogStickListener {
+        void onAnalogStickChange(float x, float y);
     }
 
     public void addAnalogStickListener(AnalogStickListener asl) {
         listeners.add(asl);
     }
 
-    public AnalogStick(Context context) {
+    public ControllerStick(Context context) {
         super(context);
         init(null, 0);
         mTitle = "";
+        mTextPainter = new Paint();
+
+        mTextPainter.setStyle(Paint.Style.FILL);
+        mTextPainter.setColor(Color.WHITE);
+        mTextPainter.setTextSize(20);
+
+        mTextBounds = new Rect();
     }
 
-    public AnalogStick(Context context, AttributeSet attrs) {
+    public ControllerStick(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(attrs, 0);
     }
 
-    public AnalogStick(Context context, AttributeSet attrs, int defStyle) {
+    public ControllerStick(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(attrs, defStyle);
     }
@@ -117,24 +127,17 @@ public class AnalogStick extends View implements IRobotControl {
         }
 
         // If there's a label, draw it.
-        Paint paint = new Paint();
-
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(Color.WHITE);
-        paint.setTextSize(20);
-
-        Rect bounds = new Rect();
-        paint.getTextBounds(mTitle, 0, mTitle.length(), bounds);
+        mTextPainter.getTextBounds(mTitle, 0, mTitle.length(), mTextBounds);
 
         int middleWidth = width / 2;
         int middleHeight = height / 2;
 
-        canvas.drawText(mTitle, middleWidth - bounds.width(), middleHeight, paint);
+        canvas.drawText(mTitle, middleWidth - mTextBounds.width(), middleHeight, mTextPainter);
     }
 
 
     @Override
-    public boolean onTouchEvent(MotionEvent me ) {
+    public boolean onTouchEvent(MotionEvent me) {
         int width = getWidth();
         int height = getHeight();
 
@@ -147,10 +150,10 @@ public class AnalogStick extends View implements IRobotControl {
         }
 
         /* Check for down/up */
-        if(me.getAction() == me.ACTION_DOWN) {
+        if(me.getAction() == MotionEvent.ACTION_DOWN) {
             isTouching = true;
         }
-        else if(me.getAction() == me.ACTION_UP) {
+        else if(me.getAction() == MotionEvent.ACTION_UP) {
             isTouching = false;
             touchX = width / 2;
             touchY = height / 2;

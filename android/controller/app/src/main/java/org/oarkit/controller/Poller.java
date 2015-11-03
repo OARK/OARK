@@ -27,8 +27,6 @@ public class Poller {
 
     private Transceiver mTransceiver;
 
-    private Thread pollerThread;
-
     private volatile boolean mRunning;
 
     private List<IRobotControl> mControls;
@@ -44,7 +42,7 @@ public class Poller {
 
     private void createAndStartThread() {
         PollerThread ti = new PollerThread();
-        pollerThread = new Thread(ti);
+        Thread pollerThread = new Thread(ti);
         pollerThread.start();
     }
 
@@ -56,7 +54,7 @@ public class Poller {
         public void run() {
             while (mRunning) {
                 // Build up our list of values to send.
-                List<Float> controlValues = new ArrayList<Float>();
+                List<Float> controlValues = new ArrayList<>();
 
                 for (IRobotControl control : mControls) {
                     for (float value : control.getValues()) {

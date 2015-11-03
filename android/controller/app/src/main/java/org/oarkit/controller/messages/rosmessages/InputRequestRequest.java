@@ -12,6 +12,6 @@ package org.oarkit.controller.messages.rosmessages;
  * control that robot.
  */
 public interface InputRequestRequest extends org.ros.internal.message.Message {
-  static final java.lang.String _TYPE = "org/oarkit/controller/messages/rosmessages/InputRequestRequest";
-  static final java.lang.String _DEFINITION = "";
+  java.lang.String _TYPE = "org/oarkit/controller/messages/rosmessages/InputRequestRequest";
+  java.lang.String _DEFINITION = "";
 }

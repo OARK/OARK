@@ -45,7 +45,7 @@ public class Transceiver {
 
     private byte[] mMessageBuffer = new byte[Message.MAX_MESSAGE_SIZE];
 
-    private Transceiver() {};
+    private Transceiver() {}
 
     /**
      * Given an IP address of the robot, connect to the robot on the
@@ -134,7 +134,7 @@ public class Transceiver {
          * it will receive nothing but OARK messages, it doesn't
          * verify that the data received is an OARK message.
          */
-        public void run() throws IllegalStateException, RuntimeException {
+        public void run() throws RuntimeException {
             if (mCallback == null) {
                 throw new IllegalStateException("No callback set");
             }

@@ -82,7 +82,7 @@ public class SipdroidSocket extends DatagramSocket {
                         try {
                         System.loadLibrary("OSNetworkSystem");
                         OSNetworkSystem.getOSNetworkSystem().getClass().getMethod(
-                                   "oneTimeInitialization", new Class[] { Boolean.class } );
+                                   "oneTimeInitialization", Boolean.class);
                         OSNetworkSystem.getOSNetworkSystem().oneTimeInitialization(true);
                         SipdroidSocket.loaded = true;
                         } catch (Throwable e) {

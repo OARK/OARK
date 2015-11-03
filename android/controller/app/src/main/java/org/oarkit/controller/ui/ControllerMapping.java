@@ -38,7 +38,7 @@ public class ControllerMapping {
         ControllerTable inTable,
         List<Input> inInputs) {
 
-        List<IRobotControl> result = new ArrayList<IRobotControl>();
+        List<IRobotControl> result = new ArrayList<>();
 
         /*
          * Our mapping is very simple, sliders first, then just
@@ -47,8 +47,8 @@ public class ControllerMapping {
          * building, because the sliders need a span value because
          * of the table layout we're using.
          */
-        List<ControllerSeekBar> sliders = new ArrayList<ControllerSeekBar>();
-        List<AnalogStick> sticks = new ArrayList<AnalogStick>();
+        List<ControllerSeekBar> sliders = new ArrayList<>();
+        List<ControllerStick> sticks = new ArrayList<>();
 
         for (Input input : inInputs) {
             switch (input.getType().toUpperCase()) {
@@ -60,22 +60,22 @@ public class ControllerMapping {
                 sliders.add(currentSlider);
                 break;
             case STICK_TYPE:
-                AnalogStick currentStick = new AnalogStick(inUi);
+                ControllerStick currentStick = new ControllerStick(inUi);
                 currentStick.setTitle(input.getTitle());
                 switch (input.getAxes().toUpperCase()) {
                     case "X":
-                        currentStick.setAxes(AnalogStick.X);
+                        currentStick.setAxes(ControllerStick.X);
                         break;
                     case "Y":
-                        currentStick.setAxes(AnalogStick.Y);
+                        currentStick.setAxes(ControllerStick.Y);
                         break;
                     case "XY":
                     case "YX":
-                        currentStick.setAxes(AnalogStick.BOTH);
+                        currentStick.setAxes(ControllerStick.BOTH);
                         break;
                     default:
                         Log.e("ControllerMapping", "Unknow axes demand on analog stick.");
-                        currentStick.setAxes(AnalogStick.BOTH);
+                        currentStick.setAxes(ControllerStick.BOTH);
                         break;
                 }
                 result.add(currentStick);
@@ -99,7 +99,7 @@ public class ControllerMapping {
         }
 
         // Sticks
-        for (AnalogStick stick : sticks) {
+        for (ControllerStick stick : sticks) {
             inTable.addStick(stick);
         }
 

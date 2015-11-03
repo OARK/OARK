@@ -50,7 +50,7 @@ public class VideoStream extends Thread {
      * Doesn't make sense to build an instance without socket and
      * output surface.
      */
-    private VideoStream() {};
+    private VideoStream() {}
 
     public VideoStream(RtpSocket inRtpSocket,
                        SurfaceView outputSurfaceView) throws IOException {
