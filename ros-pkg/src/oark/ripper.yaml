@@ -1,1 +1,62 @@
-# Define the controls for Murillo's arm + gripper here
+#An oark config file for Murillo's gripper robot.
+#
+
+
+inputs:
+  - name: base_analog
+    type: analog
+    axes: Y
+    title: 'Base'
+    
+  - name: elbow_analog
+    type: analog
+    axes: Y
+    title: 'Elbow'
+
+  - name: camera_analog
+    type: analog
+    axes: X
+    title: 'Camera'
+
+  - name: gripper_analog
+    type: analog
+    axes: Y
+    title: 'Gripper'
+
+
+
+
+controllers:
+    base:
+        id: 1
+        type: torque
+        min: 0
+        max: 4093
+        joint_name: joint_base
+        value: 'base_analog'
+    elbow:
+        id: 2
+        type: torque
+        min: 0
+        max: 4093
+        joint_name: joint_elbow
+        value: 'elbow_analog'
+    camera:
+        id: 3
+        type: torque
+        min: 0
+        max: 4093
+        joint_name: joint_camera
+        value: 'camera_analog'
+    gripper:
+        id: 4
+        type: torque
+        min: 0
+        max: 4093
+        joint_name: joint_gripper
+        value: 'gripper_analog`'
+
+
+
+#Settings
+video: false
