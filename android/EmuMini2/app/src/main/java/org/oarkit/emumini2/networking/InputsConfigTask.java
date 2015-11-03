@@ -48,7 +48,7 @@ public class InputsConfigTask extends AsyncTask<Transceiver, String, InputRespon
             inTransceiver[0].start();
             inTransceiver[0].send(requestInputs);
 
-            boolean responseReceived = false;
+            boolean responseReceived;
             byte[] tempBuffer;
 
             do {
