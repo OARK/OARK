@@ -60,7 +60,13 @@ public class Poller {
 
                 for (IRobotControl control : mControls) {
                     for (float value : control.getValues()) {
-                        controlValues.add(value);
+                        Log.i("Poller:", "Value is: " + value);
+
+                        if (Float.isNaN(value)) {
+                            controlValues.add(0.0f);
+                        } else {
+                            controlValues.add(value);
+                        }
                     }
 
                 }

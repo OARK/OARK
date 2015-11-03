@@ -1,5 +1,5 @@
 <resources>
-    <declare-styleable name="AnalogStickView">
+    <declare-styleable name="AnalogStick">
         <attr name="backColor" format="color" />
         <attr name="transparent" format="boolean" />
 

@@ -7,6 +7,7 @@
 package org.oarkit.controller.ui;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.oarkit.controller.messages.rosmessages.Input;
 
@@ -24,7 +25,7 @@ import java.util.List;
  */
 public class ControllerMapping {
     private final static String SLIDER_TYPE = "SLIDER";
-    private final static String STICK_TYPE = "STICK";
+    private final static String STICK_TYPE = "ANALOG";
 
     /**
      * Given a UI context and input list, create and add the UI
@@ -52,6 +53,7 @@ public class ControllerMapping {
         for (Input input : inInputs) {
             switch (input.getType().toUpperCase()) {
             case SLIDER_TYPE:
+                Log.i("ControllerMapping", "Slider Title: " + input.getTitle());
                 ControllerSeekBar currentSlider =
                     new ControllerSeekBar(inUi, input.getTitle());
                 result.add(currentSlider);
@@ -59,6 +61,23 @@ public class ControllerMapping {
                 break;
             case STICK_TYPE:
                 AnalogStick currentStick = new AnalogStick(inUi);
+                currentStick.setTitle(input.getTitle());
+                switch (input.getAxes().toUpperCase()) {
+                    case "X":
+                        currentStick.setAxes(AnalogStick.X);
+                        break;
+                    case "Y":
+                        currentStick.setAxes(AnalogStick.Y);
+                        break;
+                    case "XY":
+                    case "YX":
+                        currentStick.setAxes(AnalogStick.BOTH);
+                        break;
+                    default:
+                        Log.e("ControllerMapping", "Unknow axes demand on analog stick.");
+                        currentStick.setAxes(AnalogStick.BOTH);
+                        break;
+                }
                 result.add(currentStick);
                 sticks.add(currentStick);
                 break;

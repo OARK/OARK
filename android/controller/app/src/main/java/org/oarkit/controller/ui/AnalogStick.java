@@ -10,6 +10,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,9 +18,9 @@ import android.view.View;
 import java.util.ArrayList;
 
 public class AnalogStick extends View implements IRobotControl {
-    private final int X = 0;
-    private final int Y = 1;
-    private final int BOTH = 2;
+    public final static int X = 0;
+    public final static int Y = 1;
+    public final static int BOTH = 2;
 
     private int backColor = Color.BLACK;
     private int pointerColor = Color.RED;
@@ -32,6 +33,8 @@ public class AnalogStick extends View implements IRobotControl {
     private boolean effects = true;
     private int axes = BOTH;
     private boolean transparent = true;
+
+    private String mTitle;
 
     private ArrayList<AnalogStickListener> listeners =
         new ArrayList<AnalogStickListener>();
@@ -51,6 +54,7 @@ public class AnalogStick extends View implements IRobotControl {
     public AnalogStick(Context context) {
         super(context);
         init(null, 0);
+        mTitle = "";
     }
 
     public AnalogStick(Context context, AttributeSet attrs) {
@@ -90,20 +94,20 @@ public class AnalogStick extends View implements IRobotControl {
         }
 
         if(effects) {
-        /* Save current transformation matrix */
+            /* Save current transformation matrix */
             canvas.save();
-                double angle;
-                double tilt;
+            double angle;
+            double tilt;
 
-                angle = Math.toDegrees(Math.atan2(getAnalogY(), getAnalogX()));
-                tilt = 1 - (Math.hypot(touchX - width / 2, touchY - height / 2) /
-                            Math.hypot(width / 2, height / 2));
+            angle = Math.toDegrees(Math.atan2(getAnalogY(), getAnalogX()));
+            tilt = 1 - (Math.hypot(touchX - width / 2, touchY - height / 2) /
+                        Math.hypot(width / 2, height / 2));
 
-                canvas.translate(touchX, touchY);
-                canvas.rotate((float) -angle);
-                canvas.scale((float) tilt, 1);
+            canvas.translate(touchX, touchY);
+            canvas.rotate((float) -angle);
+            canvas.scale((float) tilt, 1);
 
-                canvas.drawCircle(0, 0, circleRad, circlePainter);
+            canvas.drawCircle(0, 0, circleRad, circlePainter);
 
             /* Restore old transformation matrix */
             canvas.restore();
@@ -111,6 +115,21 @@ public class AnalogStick extends View implements IRobotControl {
         else {
             canvas.drawCircle(touchX, touchY, circleRad, circlePainter);
         }
+
+        // If there's a label, draw it.
+        Paint paint = new Paint();
+
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.WHITE);
+        paint.setTextSize(20);
+
+        Rect bounds = new Rect();
+        paint.getTextBounds(mTitle, 0, mTitle.length(), bounds);
+
+        int middleWidth = width / 2;
+        int middleHeight = height / 2;
+
+        canvas.drawText(mTitle, middleWidth - bounds.width(), middleHeight, paint);
     }
 
 
@@ -150,6 +169,14 @@ public class AnalogStick extends View implements IRobotControl {
         invalidate();
 
         return true;
+    }
+
+    public void setAxes(int inAxes) {
+        axes = inAxes;
+    }
+
+    public void setTitle(String inTitle) {
+        mTitle = inTitle;
     }
 
     /* We have to use an effective width/height because the range of the pointer is

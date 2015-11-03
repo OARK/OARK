@@ -24,6 +24,7 @@ public class ControllerSeekBar extends SeekBar implements IRobotControl {
     public ControllerSeekBar(final Context inContext, String inTitle) {
         super(inContext);
 
+        mTitle = inTitle;
         this.setMax(MAX_VALUE);
         this.setProgress(MAX_VALUE / 2);
     }

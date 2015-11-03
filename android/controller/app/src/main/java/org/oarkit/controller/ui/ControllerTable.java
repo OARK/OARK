@@ -9,6 +9,7 @@ package org.oarkit.controller.ui;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Space;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -39,6 +40,8 @@ public class ControllerTable extends TableLayout {
         TableRow newRow = new TableRow(this.getContext());
         TextView newText = new TextView(this.getContext());
 
+        Log.i("ControllerTable", "Setting the title to: " +
+                inControllerSeekBar.getTitle());
         newText.setText(inControllerSeekBar.getTitle());
         newRow.addView(newText);
         newRow.addView(inControllerSeekBar);
