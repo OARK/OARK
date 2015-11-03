@@ -9,6 +9,7 @@ package org.oarkit.controller;
 import android.util.Log;
 
 import org.oarkit.controller.messages.Message;
+import org.oarkit.controller.networking.ConnectRobotException;
 import org.oarkit.controller.networking.INetworkCallback;
 
 import java.io.DataInputStream;
@@ -106,7 +107,7 @@ public class Transceiver {
          * @exception RuntimeException Thrown when unable to open the
          *                             socket.
          */
-        public TransceiverThread() throws RuntimeException {
+        public TransceiverThread() throws ConnectRobotException {
             try {
                 mRobotSocket = new Socket(InetAddress.getByName(mAddress),
                                           mPort);
@@ -117,7 +118,8 @@ public class Transceiver {
 
             } catch (IOException e) {
                 Log.i("TransceiverThread", "IOException: " + e.getMessage());
-                throw new RuntimeException(e);
+                throw new ConnectRobotException(e,
+                    ConnectRobotException.ErrorCode.CANT_CONNECT);
             }
         }
 
@@ -177,7 +179,9 @@ public class Transceiver {
             }
         } catch (IOException e) {
             Log.e("Transceiver", "Exception: " + e.getMessage());
-            throw new RuntimeException(e);
+            throw new
+                ConnectRobotException(e,
+                    ConnectRobotException.ErrorCode.CONNECTION_DROPPED);
         }
     }
 
@@ -246,9 +250,15 @@ public class Transceiver {
     /*
      *
      */
-    public synchronized void send(Message inMessage) throws IOException {
+    public synchronized void send(Message inMessage) throws ConnectRobotException {
         Log.i("Transceiver", "Message: " + inMessage.toString());
-        mToRobot.write(inMessage.toByteArray());
-        mToRobot.flush();
+        try {
+            mToRobot.write(inMessage.toByteArray());
+            mToRobot.flush();
+        } catch (IOException e) {
+            Log.e("Transceiver", "IO error sending to robot." + e.getMessage());
+            throw new ConnectRobotException(e,
+                ConnectRobotException.ErrorCode.CONNECTION_DROPPED);
+        }
     }
 }

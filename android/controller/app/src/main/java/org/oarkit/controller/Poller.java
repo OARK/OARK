@@ -9,6 +9,7 @@ package org.oarkit.controller;
 import android.util.Log;
 
 import org.oarkit.controller.messages.ControlMessage;
+import org.oarkit.controller.networking.ConnectRobotException;
 import org.oarkit.controller.ui.IRobotControl;
 
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class Poller {
     }
 
     class PollerThread implements Runnable {
-        public void run() {
+        public void run() throws ConnectRobotException {
             while (mRunning) {
                 // Build up our list of values to send.
                 List<Float> controlValues = new ArrayList<>();
@@ -80,8 +81,9 @@ public class Poller {
 
                 try {
                     mTransceiver.send(message);
-                } catch (IOException e) {
+                } catch (ConnectRobotException e) {
                     Log.e("PollerThread", e.getMessage());
+                    throw e;
                 }
 
                 try {

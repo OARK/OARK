@@ -18,9 +18,9 @@ import android.view.View;
 import java.util.ArrayList;
 
 public class ControllerStick extends View implements IRobotControl {
-    public final static int X = 0;
-    public final static int Y = 1;
-    public final static int BOTH = 2;
+    public enum Axes {
+        X, Y, BOTH;
+    }
 
     private int backColor = Color.BLACK;
     private int pointerColor = Color.RED;
@@ -34,7 +34,7 @@ public class ControllerStick extends View implements IRobotControl {
     private Rect mTextBounds;
 
     private boolean effects = true;
-    private int axes = BOTH;
+    private Axes axes = Axes.BOTH;
     private boolean transparent = true;
 
     private String mTitle;
@@ -142,10 +142,10 @@ public class ControllerStick extends View implements IRobotControl {
         int height = getHeight();
 
         /* Get only required axes */
-        if(axes != Y) {
+        if(axes != Axes.Y) {
             touchX = me.getX();
         }
-        if(axes != X) {
+        if(axes != Axes.X) {
             touchY = me.getY();
         }
 
@@ -174,7 +174,7 @@ public class ControllerStick extends View implements IRobotControl {
         return true;
     }
 
-    public void setAxes(int inAxes) {
+    public void setAxes(Axes inAxes) {
         axes = inAxes;
     }
 

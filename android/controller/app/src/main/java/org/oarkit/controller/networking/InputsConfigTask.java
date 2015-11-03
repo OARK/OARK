@@ -38,38 +38,30 @@ public class InputsConfigTask extends AsyncTask<Transceiver, String, InputRespon
      */
     @Override
     protected InputResponse doInBackground(Transceiver... inTransceiver) throws
-        RuntimeException {
+        ConnectRobotException {
         InputRequestMessage requestInputs = new InputRequestMessage();
         InputResponse inputResponse;
 
-        try {
-            inTransceiver[0].start();
-            inTransceiver[0].send(requestInputs);
+        inTransceiver[0].start();
+        inTransceiver[0].send(requestInputs);
 
-            boolean responseReceived;
-            byte[] tempBuffer;
+        boolean responseReceived;
+        byte[] tempBuffer;
 
-            do {
-                inTransceiver[0].readFromNetwork();
+        do {
+            inTransceiver[0].readFromNetwork();
 
-                int messageLength = inTransceiver[0].getMessageLength();
-                tempBuffer = new byte[messageLength];
-                responseReceived = inTransceiver[0].parseMessage(tempBuffer,messageLength);
-                inputResponse = new InputResponse(tempBuffer);
-            } while (!responseReceived);
+            int messageLength = inTransceiver[0].getMessageLength();
+            tempBuffer = new byte[messageLength];
+            responseReceived = inTransceiver[0].parseMessage(tempBuffer,messageLength);
+            inputResponse = new InputResponse(tempBuffer);
+        } while (!responseReceived);
 
-            Log.i("InputsConfigTask", "Message in buffer. Type: " +
-                  tempBuffer[0]);
+        Log.i("InputsConfigTask", "Message in buffer. Type: " +
+              tempBuffer[0]);
 
-            Log.i("InputsConfigTask", "Response: " +
-                  inputResponse.toString());
-
-        } catch (ConnectException e) {
-            Log.e("InputConfigTask", "Unable to connect to robot.");
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Log.i("InputsConfigTask", "Response: " +
+              inputResponse.toString());
 
         // Wait for response.
         return inputResponse;

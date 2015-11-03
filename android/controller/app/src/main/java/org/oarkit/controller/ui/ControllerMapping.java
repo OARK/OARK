@@ -64,18 +64,18 @@ public class ControllerMapping {
                 currentStick.setTitle(input.getTitle());
                 switch (input.getAxes().toUpperCase()) {
                     case "X":
-                        currentStick.setAxes(ControllerStick.X);
+                        currentStick.setAxes(ControllerStick.Axes.X);
                         break;
                     case "Y":
-                        currentStick.setAxes(ControllerStick.Y);
+                        currentStick.setAxes(ControllerStick.Axes.Y);
                         break;
                     case "XY":
                     case "YX":
-                        currentStick.setAxes(ControllerStick.BOTH);
+                        currentStick.setAxes(ControllerStick.Axes.BOTH);
                         break;
                     default:
                         Log.e("ControllerMapping", "Unknow axes demand on analog stick.");
-                        currentStick.setAxes(ControllerStick.BOTH);
+                        currentStick.setAxes(ControllerStick.Axes.BOTH);
                         break;
                 }
                 result.add(currentStick);

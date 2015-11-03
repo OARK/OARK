@@ -25,9 +25,15 @@ import org.oarkit.controller.ui.IRobotControl;
 import java.io.IOException;
 import java.util.List;
 
+
+/**
+ * This is the activity that does all the work. It will query the
+ * robot for inputs and build the GUI to match, allowing the user to
+ * control the robot.
+ */
 public class ControlActivity extends Activity implements IInputRequestCallback {
     private final static int DEFAULT_VIDEO_PORT = 5000;
-    private final static String targetIP = "192.168.12.1";
+    private final static String ROBOT_IP = "192.168.12.1";
 
     private VideoRenderer videoRenderer;
     private FrameLayout mainFrame;
@@ -41,8 +47,6 @@ public class ControlActivity extends Activity implements IInputRequestCallback {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // setContentView(R.layout.activity_control);
 
         /* Stop screen dimming */
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -58,7 +62,7 @@ public class ControlActivity extends Activity implements IInputRequestCallback {
         /* Connect to raspberry pi server */
         try {
 
-            mTransceiver = new Transceiver(targetIP);
+            mTransceiver = new Transceiver(ROBOT_IP);
             mTransceiver.addCallback(new ReceiveTransceiverMessage());
 
             InputsConfigTask configTask = new InputsConfigTask();
