@@ -38,7 +38,7 @@
         name="oark_control_node"
         pkg="oark"
         type="control_node.py"
-        args="dxl_manager pi_out_port $(find oark)/emumini2.yaml"
+        args="dxl_manager pi_out_port $(find oark)/demo.yaml"
         required="true"
         output="screen"/>
 
