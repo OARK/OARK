@@ -24,17 +24,21 @@
 inputs:
   - name: left_analog
     type: analog
+    title: 'Left Wheels'
     axes: Y
 
   - name: right_analog
     type: analog
+    title: 'Right Wheels'
     axes: Y
 
   - name: elbow_slider
     type: slider
+    title: 'Elbow'
     
   - name: wrist_slider
     type: slider
+    title: 'Wrist'
 
   - name: hand_slider
     title: Hand

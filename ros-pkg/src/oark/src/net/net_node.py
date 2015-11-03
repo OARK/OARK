@@ -92,7 +92,6 @@ class NetNode(object):
         rospy.loginfo('Got data')
 
         #Deserialise msg
-        #print 'Packet', [ord(a) for a in msg]
         ros_msg = net_consts.MSGS[msg_type]()
         ros_msg.deserialize(msg)
 
