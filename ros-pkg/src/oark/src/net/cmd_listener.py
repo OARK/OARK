@@ -143,15 +143,18 @@ class CmdListener:
 
         Returns a list of bytes received, or None if client disconnects.
         """
-        data = socket.recv(length)
-        while data and len(data) < length:
-            new_bytes = socket.recv(length - len(data))
-            if new_bytes is None:
-                data = None
-            else:
-                data = data + new_bytes
+        if length > 0:
+            data = socket.recv(length)
+            while data and len(data) < length:
+                new_bytes = socket.recv(length - len(data))
+                if new_bytes is None:
+                    data = None
+                else:
+                    data = data + new_bytes
 
-        return data
+            return data
+        else:
+            return None
 
 
     def send_str(self, msg_type, data):
