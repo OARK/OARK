@@ -42,20 +42,3 @@ sudo chmod 700 temp/home/pi/.ssh
 sudo umount temp
 
 ./start.sh 2015-05-05-raspbian-wheezy.img
-
-echo -e "${COLOUR_PROGRESS}Waiting for emulator...${NC}"
-
-test_emulator_running=255
-
-# It takes awhile for the emulator to start and for it to be
-# responsive, so keep doing a simple looping test on SSH until it
-# responds.
-until ssh localhost -p 10022 exit
-do
-    echo -e "${COLOUR_PROGRESS}Not running, sleeping.${NC}"
-    sleep 10
-
-    echo -e "${COLOUR_PROGRESS}Checking if emulator image is running...${NC}"
-done
-
-echo -e "${COLOUR_SUCCESS}Emulator booted.${NC}"
