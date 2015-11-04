@@ -23,5 +23,8 @@ apt-get install -y bc build-essential git mercurial unzip
 # For installation scripting on the Pi virtual machine.
 apt-get install -y ansible sshpass
 
+# QEmu for emulation
+apt-get install -y qemu-system-arm
+
 # For the Ansible hosts file added later.
 echo "export ANSIBLE_INVENTORY=~/.ansible_hosts" >> .bashrc
