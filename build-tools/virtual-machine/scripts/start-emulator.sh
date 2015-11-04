@@ -16,8 +16,7 @@ NC='\033[0m' # No Color
 IMAGE_NAME="2015-05-05-raspbian-wheezy.img"
 
 echo -e "${COLOUR_PROGRESS}Copy Raspbian image...${NC}"
-cd /vagrant/files/oark-build/build-tools/emulation
-cp /vagrant/files/$IMAGE_NAME .
+cd /home/vagrant/Projects/oark/build-tools/emulation
 
 echo -e "${COLOUR_PROGRESS} Mounting image...${NC}"
 # Image needs to be modified before emulator can run it.

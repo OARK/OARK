@@ -12,8 +12,6 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-REPO_HASH="9e8e5dc45"
-
 # I want to be sure that operations are done relative to this scripts directory,
 # not from current directory someone may have when running it.
 #
@@ -71,7 +69,7 @@ pullGitRepo() {
 # $1 - Directory of repo.
 # $2 - Commit revision no.
 switchGitRepoToCommit() {
-  git -C $1 reset --hard $2
+  git -C $1 reset --hard
 }
 
 # Be sure we have the cross compilation toolchain.
@@ -84,7 +82,7 @@ ensureToolchain() {
 ensureKernel() {
     echo "Kernel"
     pullGitRepo $(kernelDirectory) https://github.com/raspberrypi/linux --depth=1
-    switchGitRepoToCommit $(kernelDirectory) $REPO_HASH
+    switchGitRepoToCommit $(kernelDirectory)
 }
 
 # Patch kernel
