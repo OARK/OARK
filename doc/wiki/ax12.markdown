@@ -1,0 +1,136 @@
+# AX-12 #
+
+(Note: AX-12 is used in this article to encompass all of the AX-12, AX-12+,
+and AX-12A models of AX-12 servomotors)
+
+> The AX-12A servo actuator from Robotis is the most advanced actuator on the
+> market in this price range and has become the defacto standard for the next
+> generation of hobby robotics. The AX-12A robot servo has the ability to
+> track its speed, temperature, shaft position, voltage, and load. As if this
+> weren't enough, the control algorithm used to maintain shaft position on the
+> ax-12 actuator can be adjusted individually for each servo, allowing you to
+> control the speed and strength of the motor's response. All of the sensor
+> management and position control is handled by the servo's built-in
+> microcontroller. This distributed approach leaves your main controller free
+> to perform other functions.
+
+ --- [Trossen
+Robotics](http://www.trossenrobotics.com/dynamixel-ax-12-robot-actuator.aspx)
+
+
+What's notable here is that each motor has its own processor and memory. Some
+of this memory is EEPROM and needs to be written with certain values before
+the AX-12 will operate as desired. This article is dedicated to initialising
+the AX-12 properly.
+
+If using the full OARK software stack, then very little of this article is
+necessary. Only the correct ID needs to be set on each AX-12 motor before the
+software is started. This is possible because the motor settings are specified
+in a configuration file that is read upon launch.
+
+The rest of this article is still useful for debugging and development
+purposes.
+
+## AX-12 Specifics ##
+
+### Modes ###
+
+The AX-12 can be set to two different modes:
+
+ *  Position Mode
+
+    The command sent to the motor will send it to a definite position. This
+position is the same every time it is sent, even after reboots. In simple
+terms, the command determines a certain position on the AX-12 horn.
+
+ *  Wheel/Torque Mode
+
+    The command sent to the motor will set the moving speed. The motor will
+begin turning at the given speed until either a new speed is sent or until the
+motor is powered off.
+
+A motor can be set to wheel/torque mode by setting its clockwise and
+counter-clockwise angle limits to zero.
+
+
+### Coordinates ###
+
+The AX-12 needs to store its current position in its RAM. Due to the hardware
+limitations of the AX-12's processor and memory, it would be a waste of
+processing time and space to store this value as a float. As such, the current
+position coordinate is represented as a value between 0 and 1023. The value of
+0 represents the most clockwise that the horn can be positioned. The value of
+1023 represents the most counter-clockwise that the horn can be positioned.
+This may seem a little unintuitive, but coordinates increasing in a
+counter-clockwise direction mirrors the trend in mathematics.
+
+Changing the clockwise angle limit in the AX-12's EEPROM memory will change
+the most clockwise point to which that AX-12 can turn. It is important that
+even though the AX-12 stops turning at this point, the coordinate of this
+point is still the same as it was before. Coordinates are 'absolute' in some
+sense.
+
+Finally, the AX-12 has a dead-zone when set to position mode. The full range
+of the AX-12 in position mode is only 300 degrees. This means that AX-12
+coordinate 0 and AX-12 coordinate 1023 are 60 degrees apart.
+
+More information on this topic can be seen at the [AX-12 reference page](http://support.robotis.com/en/product/dynamixel/ax_series/dxl_ax_actuator.htm).
+
+
+## Configuring the AX-12 ##
+
+To configure the AX-12 using the Raspberry Pi, ROS and the dynamixel_motor
+package need to be installed. The dynamixel_motor package contains a handful
+of scripts that can be used to work with the motors.
+
+If installed, the relevant scripts should be located at 
+
+    /opt/ros/indigo/lib/dynamixel_driver/
+
+Running the scripts in this directory without arguments will provide usage
+information. Feel free to play around with these scripts.
+
+Navigating to the above directory in a terminal will allow the following
+configurations to be performed.
+
+### Changing an AX-12 ID ###
+
+Once in the above directory, the following command can be executed to change
+the ID of motor 1 to motor 2
+
+    ./change_id.py -b 115200 -p /dev/ttyAMA0 1 2
+
+The -b specifies the baud rate and the -p specifies the port that the AX-12
+motors are on.
+
+Care should be taken to prevent two motors on the same dynamixel bus having
+the same ID.
+
+
+### Setting AX-12 Angle Limits ###
+
+To set the angle limits of the motors with IDs 2 and 3 to only travel from the
+middle of their range to the most counter-clockwise of their range, the
+following command can be used
+
+    ./set_servo_config.py -b 115200 -p /dev/ttyAMA0 --cw-angle-limit=512 --ccw-angle-limit=1023 2 3
+
+As a special case of using this command, to set a motor into wheel mode the
+following command can be used
+
+    ./set_servo_config.py -b 115200 -p /dev/ttyAMA0 --cw-angle-limit=0 --ccw-angle-limit=0 2 3
+
+
+### Retrieving an AX-12 Config ###
+
+To get information about motors with IDs 1, 2, and 3, you can use the following
+ command
+
+    ./info_dump.py -b 115200 -p /dev/ttyAMA0 1 2 3
+
+
+## References ##
+
+[Robotis Website AX-12A Information Page](http://support.robotis.com/en/product/dynamixel/ax_series/dxl_ax_actuator.htm)
+
+[AX-12 Manual](http://www.trossenrobotics.com/images/productdownloads/AX-12(English).pdf)

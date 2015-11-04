@@ -1,0 +1,34 @@
+@startuml
+
+title Overall Structure of OARK Software
+
+() "AX12 Motor Bus" as ax12
+() "Pi Serial Port /dev/ttyAMA0" as serial
+() "Network" as network
+() "User" as user
+
+node "OpenCM" {
+    [OpenCM Serial Tosser Software] --> ax12
+    [OpenCM Serial Tosser Software] <-- serial
+}
+
+node "Raspberry Pi" {
+    [dynamixel_motors] --> serial
+    frame "OARK ROS Nodes" {
+        [Control Node] --> [dynamixel_motors]
+        [Network Node] --> [Control Node]
+        [Network Node] <-- network
+        [Control Node] -- [Video Node]
+        [Video Node] --> network
+    }
+    
+}
+
+
+node "Android Device" {
+    [Android Application] <-- network
+    [Android Application] --> user
+}
+
+
+@enduml
