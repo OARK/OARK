@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">OARK Controller</string>
+    <string name="splash_text">OARK Controller</string>
+    <string name="title_activity_splash">OARK</string>
+</resources>
