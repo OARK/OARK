@@ -74,4 +74,32 @@ Vagrant.configure(2) do |config|
   # Start building the Raspberry Pi image.
   config.vm.provision :shell, privileged: false,
                       path: "scripts/bootstrap-raspbian.sh"
+
+  # The bootstrap process should reboot the Pi. Wait until it's
+  # shutdown, then start it up again
+  config.vm.provision :shell, privileged: false,
+                      path: "scripts/wait-for-emulator-shutdown.sh"
+
+  # Start the emulator
+  config.vm.provision :shell, privileged: false,
+                      path: "scripts/start-emulator.sh"
+
+  # Wait for emulator to start
+  config.vm.provision :shell, privileged: false,
+                      path: "scripts/wait-for-emulator.sh"
+
+  # Copy files needed for Wifi setup
+  config.vm.provision :file, source: "files/interfaces",
+                      destination: "interfaces"
+
+  config.vm.provision :file, source: "files/hostapd.conf",
+                      destination: "hostapd.conf"
+
+  # Start the ROS install
+  config.vm.provision :shell, privileged: false,
+                      path: "scripts/install-oark.sh"
+
+  # Wait for emulator to shut down
+  config.vm.provision :shell, privileged: false,
+                      path: "scripts/wait-for-emulator.sh"
 end

@@ -6,7 +6,9 @@
     - name: Create OARK directory.
       file: path=/opt/oark state=directory owner=pi group=pi mode=0775 recurse=yes
     - name: Copy OARK runtime files.
-      synchronize: src=../../../../ros-pkg dest=/opt/oark/ recursive=yes delete=yes
+      copy: src=../Projects/oark/ros-pkg dest=/opt/oark/
+    - name: Create missing symlink
+      file: path=/opt/oark/ros-pkg/src/CMakeLists.txt src=/opt/ros/indigo/share/catkin/cmake/toplevel.cmake state=link
     - name: Build OARK ROS package.
       shell: bash build-dynamite.sh
       args:
@@ -21,8 +23,8 @@
         line="T0:23:respawn:/sbin/getty -L ttyAMA0 115200 vt100"
         state=absent
     - name: Copy utils.
-      synchronize: src=../../../../utils dest=/opt/oark/ recursive=yes delete=yes
+      copy: src=../Projects/oark/utils dest=/opt/oark/
     - name: Copy startup file.
-      copy: src=../../../../utils/emumini2 dest=/etc/init.d/emumini2 owner=root group=root mode=755
+      copy: src=../Projects/oark/utils/oark dest=/etc/init.d/oark owner=root group=root mode=755
     - name: Set Emumini to run on startup
-      command: update-rc.d emumini2 defaults
+      command: update-rc.d oark defaults
