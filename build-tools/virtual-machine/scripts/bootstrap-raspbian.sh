@@ -45,6 +45,9 @@ echo -e "${COLOUR_PROGRESS}Slimming Raspbian image...${NC}"
 runAnsiblePlaybook 02-slimline_install.yaml
 echo -e "${COLOUR_SUCCESS}Raspbian image slimmed.${NC}"
 
+# Will reboot after install, so wait for it to pop back up.
+./wait-for-emulator.sh
+
 echo -e "${COLOUR_PROGRESS}Starting ROS install...${NC}"
 runAnsiblePlaybook ros_indigo_install.yaml
 echo -e "${COLOUR_SUCCESS}ROS install success.${NC}"

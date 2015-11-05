@@ -18,7 +18,7 @@ IMAGE_NAME="2015-05-05-raspbian-wheezy.img"
 echo -e "${COLOUR_PROGRESS}Copy Raspbian image...${NC}"
 cd /home/vagrant/Projects/oark/build-tools/emulation
 
-echo -e "${COLOUR_PROGRESS} Mounting image...${NC}"
+echo -e "${COLOUR_PROGRESS}Mounting image...${NC}"
 # Image needs to be modified before emulator can run it.
 # Directory for mounting image.
 mkdir -p temp
@@ -26,6 +26,7 @@ mkdir -p temp
 cd ../disk
 
 sudo ./mount_rpi_image.sh ../emulation/$IMAGE_NAME ../emulation/temp
+echo -e "${COLOUR_SUCCESS}Image mounted.${NC}"
 
 cd ../emulation
 
@@ -37,7 +38,9 @@ sudo mkdir -p temp/home/pi/.ssh
 sudo cp ~vagrant/.ssh/id_rsa.pub temp/home/pi/.ssh/authorized_keys
 sudo chown -R 1000:1000 temp/home/pi/.ssh
 sudo chmod 700 temp/home/pi/.ssh
+echo -e "%{COLOUR_SUCCESS}Added SSH key...${NC}"
 
 sudo umount temp
+echo -e "${COLOUR_PROGRESS}Image update completed.${NC}"
 
 ./start.sh 2015-05-05-raspbian-wheezy.img

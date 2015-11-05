@@ -59,9 +59,17 @@ Vagrant.configure(2) do |config|
   config.vm.provision :file, source: "files/playbooks",
                       destination: "ansible_playbooks"
 
+  # Download Raspbian
+  config.vm.provision :shell, privileged: false,
+                      path: "scripts/download-raspbian.sh"
+
   # Start the emulator
   config.vm.provision :shell, privileged: false,
                       path: "scripts/start-emulator.sh"
+
+  # Wait for emulator to start
+  config.vm.provision :shell, privileged: false,
+                      path: "scripts/wait-for-emulator.sh"
 
   # Start building the Raspberry Pi image.
   config.vm.provision :shell, privileged: false,
