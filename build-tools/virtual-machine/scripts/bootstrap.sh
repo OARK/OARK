@@ -4,7 +4,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Assume we live in Western Australia
-sed -i 's/http:\/\/us\.archive\.ubuntu\.com/http:\/\/ftp.iinet.net.au\/linux/g' /etc/apt/sources.list
+# sed -i 's/http:\/\/us\.archive\.ubuntu\.com/http:\/\/ftp.iinet.net.au\/linux/g' /etc/apt/sources.list
 
 # Update package lists
 apt-get update
@@ -22,6 +22,9 @@ apt-get install -y bc build-essential git mercurial unzip
 
 # For installation scripting on the Pi virtual machine.
 apt-get install -y ansible sshpass
+
+# QEmu for emulation
+apt-get install -y qemu-system-arm
 
 # For the Ansible hosts file added later.
 echo "export ANSIBLE_INVENTORY=~/.ansible_hosts" >> .bashrc

@@ -11,7 +11,7 @@ COLOUR_SUCCESS='\033[0;32m'
 COLOUR_PROGRESS='\033[0;33m'
 NC='\033[0m' # No Color
 
-HOST_IP=10.0.1.24
+HOST_IP=localhost
 
 # Not getting picked up from .bashrc?
 # TODO: Must fix properly.

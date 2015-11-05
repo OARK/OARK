@@ -1,0 +1,16 @@
+<resources>
+    <declare-styleable name="ControllerStick">
+        <attr name="backColor" format="color" />
+        <attr name="transparent" format="boolean" />
+
+        <attr name="pointerColor" format="color" />
+        <attr name="pointerRad" format="float" />
+
+        <attr name="effects" format="boolean" />
+        <attr name="axes" format="enum">
+            <enum name="X" value="0"/>
+            <enum name="Y" value="1"/>
+            <enum name="BOTH" value="2"/>
+        </attr>
+    </declare-styleable>
+</resources>

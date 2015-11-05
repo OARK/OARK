@@ -7,6 +7,9 @@ syntax: glob
 #Vim swap file
 *.swp
 
+# Emacs swap files
+.\#*
+
 #Build directories
 ros-pkg/devel
 ros-pkg/build
@@ -24,14 +27,23 @@ build-tools/toochain
 # Android Project
 .gradle
 local.properties
-.idea/workspace.xml
-.idea/libraries
+.idea
 .DS_Store
 build
+*.iml
+gradlew
+gradlew.bat
 
 # Ignore any Rasbian images
 *raspbian*.img
 *raspbian*.zip
 
-#Commit
+# Ignore rosjava_bootstrap
+rosjava_bootstrap
+
+# Don't care about .gitignore
+.gitignore
+
+# Ignore Java class files
+*.class
 
