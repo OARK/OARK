@@ -93,6 +93,8 @@ class OARKNode(object):
         self.start_stream = rospy.ServiceProxy('/oark_vid_node/start_stream',
                                                Connected)
 
+        self.start_time = rospy.get_time()
+
 
     def _create_controllers(self, cont_dict):
         """A helper function to take the yaml-specified motor configuration data
@@ -143,6 +145,9 @@ class OARKNode(object):
         the motors are moved appropriately.
         """
         with self._cmd_mutex:
+            #Add global variables to symbol table
+            self._sym_table['t'] = rospy.get_time() - self.start_time
+
             #Associate each input value with the name of the
             #input to which it corresponds
             syms = dict()
@@ -155,8 +160,6 @@ class OARKNode(object):
                 else:
                     syms[input['name']] = cmd.values[i]
                     i = i + 1
-
-
             self._sym_table.update(syms)
 
 
