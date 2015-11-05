@@ -55,6 +55,11 @@ echo -e "${COLOUR_PROGRESS}Setup config UI...${NC}"
 runAnsiblePlaybook 10-config_ui.yaml
 echo -e "${COLOUR_SUCCESS}Config UI set.${NC}"
 
+# Can't use rsync, so have to remove symlink and add it back later.
+echo -e "${COLOUR_PROGRESS}Removing symlink...${NC}"
+rm ~/Projects/oark/ros-pkg/src/CMakeLists.txt
+echo -e "${COLOUR_SUCCESS}Symlink removed.${NC}"
+
 echo -e "${COLOUR_PROGRESS}Install OARK...${NC}"
 runAnsiblePlaybook 11-oark_install.yaml
 echo -e "${COLOUR_SUCCESS}OARK installed.${NC}"

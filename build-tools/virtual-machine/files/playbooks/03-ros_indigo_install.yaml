@@ -56,7 +56,7 @@
       chdir: ~/Projects/ros_catkin_ws/external_src
     sudo: no
   - name: Install libconsole-bridge-dev
-    shell: dpkg -i libconsole-bridge0.2_*.deb libconsole-bridge-dev_*.deb
+    shell: dpkg -i libconsole-bridge0.2*.deb libconsole-bridge-dev_*.deb
     args:
       chdir: ~pi/Projects/ros_catkin_ws/external_src
   - name: Get lz4 source

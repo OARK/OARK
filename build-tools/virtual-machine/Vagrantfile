@@ -88,7 +88,18 @@ Vagrant.configure(2) do |config|
   config.vm.provision :shell, privileged: false,
                       path: "scripts/wait-for-emulator.sh"
 
+  # Copy files needed for Wifi setup
+  config.vm.provision :file, source: "files/interfaces",
+                      destination: "interfaces"
+
+  config.vm.provision :file, source: "files/hostapd.conf",
+                      destination: "hostapd.conf"
+
   # Start the ROS install
   config.vm.provision :shell, privileged: false,
                       path: "scripts/install-oark.sh"
+
+  # Wait for emulator to shut down
+  config.vm.provision :shell, privileged: false,
+                      path: "scripts/wait-for-emulator.sh"
 end
