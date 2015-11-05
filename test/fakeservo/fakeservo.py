@@ -58,7 +58,7 @@ if __name__ == '__main__':
         print ('Usage: %s <serial port name> <motor file>\n\
                 Emulates the motors specified in <motor file> over the \
                 virtual serial port <serial port name>.'%sys.argv[0])
-        exit(0)
+        sys.exit(1)
 
     mutex = threading.Lock()
 
