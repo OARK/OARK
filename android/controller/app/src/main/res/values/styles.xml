@@ -24,6 +24,6 @@
     <style name="ButtonBarButton" />
 
     <style name="ControllerStick">
-        <item name="pointerColor">#FF0000</item>
+        <item name="pointerColor">#00FF00</item>
     </style>
 </resources>

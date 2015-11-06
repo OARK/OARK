@@ -92,7 +92,8 @@ public class ControllerStick extends View implements IRobotControl {
         transparent = a.getBoolean(R.styleable.ControllerStick_transparent, transparent);
         pointerColor = a.getColor(R.styleable.ControllerStick_pointerColor, pointerColor);
         effects = a.getBoolean(R.styleable.ControllerStick_effects, effects);
-        mTitleColor = a.getColor(R.styleable.ControllerStick_titleColor, mTitleColor);
+        mTitleColor = a.getColor(R.styleable.ControllerStick_titleColor,
+                                 defaultTitleColor(pointerColor));
         mTitleSize = a.getColor(R.styleable.ControllerStick_titleSize, mTitleSize);
 
         a.recycle();
@@ -219,5 +220,20 @@ public class ControllerStick extends View implements IRobotControl {
 
     public float[] getValues() {
         return new float[]{(float)getAnalogX(), (float)getAnalogY()};
+    }
+
+    /**
+     * Use either black or white for the title colour, given the pointer color.
+     *
+     * @param inPointerColor
+     * @return Black or white.
+     */
+    private int defaultTitleColor(int inPointerColor) {
+        int titleColor = Color.WHITE;
+        if (Utility.calculateLuminance(inPointerColor) > 0.5) {
+            titleColor = Color.BLACK;
+        }
+
+        return titleColor;
     }
 }
