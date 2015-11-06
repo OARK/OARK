@@ -1,9 +1,12 @@
 # Build Tools
 
+WARNING: As of 2015-11-06, only the Vagrant method is supported, a real hardware Pi can still be used with the Ansible method, but some source file paths have changed. Check the history of commits of the `virtual-machine/files/playbooks` for details.
+
 As the name says, tools for building the project. There are two different ways that the system can be built, both rely on having a real Pi available on a known IP address. One method is to use Vagrant which will download and script a virtual machine to build the software on the Pi, the other is if you run the build scripts locally on a Linux machine.
 
 # Requirements
-The scripting expects an untouched Raspbian install. You can download the Raspbian image from the Raspbian site, and copy the image to a SD card, please check the Raspbian site for details.
+
+The scripting expects an untouched Raspbian install. You can download the Raspbian image from the Raspbian site, and copy the image to a SD card, please check the Raspbian site for details. If you're building using Vagrant, this isn't needed.
 
 # Vagrant
 
@@ -36,7 +39,4 @@ You may have to remove the ~/.ssh/known_hosts file if you are using the same IP 
 
 ## Installing OARK
 
-# Note
-This directory used to contain scripts for building a QEMU compatible kernel and installing Arch Linux onto an image file for generating the OARK without need of a real Pi. However, as of 2015-08-17, this has proven to be a bit difficult, with errors occurring in the emulated system, in particular package downloads.
-
-These utilities and their directories have been deleted to reduce confusion. However, if you check the history of the repository, they can be viewed if a reference is necessary for future work. It should be around changeset 225, (hash: d46c937e4da2).
+Once Ansible is set up, then execute the different playbooks in order, so `01-init.yaml`, `02-slimline_install.yaml`, `03-ros_indigo_install.yaml` and so forth. The Pi will need to reboot after `02-slimline_install.yaml` so be sure to wait for it to come back up before proceeding.

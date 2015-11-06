@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Script to get the Raspberry Pi QEMU instance up and running.
+# Script to finalise the image, so it's ready to be copied to a SD
+# card onto a real Pi.
 
 # Copy of Raspbian image is expected in vagrant files dir.
 # Hardcoded for 2015-05-05-raspbian-wheezy.img at the moment.
@@ -14,8 +15,8 @@ COLOUR_PROGRESS='\033[0;33m'
 NC='\033[0m' # No Color
 
 IMAGE_NAME="2015-05-05-raspbian-wheezy.img"
+OARK_IMAGE="oark.img"
 
-echo -e "${COLOUR_PROGRESS}Copy Raspbian image...${NC}"
 cd /home/vagrant/Projects/oark/build-tools/emulation
 
 echo -e "${COLOUR_PROGRESS}Mounting image...${NC}"
@@ -30,17 +31,18 @@ echo -e "${COLOUR_SUCCESS}Image mounted.${NC}"
 
 cd ../emulation
 
-echo -e "${COLOUR_PROGRESS}Updating image for emulation...${NC}"
-sudo ./update_raspbian_image.sh temp
+echo -e "${COLOUR_PROGRESS}Reverting image...${NC}"
+sudo ./revert_raspbian_image.sh
+echo -e "${COLOUR_SUCCESS}Image reverted.${NC}"
 
-echo -e "${COLOUR_PROGRESS}Adding SSH key...${NC}"
-sudo mkdir -p temp/home/pi/.ssh
-sudo cp ~vagrant/.ssh/id_rsa.pub temp/home/pi/.ssh/authorized_keys
-sudo chown -R 1000:1000 temp/home/pi/.ssh
-sudo chmod 700 temp/home/pi/.ssh
-echo -e "${COLOUR_SUCCESS}Added SSH key...${NC}"
-
+echo -e "${COLOUR_PROGRESS}Unmounting image...${NC}"
 sudo umount temp
-echo -e "${COLOUR_PROGRESS}Image update completed.${NC}"
+echo -e "${COLOUR_SUCCESS}Image unmounted.${NC}"
 
-./start.sh 2015-05-05-raspbian-wheezy.img
+# Copy the image into the vagrant files folder.
+
+echo -e "${COLOUR_PROGRESS}Copy image to files/ directory...${NC}"
+NOW=$(date +"%Y-%m-%d")
+
+cp ${IMAGE_NAME} "/vagrant/files/${NOW}-${OARK_IMAGE}"
+echo -e "${COLOUR_SUCCESS}Image ${OARK_IMAGE} copied.${NC}"
