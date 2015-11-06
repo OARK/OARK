@@ -7,6 +7,7 @@
 package org.oarkit.controller.ui;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,6 +15,8 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+
+import org.oarkit.R;
 
 import java.util.ArrayList;
 
@@ -24,6 +27,8 @@ public class ControllerStick extends View implements IRobotControl {
 
     private int backColor = Color.BLACK;
     private int pointerColor = Color.RED;
+    private int mTitleColor = Color.WHITE;
+    private int mTitleSize = 20;
 
     private boolean isTouching = false;
     private float touchX, touchY;
@@ -56,28 +61,43 @@ public class ControllerStick extends View implements IRobotControl {
 
     public ControllerStick(Context context) {
         super(context);
-        init(null, 0);
+        init(context, null, R.attr.controllerStickStyle);
         mTitle = "";
         mTextPainter = new Paint();
 
         mTextPainter.setStyle(Paint.Style.FILL);
-        mTextPainter.setColor(Color.WHITE);
-        mTextPainter.setTextSize(20);
+        mTextPainter.setColor(mTitleColor);
+        mTextPainter.setTextSize(mTitleSize);
 
         mTextBounds = new Rect();
     }
 
     public ControllerStick(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(attrs, 0);
+        super(context, attrs, R.attr.controllerStickStyle);
+        init(context, attrs, R.attr.controllerStickStyle);
     }
 
     public ControllerStick(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        init(attrs, defStyle);
+        init(context, attrs, defStyle);
     }
 
-    private void init(AttributeSet attrs, int defStyle) {
+    private void init(Context inContext, AttributeSet attrs, int defStyle) {
+        // Load attributes
+        final TypedArray a = inContext.obtainStyledAttributes(
+            attrs, R.styleable.ControllerStick, defStyle, R.style.ControllerStick);
+
+        /* Retrieve styling attributes if available */
+        backColor = a.getColor(R.styleable.ControllerStick_backColor, backColor);
+        transparent = a.getBoolean(R.styleable.ControllerStick_transparent, transparent);
+        pointerColor = a.getColor(R.styleable.ControllerStick_pointerColor, pointerColor);
+        effects = a.getBoolean(R.styleable.ControllerStick_effects, effects);
+        mTitleColor = a.getColor(R.styleable.ControllerStick_titleColor,
+                                 defaultTitleColor(pointerColor));
+        mTitleSize = a.getColor(R.styleable.ControllerStick_titleSize, mTitleSize);
+
+        a.recycle();
+
         /* Create default painting object */
         circlePainter = new Paint();
         circlePainter.setColor(pointerColor);
@@ -132,7 +152,7 @@ public class ControllerStick extends View implements IRobotControl {
         int middleWidth = width / 2;
         int middleHeight = height / 2;
 
-        canvas.drawText(mTitle, middleWidth - mTextBounds.width(), middleHeight, mTextPainter);
+        canvas.drawText(mTitle, middleWidth - (mTextBounds.width() / 2), middleHeight, mTextPainter);
     }
 
 
@@ -200,5 +220,20 @@ public class ControllerStick extends View implements IRobotControl {
 
     public float[] getValues() {
         return new float[]{(float)getAnalogX(), (float)getAnalogY()};
+    }
+
+    /**
+     * Use either black or white for the title colour, given the pointer color.
+     *
+     * @param inPointerColor
+     * @return Black or white.
+     */
+    private int defaultTitleColor(int inPointerColor) {
+        int titleColor = Color.WHITE;
+        if (Utility.calculateLuminance(inPointerColor) > 0.5) {
+            titleColor = Color.BLACK;
+        }
+
+        return titleColor;
     }
 }
