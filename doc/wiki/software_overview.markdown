@@ -9,7 +9,7 @@ There are three parts to this software, the controller software, robot software,
 
 The controller software is an Android application that is used to control the robot remotely. The Android platform was selected because it can be developed on a wide range of platforms, has a larger amount of devices available for it cheaply, and is considered a much more open platform.
 
-Currently Android Studio is used for development, the root directory of the project being located under: ''android/EmuMini2/'', this directory can be opened in Android Studio via ''Open Project'' and allow for the project to be built.
+Currently Android Studio is used for development, the root directory of the project being located under: ''android/controller/'', this directory can be opened in Android Studio via ''Open Project'' and allow for the project to be built.
 
 ===== Robot Software =====
 
