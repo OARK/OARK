@@ -13,7 +13,7 @@ PROJ_PATH=/opt/oark/ros-pkg
 
 # The OARK robot config file. This config file specifies all of the motor
 # configurations and the Android inputs.
-OARK_ROBOT_CONFIG="$PROJ_PATH/src/oark/emumini2.yaml"
+OARK_ROBOT_CONFIG="$PROJ_PATH/src/oark/robot/emumini2.yaml"
 
 
 . "$ROS_PATH/setup.bash"
