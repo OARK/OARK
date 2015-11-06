@@ -74,7 +74,7 @@ public class ControllerMapping {
                         currentStick.setAxes(ControllerStick.Axes.BOTH);
                         break;
                     default:
-                        Log.e("ControllerMapping", "Unknow axes demand on analog stick.");
+                        Log.e("ControllerMapping", "Unknown axes demand on analog stick.");
                         currentStick.setAxes(ControllerStick.Axes.BOTH);
                         break;
                 }
